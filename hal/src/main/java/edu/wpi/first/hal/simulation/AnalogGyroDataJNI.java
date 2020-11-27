@@ -10,6 +10,9 @@ package edu.wpi.first.hal.simulation;
 import edu.wpi.first.hal.JNIWrapper;
 
 public class AnalogGyroDataJNI extends JNIWrapper {
+  public static native String getDisplayName();
+  public static native void setDisplayName(String displayName);
+  
   public static native int registerAngleCallback(int index, NotifyCallback callback, boolean initialNotify);
   public static native void cancelAngleCallback(int index, int uid);
   public static native double getAngle(int index);

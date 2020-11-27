@@ -46,6 +46,14 @@ int32_t HALSIM_FindEncoderForChannel(int32_t channel) {
   return -1;
 }
 
+char* HALSIM_GetEncoderDisplayName(int32_t index) {
+  return SimEncoderData[index].displayName;
+}
+
+void HALSIM_SetEncoderDisplayName(int32_t index, const char* displayName) {
+  // SimEncoderData[index].displayName = displayName;
+}
+
 void HALSIM_ResetEncoderData(int32_t index) {
   SimEncoderData[index].ResetData();
 }
