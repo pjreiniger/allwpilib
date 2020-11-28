@@ -47,6 +47,10 @@ class EncoderSim {
    * @return Simulated object
    */
   static EncoderSim CreateForIndex(int index);
+  
+
+  void setDisplayName(const char* displayName);
+  const char* getDisplayName();
 
   std::unique_ptr<CallbackStore> RegisterInitializedCallback(
       NotifyCallback callback, bool initialNotify);

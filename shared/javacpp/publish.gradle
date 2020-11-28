@@ -58,7 +58,7 @@ model {
 
                 artifactId = "${baseArtifactId}-cpp"
                 groupId artifactGroupId
-                version wpilibVersioning.version.get()
+                version 'pj_local_dev'
             }
         }
     }

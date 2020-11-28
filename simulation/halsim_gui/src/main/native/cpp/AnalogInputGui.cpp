@@ -37,7 +37,7 @@ static void UpdateAnalogInputSources() {
     if (HALSIM_GetAnalogInInitialized(i)) {
       if (!source) {
         source = std::make_unique<AnalogInVoltageSource>(i);
-        source->SetName(gAnalogInputs[i].GetName());
+        // source->SetName(gAnalogInputs[i].GetName());
       }
     } else {
       source.reset();
@@ -81,10 +81,7 @@ static void DisplayAnalogInputs() {
           HALSIM_SetAnalogInVoltage(i, val);
       }
 
-      // context menu to change name
-      if (info.PopupEditName(i)) {
-        source->SetName(info.GetName());
-      }
+      // source->SetName(info.GetName());
       ImGui::PopID();
     }
   }

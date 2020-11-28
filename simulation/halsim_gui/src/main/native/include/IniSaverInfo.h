@@ -23,11 +23,11 @@ class NameInfo {
 //                int index) const;
 //   void GetName(char* buf, size_t size, const char* defaultName, int index,
 //                int index2) const;
-//   void GetLabel(char* buf, size_t size, const char* defaultName) const;
-//   void GetLabel(char* buf, size_t size, const char* defaultName,
-//                 int index) const;
-//   void GetLabel(char* buf, size_t size, const char* defaultName, int index,
-//                 int index2) const;
+  void GetLabel(char* buf, size_t size, const char* defaultName) const;
+  void GetLabel(char* buf, size_t size, const char* defaultName,
+                int index) const;
+  void GetLabel(char* buf, size_t size, const char* defaultName, int index,
+                int index2) const;
 
 //   bool ReadIni(wpi::StringRef name, wpi::StringRef value);
 //   void WriteIni(ImGuiTextBuffer* out);

@@ -97,9 +97,9 @@ static void DisplayPDP() {
           if (source->currents[left]->InputDouble(name, &val, 0, 0, "%.3f"))
             HALSIM_SetPDPCurrent(i, left, val);
           float leftWidth = ImGui::GetItemRectSize().x;
-          if (leftInfo.PopupEditName(left)) {
-            source->currents[left]->SetName(leftInfo.GetName());
-          }
+          // if (leftInfo.PopupEditName(left)) {
+          //   source->currents[left]->SetName(leftInfo.GetName());
+          // }
           ImGui::PopID();
           ImGui::NextColumn();
 
@@ -111,9 +111,9 @@ static void DisplayPDP() {
           if (source->currents[right]->InputDouble(name, &val, 0, 0, "%.3f"))
             HALSIM_SetPDPCurrent(i, right, val);
           float rightWidth = ImGui::GetItemRectSize().x;
-          if (rightInfo.PopupEditName(right)) {
-            source->currents[right]->SetName(rightInfo.GetName());
-          }
+          // if (rightInfo.PopupEditName(right)) {
+          //   source->currents[right]->SetName(rightInfo.GetName());
+          // }
           ImGui::PopID();
           ImGui::NextColumn();
 

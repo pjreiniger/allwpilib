@@ -65,7 +65,7 @@ publishing {
 
             artifactId = baseExamplesArtifactId
             groupId artifactGroupId
-            version wpilibVersioning.version.get()
+            version 'pj_local_dev'
         }
 
         templates(MavenPublication) {
@@ -73,7 +73,7 @@ publishing {
 
             artifactId = baseTemplatesArtifactId
             groupId artifactGroupId
-            version wpilibVersioning.version.get()
+            version 'pj_local_dev'
         }
 
         commands(MavenPublication) {
@@ -81,7 +81,7 @@ publishing {
 
             artifactId = baseCommandsArtifactId
             groupId artifactGroupId
-            version wpilibVersioning.version.get()
+            version 'pj_local_dev'
         }
     }
 }

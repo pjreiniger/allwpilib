@@ -27,6 +27,7 @@ void PWMData::ResetData() {
   position.Reset(0);
   periodScale.Reset(0);
   zeroLatch.Reset(false);
+  displayName[0] = '\0';
 }
 
 extern "C" {
@@ -35,6 +36,22 @@ void HALSIM_ResetPWMData(int32_t index) { SimPWMData[index].ResetData(); }
 #define DEFINE_CAPI(TYPE, CAPINAME, LOWERNAME)                          \
   HAL_SIMDATAVALUE_DEFINE_CAPI(TYPE, HALSIM, PWM##CAPINAME, SimPWMData, \
                                LOWERNAME)
+
+const char* HALSIM_GetPWMDisplayName(int32_t index) 
+{ 
+  if(SimPWMData[index].displayName[0] != '\0') {
+    return SimPWMData[index].displayName;
+  }
+
+  std::snprintf(SimPWMData[index].displayName, 256, "PWM [%d]", index);
+  return SimPWMData[index].displayName;
+} 
+void HALSIM_SetPWMDisplayName(int32_t index, const char* displayName) 
+{ 
+  std::cout << "Setting display name for " << "SimPWMData" << ", port " << index << " -> " << displayName << std::endl; 
+  std::strncpy(SimPWMData[index].displayName, displayName, sizeof(SimPWMData[index].displayName) - 1); 
+  *(std::end(SimPWMData[index].displayName) - 1) = '\0'; 
+}
 
 DEFINE_CAPI(HAL_Bool, Initialized, initialized)
 DEFINE_CAPI(int32_t, RawValue, rawValue)

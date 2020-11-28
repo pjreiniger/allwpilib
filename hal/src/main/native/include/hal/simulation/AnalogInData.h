@@ -16,7 +16,7 @@ extern "C" {
 
 void HALSIM_ResetAnalogInData(int32_t index);
 
-char* HALSIM_GetAnalogInDisplayName(int32_t index);
+const char* HALSIM_GetAnalogInDisplayName(int32_t index);
 void HALSIM_SetAnalogInDisplayName(int32_t index, const char* displayName);
 
 int32_t HALSIM_RegisterAnalogInInitializedCallback(int32_t index,

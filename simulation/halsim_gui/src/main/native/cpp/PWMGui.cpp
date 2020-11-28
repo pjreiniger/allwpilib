@@ -41,7 +41,6 @@ static void UpdatePWMSources() {
     if (HALSIM_GetPWMInitialized(i)) {
       if (!source) {
         source = std::make_unique<PWMSpeedSource>(i);
-        source->SetName(gPWM[i].GetName());
       }
     } else {
       source.reset();
@@ -85,9 +84,7 @@ static void DisplayPWMs() {
         float val = HALSimGui::AreOutputsDisabled() ? 0 : HALSIM_GetPWMSpeed(i);
         source->LabelText(label, "%0.3f", val);
       }
-      if (info.PopupEditName(i)) {
-        source->SetName(info.GetName());
-      }
+      source->SetName(HALSIM_GetPWMDisplayName(i));
       ImGui::PopID();
     }
   }

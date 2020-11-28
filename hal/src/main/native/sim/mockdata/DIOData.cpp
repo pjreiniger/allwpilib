@@ -27,6 +27,7 @@ void DIOData::ResetData() {
   pulseLength.Reset(0.0);
   isInput.Reset(true);
   filterIndex.Reset(-1);
+  displayName[0] = '\0';
 }
 
 extern "C" {
@@ -39,6 +40,22 @@ HAL_SimDeviceHandle HALSIM_GetDIOSimDevice(int32_t index) {
 #define DEFINE_CAPI(TYPE, CAPINAME, LOWERNAME)                          \
   HAL_SIMDATAVALUE_DEFINE_CAPI(TYPE, HALSIM, DIO##CAPINAME, SimDIOData, \
                                LOWERNAME)
+
+const char* HALSIM_GetDIODisplayName(int32_t index) 
+{ 
+  if(SimDIOData[index].displayName[0] != '\0') {
+    return SimDIOData[index].displayName;
+  }
+
+  std::snprintf(SimDIOData[index].displayName, 256, "DIO [%d]", index);
+  return SimDIOData[index].displayName;
+} 
+void HALSIM_SetDIODisplayName(int32_t index, const char* displayName) 
+{ 
+  std::cout << "Setting display name for " << "DIO" << ", port " << index << " -> " << displayName << std::endl; 
+  std::strncpy(SimDIOData[index].displayName, displayName, sizeof(SimDIOData[index].displayName) - 1); 
+  *(std::end(SimDIOData[index].displayName) - 1) = '\0'; 
+}
 
 DEFINE_CAPI(HAL_Bool, Initialized, initialized)
 DEFINE_CAPI(HAL_Bool, Value, value)

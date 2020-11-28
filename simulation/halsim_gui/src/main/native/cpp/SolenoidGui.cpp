@@ -48,7 +48,7 @@ static void UpdateSolenoidSources() {
       if (HALSIM_GetPCMSolenoidInitialized(i, j)) {
         if (!source) {
           source = std::make_unique<PCMSolenoidOutputSource>(i, j);
-          source->SetName(gSolenoids[i * numChannels + j].GetName());
+          // source->SetName(gSolenoids[i * numChannels + j].GetName());
         }
         ++pcmSource.initCount;
       } else {
@@ -103,9 +103,9 @@ static void DisplaySolenoids() {
         ImGui::PushID(j);
         pcmSource.solenoids[j]->LabelText(name, "%s",
                                           channels[j] == 1 ? "On" : "Off");
-        if (info.PopupEditName(j)) {
-          pcmSource.solenoids[j]->SetName(info.GetName());
-        }
+        // if (info.PopupEditName(j)) {
+        //   pcmSource.solenoids[j]->SetName(info.GetName());
+        // }
         ImGui::PopID();
       }
       ImGui::PopItemWidth();

@@ -31,6 +31,9 @@ class PCMData {
   }
 
  public:
+ 
+  char solenoidDisplayName[kNumSolenoidChannels][256];
+
   SimDataValue<HAL_Bool, HAL_MakeBoolean, GetSolenoidInitializedName,
                GetSolenoidInitializedDefault>
       solenoidInitialized[kNumSolenoidChannels];

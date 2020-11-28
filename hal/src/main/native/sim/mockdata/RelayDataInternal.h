@@ -18,6 +18,7 @@ class RelayData {
   HAL_SIMDATAVALUE_DEFINE_NAME(Reverse)
 
  public:
+  char displayName[256];
   SimDataValue<HAL_Bool, HAL_MakeBoolean, GetInitializedForwardName>
       initializedForward{false};
   SimDataValue<HAL_Bool, HAL_MakeBoolean, GetInitializedReverseName>

@@ -16,6 +16,7 @@ class AnalogOutData {
   HAL_SIMDATAVALUE_DEFINE_NAME(Initialized)
 
  public:
+  char displayName[256];
   SimDataValue<double, HAL_MakeDouble, GetVoltageName> voltage{0.0};
   SimDataValue<HAL_Bool, HAL_MakeBoolean, GetInitializedName> initialized{0};
 

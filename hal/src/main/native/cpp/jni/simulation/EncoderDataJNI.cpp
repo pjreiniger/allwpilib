@@ -23,12 +23,10 @@ extern "C" {
  * Signature: (I)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_edu_wpi_first_hal_simulation_EncoderDataJNI_getDisplayName
-  (JNIEnv *, jclass, jint)
+  (JNIEnv * env, jclass, jint index)
 {
-  // auto displayName = HALSIM_GetEncoderDisplayName(index);
-  // return MakeJString(env, displayName);
-  // return NULL;
-  return NULL;
+  const char* displayName = HALSIM_GetEncoderDisplayName(index);
+  return wpi::java::MakeJString(env, displayName);
 }
 
 /*
@@ -37,9 +35,10 @@ JNIEXPORT jstring JNICALL Java_edu_wpi_first_hal_simulation_EncoderDataJNI_getDi
  * Signature: (ILjava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_edu_wpi_first_hal_simulation_EncoderDataJNI_setDisplayName
-  (JNIEnv *, jclass, jint, jstring)
+  (JNIEnv * env, jclass, jint index, jstring displayName)
 {
-  // return HALSIM_SetEncoderDisplayName(index, JStringRef{env, displayName}.c_str());
+  wpi::java::JStringRef displayNameRef{env, displayName};
+  HALSIM_SetEncoderDisplayName(index, displayNameRef.c_str());
 }
 
 /*

@@ -191,24 +191,24 @@ static void JoystickReadLine(ImGuiContext* ctx, ImGuiSettingsHandler* handler,
     if (value.getAsInteger(10, num)) return;
     joy->useGamepad = num;
   } else {
-    joy->name.ReadIni(name, value);
+    // joy->name.ReadIni(name, value);
   }
 }
 
 static void JoystickWriteAll(ImGuiContext* ctx, ImGuiSettingsHandler* handler,
                              ImGuiTextBuffer* out_buf) {
-  for (int i = 0; i < HAL_kMaxJoysticks; ++i) {
-    auto& joy = gRobotJoysticks[i];
-    if (!joy.name.HasName() && !joy.sys) continue;
-    out_buf->appendf("[Joystick][%d]\nuseGamepad=%d\n", i,
-                     joy.useGamepad ? 1 : 0);
-    if (joy.name.HasName()) joy.name.WriteIni(out_buf);
-    if (joy.sys) {
-      const char* guid = glfwGetJoystickGUID(joy.sys - gSystemJoysticks);
-      if (guid) out_buf->appendf("guid=%s\n", guid);
-    }
-    out_buf->append("\n");
-  }
+  // for (int i = 0; i < HAL_kMaxJoysticks; ++i) {
+  //   auto& joy = gRobotJoysticks[i];
+  //   if (!joy.name.HasName() && !joy.sys) continue;
+  //   out_buf->appendf("[Joystick][%d]\nuseGamepad=%d\n", i,
+  //                    joy.useGamepad ? 1 : 0);
+  //   if (joy.name.HasName()) joy.name.WriteIni(out_buf);
+  //   if (joy.sys) {
+  //     const char* guid = glfwGetJoystickGUID(joy.sys - gSystemJoysticks);
+  //     if (guid) out_buf->appendf("guid=%s\n", guid);
+  //   }
+  //   out_buf->append("\n");
+  // }
 }
 
 // read/write DS settings to ini file
@@ -611,7 +611,7 @@ static void DisplayJoysticks() {
       }
       ImGui::EndDragDropTarget();
     }
-    joy.name.PopupEditName(i);
+    // joy.name.PopupEditName(i);
     ImGui::NextColumn();
   }
   ImGui::Separator();

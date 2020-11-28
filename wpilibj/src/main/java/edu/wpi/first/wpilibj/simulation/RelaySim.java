@@ -34,6 +34,14 @@ public class RelaySim {
   public RelaySim(int channel) {
     m_index = channel;
   }
+  
+  public String getDisplayName() {
+    return RelayDataJNI.getDisplayName(m_index);
+  }
+
+  public void setDisplayName(String displayName) {
+    RelayDataJNI.setDisplayName(m_index, displayName);
+  }
 
   public CallbackStore registerInitializedForwardCallback(NotifyCallback callback, boolean initialNotify) {
     int uid = RelayDataJNI.registerInitializedForwardCallback(m_index, callback, initialNotify);

@@ -35,7 +35,7 @@ static void UpdateAnalogOutSources() {
     if (HALSIM_GetAnalogOutInitialized(i)) {
       if (!source) {
         source = std::make_unique<AnalogOutVoltageSource>(i);
-        source->SetName(gAnalogOuts[i].GetName());
+        // source->SetName(gAnalogOuts[i].GetName());
       }
     } else {
       source.reset();
@@ -62,9 +62,9 @@ static void DisplayAnalogOutputs() {
         HAL_Value value = HAL_MakeDouble(source->GetValue());
         SimDeviceGui::DisplayValueSource(label, true, &value, source);
 
-        if (info.PopupEditName(i)) {
-          if (source) source->SetName(info.GetName());
-        }
+        // if (info.PopupEditName(i)) {
+        //   if (source) source->SetName(info.GetName());
+        // }
         ImGui::PopID();
       }
     }

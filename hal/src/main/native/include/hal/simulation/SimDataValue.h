@@ -16,6 +16,8 @@
 #include "hal/simulation/NotifyListener.h"
 #include "hal/simulation/SimCallbackRegistry.h"
 
+#include <iostream>
+
 namespace hal {
 
 namespace impl {

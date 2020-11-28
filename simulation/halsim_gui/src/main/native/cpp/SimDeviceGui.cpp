@@ -29,12 +29,12 @@ namespace {
 
 struct ElementInfo : public NameInfo, public OpenInfo {
   bool ReadIni(wpi::StringRef name, wpi::StringRef value) {
-    if (NameInfo::ReadIni(name, value)) return true;
+    // if (NameInfo::ReadIni(name, value)) return true;
     if (OpenInfo::ReadIni(name, value)) return true;
     return false;
   }
   void WriteIni(ImGuiTextBuffer* out) {
-    NameInfo::WriteIni(out);
+    // NameInfo::WriteIni(out);
     OpenInfo::WriteIni(out);
   }
   bool visible = true;  // not saved
@@ -106,7 +106,7 @@ bool SimDeviceGui::StartDevice(const char* label, ImGuiTreeNodeFlags flags) {
   bool open = ImGui::CollapsingHeader(
       name, flags | (element.IsOpen() ? ImGuiTreeNodeFlags_DefaultOpen : 0));
   element.SetOpen(open);
-  element.PopupEditName(label);
+  // element.PopupEditName(label);
 
   if (open) ImGui::PushID(label);
   return open;

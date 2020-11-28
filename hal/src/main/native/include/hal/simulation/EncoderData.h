@@ -16,7 +16,7 @@ extern "C" {
 
 int32_t HALSIM_FindEncoderForChannel(int32_t channel);
 
-char* HALSIM_GetEncoderDisplayName(int32_t index);
+const char* HALSIM_GetEncoderDisplayName(int32_t index);
 void HALSIM_SetEncoderDisplayName(int32_t index, const char* displayName);
 
 void HALSIM_ResetEncoderData(int32_t index);

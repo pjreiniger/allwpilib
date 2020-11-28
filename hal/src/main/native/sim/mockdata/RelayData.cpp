@@ -25,6 +25,7 @@ void RelayData::ResetData() {
   initializedReverse.Reset(false);
   forward.Reset(false);
   reverse.Reset(false);
+  displayName[0] = '\0';
 }
 
 extern "C" {
@@ -33,6 +34,23 @@ void HALSIM_ResetRelayData(int32_t index) { SimRelayData[index].ResetData(); }
 #define DEFINE_CAPI(TYPE, CAPINAME, LOWERNAME)                              \
   HAL_SIMDATAVALUE_DEFINE_CAPI(TYPE, HALSIM, Relay##CAPINAME, SimRelayData, \
                                LOWERNAME)
+
+const char* HALSIM_GetRelayDisplayName(int32_t index) 
+{ 
+  std::cout << "Getting display name for " << "Relay" << ", port " << index << " -> " << SimRelayData[index].displayName << std::endl; 
+  if(SimRelayData[index].displayName[0] != '\0') {
+    return SimRelayData[index].displayName;
+  }
+
+  std::snprintf(SimRelayData[index].displayName, 256, "Relay [%d]", index);
+  return SimRelayData[index].displayName;
+} 
+void HALSIM_SetRelayDisplayName(int32_t index, const char* displayName) 
+{ 
+  std::cout << "Setting display name for " << "Relay" << ", port " << index << " -> " << displayName << std::endl; 
+  std::strncpy(SimRelayData[index].displayName, displayName, sizeof(SimRelayData[index].displayName) - 1); 
+  *(std::end(SimRelayData[index].displayName) - 1) = '\0'; 
+}
 
 DEFINE_CAPI(HAL_Bool, InitializedForward, initializedForward)
 DEFINE_CAPI(HAL_Bool, InitializedReverse, initializedReverse)

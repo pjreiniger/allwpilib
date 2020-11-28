@@ -23,6 +23,7 @@ class AnalogInData {
   HAL_SIMDATAVALUE_DEFINE_NAME(AccumulatorDeadband)
 
  public:
+  char displayName[256];
   SimDataValue<HAL_Bool, HAL_MakeBoolean, GetInitializedName> initialized{
       false};
   std::atomic<HAL_SimDeviceHandle> simDevice;

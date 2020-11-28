@@ -39,7 +39,7 @@ void IniSaver<Info>::ReadLine(ImGuiContext* ctx, ImGuiSettingsHandler* handler,
   auto [name, value] = line.split('=');
   name = name.trim();
   value = value.trim();
-  element->ReadIni(name, value);
+  // element->ReadIni(name, value);
 }
 
 template <typename Info>
@@ -48,7 +48,7 @@ void IniSaver<Info>::WriteAll(ImGuiContext* ctx, ImGuiSettingsHandler* handler,
   auto self = static_cast<IniSaver*>(handler->UserData);
   for (auto&& it : self->m_map) {
     out_buf->appendf("[%s][%d]\n", self->m_typeName, it.first);
-    it.second.WriteIni(out_buf);
+    // it.second.WriteIni(out_buf);
     out_buf->append("\n");
   }
 }

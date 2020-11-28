@@ -17,6 +17,7 @@ class AnalogGyroData {
   HAL_SIMDATAVALUE_DEFINE_NAME(Initialized)
 
  public:
+  char displayName[256];
   SimDataValue<double, HAL_MakeDouble, GetAngleName> angle{0.0};
   SimDataValue<double, HAL_MakeDouble, GetRateName> rate{0.0};
   SimDataValue<HAL_Bool, HAL_MakeBoolean, GetInitializedName> initialized{

@@ -35,6 +35,9 @@ class RelaySim {
    * @param channel Channel number
    */
   explicit RelaySim(int channel);
+  
+  void setDisplayName(const char* displayName);
+  const char* getDisplayName();
 
   std::unique_ptr<CallbackStore> RegisterInitializedForwardCallback(
       NotifyCallback callback, bool initialNotify);

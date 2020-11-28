@@ -67,7 +67,7 @@ publishing {
 
             artifactId = "${baseArtifactId}-java"
             groupId artifactGroupId
-            version wpilibVersioning.version.get()
+            version 'pj_local_dev'
         }
     }
 }

@@ -35,6 +35,9 @@ class AnalogOutputSim {
    * @param channel Channel number
    */
   explicit AnalogOutputSim(int channel);
+  
+  void setDisplayName(const char* displayName);
+  const char* getDisplayName();
 
   std::unique_ptr<CallbackStore> RegisterVoltageCallback(
       NotifyCallback callback, bool initialNotify);

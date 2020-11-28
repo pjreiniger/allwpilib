@@ -23,6 +23,7 @@ AnalogOutData* hal::SimAnalogOutData;
 void AnalogOutData::ResetData() {
   voltage.Reset(0.0);
   initialized.Reset(0);
+  displayName[0] = '\0';
 }
 
 extern "C" {
@@ -34,6 +35,21 @@ void HALSIM_ResetAnalogOutData(int32_t index) {
   HAL_SIMDATAVALUE_DEFINE_CAPI(TYPE, HALSIM, AnalogOut##CAPINAME, \
                                SimAnalogOutData, LOWERNAME)
 
+const char* HALSIM_GetAnalogOutDisplayName(int32_t index) 
+{ 
+  if(SimAnalogOutData[index].displayName[0] != '\0') {
+    return SimAnalogOutData[index].displayName;
+  }
+
+  std::snprintf(SimAnalogOutData[index].displayName, 256, "AnalogOut [%d]", index);
+  return SimAnalogOutData[index].displayName;
+} 
+void HALSIM_SetAnalogOutDisplayName(int32_t index, const char* displayName) 
+{ 
+  std::cout << "Setting display name for " << "SimAnalogOutData" << ", port " << index << " -> " << displayName << std::endl; 
+  std::strncpy(SimAnalogOutData[index].displayName, displayName, sizeof(SimAnalogOutData[index].displayName) - 1); 
+  *(std::end(SimAnalogOutData[index].displayName) - 1) = '\0'; 
+}
 DEFINE_CAPI(double, Voltage, voltage)
 DEFINE_CAPI(HAL_Bool, Initialized, initialized)
 

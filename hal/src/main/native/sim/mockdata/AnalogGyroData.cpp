@@ -24,6 +24,7 @@ void AnalogGyroData::ResetData() {
   angle.Reset(0.0);
   rate.Reset(0.0);
   initialized.Reset(false);
+  displayName[0] = '\0';
 }
 
 extern "C" {
@@ -34,6 +35,24 @@ void HALSIM_ResetAnalogGyroData(int32_t index) {
 #define DEFINE_CAPI(TYPE, CAPINAME, LOWERNAME)                     \
   HAL_SIMDATAVALUE_DEFINE_CAPI(TYPE, HALSIM, AnalogGyro##CAPINAME, \
                                SimAnalogGyroData, LOWERNAME)
+
+
+const char* HALSIM_GetAnalogGyroDisplayName(int32_t index) 
+{ 
+  if(SimAnalogGyroData[index].displayName[0] != '\0') {
+    return SimAnalogGyroData[index].displayName;
+  }
+
+  std::snprintf(SimAnalogGyroData[index].displayName, 256, "AnalogGryo [%d]", index);
+  return SimAnalogGyroData[index].displayName;
+  
+} 
+void HALSIM_SetAnalogGyroDisplayName(int32_t index, const char* displayName) 
+{ 
+  std::cout << "Setting display name for " << "AnalogGyro" << ", port " << index << " -> " << displayName << std::endl; 
+  std::strncpy(SimAnalogGyroData[index].displayName, displayName, sizeof(SimAnalogGyroData[index].displayName) - 1); 
+  *(std::end(SimAnalogGyroData[index].displayName) - 1) = '\0'; 
+}
 
 DEFINE_CAPI(double, Angle, angle)
 DEFINE_CAPI(double, Rate, rate)

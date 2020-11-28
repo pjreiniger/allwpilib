@@ -26,9 +26,9 @@ class EncoderData {
   HAL_SIMDATAVALUE_DEFINE_NAME(DistancePerPulse)
 
  public:
+  char displayName[256];
   std::atomic<int32_t> digitalChannelA{0};
   std::atomic<int32_t> digitalChannelB{0};
-  char displayName[256];
   SimDataValue<HAL_Bool, HAL_MakeBoolean, GetInitializedName> initialized{
       false};
   std::atomic<HAL_SimDeviceHandle> simDevice;

@@ -27,12 +27,12 @@ namespace {
 
 struct EncoderInfo : public NameInfo, public OpenInfo {
   bool ReadIni(wpi::StringRef name, wpi::StringRef value) {
-    if (NameInfo::ReadIni(name, value)) return true;
+    // if (NameInfo::ReadIni(name, value)) return true;
     if (OpenInfo::ReadIni(name, value)) return true;
     return false;
   }
   void WriteIni(ImGuiTextBuffer* out) {
-    NameInfo::WriteIni(out);
+    // NameInfo::WriteIni(out);
     OpenInfo::WriteIni(out);
   }
 };
@@ -183,7 +183,7 @@ static void UpdateEncoderSources() {
     if (HALSIM_GetEncoderInitialized(i)) {
       if (!source) {
         source = std::make_unique<EncoderSource>(i);
-        source->SetName(gEncoders[source->GetChannelA()].GetName());
+        // source->SetName(gEncoders[source->GetChannelA()].GetName());
       }
     } else {
       source.reset();
@@ -215,10 +215,10 @@ static void DisplayEncoders() {
             name, gEncoders[chA].IsOpen() ? ImGuiTreeNodeFlags_DefaultOpen : 0);
         info.SetOpen(open);
 
-        // context menu to change name
-        if (info.PopupEditName(chA)) {
-          source->SetName(info.GetName());
-        }
+        // // context menu to change name
+        // if (info.PopupEditName(chA)) {
+        //   source->SetName(info.GetName());
+        // }
 
         if (open) {
           ImGui::PushID(i);
