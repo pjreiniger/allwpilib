@@ -34,7 +34,7 @@ public class PWMSim {
   public PWMSim(int channel) {
     m_index = channel;
   }
-  
+
   public String getDisplayName() {
     return PWMDataJNI.getDisplayName(m_index);
   }

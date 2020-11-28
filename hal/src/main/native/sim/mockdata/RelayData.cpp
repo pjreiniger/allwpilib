@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                        */
+/* Copyright (c) 2017-2020 FIRST. All Rights Reserved.                        */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in the root directory of */
 /* the project.                                                               */
@@ -35,21 +35,25 @@ void HALSIM_ResetRelayData(int32_t index) { SimRelayData[index].ResetData(); }
   HAL_SIMDATAVALUE_DEFINE_CAPI(TYPE, HALSIM, Relay##CAPINAME, SimRelayData, \
                                LOWERNAME)
 
-const char* HALSIM_GetRelayDisplayName(int32_t index) 
-{ 
-  std::cout << "Getting display name for " << "Relay" << ", port " << index << " -> " << SimRelayData[index].displayName << std::endl; 
-  if(SimRelayData[index].displayName[0] != '\0') {
+const char* HALSIM_GetRelayDisplayName(int32_t index) {
+  std::cout << "Getting display name for "
+            << "Relay"
+            << ", port " << index << " -> " << SimRelayData[index].displayName
+            << std::endl;
+  if (SimRelayData[index].displayName[0] != '\0') {
     return SimRelayData[index].displayName;
   }
 
-  std::snprintf(SimRelayData[index].displayName, 256, "Relay [%d]", index);
+  std::snprintf(SimRelayData[index].displayName, sizeof(SimRelayData[index].displayName), "Relay [%d]", index);
   return SimRelayData[index].displayName;
-} 
-void HALSIM_SetRelayDisplayName(int32_t index, const char* displayName) 
-{ 
-  std::cout << "Setting display name for " << "Relay" << ", port " << index << " -> " << displayName << std::endl; 
-  std::strncpy(SimRelayData[index].displayName, displayName, sizeof(SimRelayData[index].displayName) - 1); 
-  *(std::end(SimRelayData[index].displayName) - 1) = '\0'; 
+}
+void HALSIM_SetRelayDisplayName(int32_t index, const char* displayName) {
+  std::cout << "Setting display name for "
+            << "Relay"
+            << ", port " << index << " -> " << displayName << std::endl;
+  std::strncpy(SimRelayData[index].displayName, displayName,
+               sizeof(SimRelayData[index].displayName) - 1);
+  *(std::end(SimRelayData[index].displayName) - 1) = '\0';
 }
 
 DEFINE_CAPI(HAL_Bool, InitializedForward, initializedForward)

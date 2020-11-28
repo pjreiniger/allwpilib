@@ -257,8 +257,8 @@ void PlotSeries::WriteIni(ImGuiTextBuffer* out) {
 
 void PlotSeries::GetLabel(char* buf, size_t size) const {
   // const char* name = GetName();
-  // if (name[0] == '\0' && m_newValueConn.connected()) name = m_source->GetName();
-  // if (name[0] == '\0') name = m_id.c_str();
+  // if (name[0] == '\0' && m_newValueConn.connected()) name =
+  // m_source->GetName(); if (name[0] == '\0') name = m_id.c_str();
   // std::snprintf(buf, size, "%s###%s", name, m_id.c_str());
 }
 
@@ -332,8 +332,8 @@ void PlotSeries::EmitDragDropPayload(size_t i, size_t plotIndex) {
   PlotSeriesRef ref = {plotIndex, i};
   ImGui::SetDragDropPayload("PlotSeries", &ref, sizeof(ref));
   // const char* name = GetName();
-  // if (name[0] == '\0' && m_newValueConn.connected()) name = m_source->GetName();
-  // if (name[0] == '\0') name = m_id.c_str();
+  // if (name[0] == '\0' && m_newValueConn.connected()) name =
+  // m_source->GetName(); if (name[0] == '\0') name = m_id.c_str();
   // ImGui::TextUnformatted(name);
 }
 

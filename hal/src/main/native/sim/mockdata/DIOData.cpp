@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/* Copyright (c) 2017-2019 FIRST. All Rights Reserved.                        */
+/* Copyright (c) 2017-2020 FIRST. All Rights Reserved.                        */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in the root directory of */
 /* the project.                                                               */
@@ -41,20 +41,21 @@ HAL_SimDeviceHandle HALSIM_GetDIOSimDevice(int32_t index) {
   HAL_SIMDATAVALUE_DEFINE_CAPI(TYPE, HALSIM, DIO##CAPINAME, SimDIOData, \
                                LOWERNAME)
 
-const char* HALSIM_GetDIODisplayName(int32_t index) 
-{ 
-  if(SimDIOData[index].displayName[0] != '\0') {
+const char* HALSIM_GetDIODisplayName(int32_t index) {
+  if (SimDIOData[index].displayName[0] != '\0') {
     return SimDIOData[index].displayName;
   }
 
-  std::snprintf(SimDIOData[index].displayName, 256, "DIO [%d]", index);
+  std::snprintf(SimDIOData[index].displayName, sizeof(SimDIOData[index].displayName), "DIO [%d]", index);
   return SimDIOData[index].displayName;
-} 
-void HALSIM_SetDIODisplayName(int32_t index, const char* displayName) 
-{ 
-  std::cout << "Setting display name for " << "DIO" << ", port " << index << " -> " << displayName << std::endl; 
-  std::strncpy(SimDIOData[index].displayName, displayName, sizeof(SimDIOData[index].displayName) - 1); 
-  *(std::end(SimDIOData[index].displayName) - 1) = '\0'; 
+}
+void HALSIM_SetDIODisplayName(int32_t index, const char* displayName) {
+  std::cout << "Setting display name for "
+            << "DIO"
+            << ", port " << index << " -> " << displayName << std::endl;
+  std::strncpy(SimDIOData[index].displayName, displayName,
+               sizeof(SimDIOData[index].displayName) - 1);
+  *(std::end(SimDIOData[index].displayName) - 1) = '\0';
 }
 
 DEFINE_CAPI(HAL_Bool, Initialized, initialized)

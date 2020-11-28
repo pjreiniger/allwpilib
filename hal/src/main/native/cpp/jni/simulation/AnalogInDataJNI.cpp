@@ -20,8 +20,9 @@ extern "C" {
  * Method:    getDisplayName
  * Signature: (I)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_edu_wpi_first_hal_simulation_AnalogInDataJNI_getDisplayName
-  (JNIEnv * env, jclass, jint index)
+JNIEXPORT jstring JNICALL
+Java_edu_wpi_first_hal_simulation_AnalogInDataJNI_getDisplayName
+  (JNIEnv* env, jclass, jint index)
 {
   const char* displayName = HALSIM_GetAnalogInDisplayName(index);
   return wpi::java::MakeJString(env, displayName);
@@ -32,8 +33,9 @@ JNIEXPORT jstring JNICALL Java_edu_wpi_first_hal_simulation_AnalogInDataJNI_getD
  * Method:    setDisplayName
  * Signature: (ILjava/lang/String;)V
  */
-JNIEXPORT void JNICALL Java_edu_wpi_first_hal_simulation_AnalogInDataJNI_setDisplayName
-  (JNIEnv * env, jclass, jint index, jstring displayName)
+JNIEXPORT void JNICALL
+Java_edu_wpi_first_hal_simulation_AnalogInDataJNI_setDisplayName
+  (JNIEnv* env, jclass, jint index, jstring displayName)
 {
   wpi::java::JStringRef displayNameRef{env, displayName};
   HALSIM_SetAnalogInDisplayName(index, displayNameRef.c_str());

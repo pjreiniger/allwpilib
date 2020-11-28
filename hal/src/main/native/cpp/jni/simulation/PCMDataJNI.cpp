@@ -20,8 +20,9 @@ extern "C" {
  * Method:    getSolenoidDisplayName
  * Signature: (II)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_edu_wpi_first_hal_simulation_PCMDataJNI_getSolenoidDisplayName
-  (JNIEnv * env, jclass, jint index, jint channel)
+JNIEXPORT jstring JNICALL
+Java_edu_wpi_first_hal_simulation_PCMDataJNI_getSolenoidDisplayName
+  (JNIEnv* env, jclass, jint index, jint channel)
 {
   const char* displayName = HALSIM_GetSolenoidDisplayName(index, channel);
   return wpi::java::MakeJString(env, displayName);
@@ -32,12 +33,12 @@ JNIEXPORT jstring JNICALL Java_edu_wpi_first_hal_simulation_PCMDataJNI_getSoleno
  * Method:    setSolenoidDisplayName
  * Signature: (IILjava/lang/String;)V
  */
-JNIEXPORT void JNICALL Java_edu_wpi_first_hal_simulation_PCMDataJNI_setSolenoidDisplayName
-  (JNIEnv * env, jclass, jint index, jint channel, jstring displayName)
+JNIEXPORT void JNICALL
+Java_edu_wpi_first_hal_simulation_PCMDataJNI_setSolenoidDisplayName
+  (JNIEnv* env, jclass, jint index, jint channel, jstring displayName)
 {
   wpi::java::JStringRef displayNameRef{env, displayName};
   HALSIM_SetSolenoidDisplayName(index, channel, displayNameRef.c_str());
-  
 }
 
 /*

@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                        */
+/* Copyright (c) 2017-2020 FIRST. All Rights Reserved.                        */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in the root directory of */
 /* the project.                                                               */
@@ -36,22 +36,22 @@ void HALSIM_ResetAnalogGyroData(int32_t index) {
   HAL_SIMDATAVALUE_DEFINE_CAPI(TYPE, HALSIM, AnalogGyro##CAPINAME, \
                                SimAnalogGyroData, LOWERNAME)
 
-
-const char* HALSIM_GetAnalogGyroDisplayName(int32_t index) 
-{ 
-  if(SimAnalogGyroData[index].displayName[0] != '\0') {
+const char* HALSIM_GetAnalogGyroDisplayName(int32_t index) {
+  if (SimAnalogGyroData[index].displayName[0] != '\0') {
     return SimAnalogGyroData[index].displayName;
   }
 
-  std::snprintf(SimAnalogGyroData[index].displayName, 256, "AnalogGryo [%d]", index);
+  std::snprintf(SimAnalogGyroData[index].displayName, sizeof(SimAnalogGyroData[index].displayName), "AnalogGryo [%d]",
+                index);
   return SimAnalogGyroData[index].displayName;
-  
-} 
-void HALSIM_SetAnalogGyroDisplayName(int32_t index, const char* displayName) 
-{ 
-  std::cout << "Setting display name for " << "AnalogGyro" << ", port " << index << " -> " << displayName << std::endl; 
-  std::strncpy(SimAnalogGyroData[index].displayName, displayName, sizeof(SimAnalogGyroData[index].displayName) - 1); 
-  *(std::end(SimAnalogGyroData[index].displayName) - 1) = '\0'; 
+}
+void HALSIM_SetAnalogGyroDisplayName(int32_t index, const char* displayName) {
+  std::cout << "Setting display name for "
+            << "AnalogGyro"
+            << ", port " << index << " -> " << displayName << std::endl;
+  std::strncpy(SimAnalogGyroData[index].displayName, displayName,
+               sizeof(SimAnalogGyroData[index].displayName) - 1);
+  *(std::end(SimAnalogGyroData[index].displayName) - 1) = '\0';
 }
 
 DEFINE_CAPI(double, Angle, angle)

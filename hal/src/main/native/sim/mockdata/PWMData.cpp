@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                        */
+/* Copyright (c) 2017-2020 FIRST. All Rights Reserved.                        */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in the root directory of */
 /* the project.                                                               */
@@ -37,20 +37,21 @@ void HALSIM_ResetPWMData(int32_t index) { SimPWMData[index].ResetData(); }
   HAL_SIMDATAVALUE_DEFINE_CAPI(TYPE, HALSIM, PWM##CAPINAME, SimPWMData, \
                                LOWERNAME)
 
-const char* HALSIM_GetPWMDisplayName(int32_t index) 
-{ 
-  if(SimPWMData[index].displayName[0] != '\0') {
+const char* HALSIM_GetPWMDisplayName(int32_t index) {
+  if (SimPWMData[index].displayName[0] != '\0') {
     return SimPWMData[index].displayName;
   }
 
-  std::snprintf(SimPWMData[index].displayName, 256, "PWM [%d]", index);
+  std::snprintf(SimPWMData[index].displayName, sizeof(SimPWMData[index].displayName), "PWM [%d]", index);
   return SimPWMData[index].displayName;
-} 
-void HALSIM_SetPWMDisplayName(int32_t index, const char* displayName) 
-{ 
-  std::cout << "Setting display name for " << "SimPWMData" << ", port " << index << " -> " << displayName << std::endl; 
-  std::strncpy(SimPWMData[index].displayName, displayName, sizeof(SimPWMData[index].displayName) - 1); 
-  *(std::end(SimPWMData[index].displayName) - 1) = '\0'; 
+}
+void HALSIM_SetPWMDisplayName(int32_t index, const char* displayName) {
+  std::cout << "Setting display name for "
+            << "SimPWMData"
+            << ", port " << index << " -> " << displayName << std::endl;
+  std::strncpy(SimPWMData[index].displayName, displayName,
+               sizeof(SimPWMData[index].displayName) - 1);
+  *(std::end(SimPWMData[index].displayName) - 1) = '\0';
 }
 
 DEFINE_CAPI(HAL_Bool, Initialized, initialized)

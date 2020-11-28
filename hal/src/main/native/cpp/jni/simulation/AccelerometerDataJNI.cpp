@@ -14,16 +14,15 @@
 using namespace hal;
 
 extern "C" {
-  
-
 
 /*
  * Class:     edu_wpi_first_hal_simulation_AccelerometerDataJNI
  * Method:    getDisplayName
  * Signature: (I)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_edu_wpi_first_hal_simulation_AccelerometerDataJNI_getDisplayName
-  (JNIEnv * env, jclass, jint index)
+JNIEXPORT jstring JNICALL
+Java_edu_wpi_first_hal_simulation_AccelerometerDataJNI_getDisplayName
+  (JNIEnv* env, jclass, jint index)
 {
   // const char* displayName = HALSIM_GetAccelerometerDisplayName(index);
   // return wpi::java::MakeJString(env, displayName);
@@ -35,8 +34,9 @@ JNIEXPORT jstring JNICALL Java_edu_wpi_first_hal_simulation_AccelerometerDataJNI
  * Method:    setDisplayName
  * Signature: (ILjava/lang/String;)V
  */
-JNIEXPORT void JNICALL Java_edu_wpi_first_hal_simulation_AccelerometerDataJNI_setDisplayName
-  (JNIEnv *, jclass, jint, jstring)
+JNIEXPORT void JNICALL
+Java_edu_wpi_first_hal_simulation_AccelerometerDataJNI_setDisplayName
+  (JNIEnv*, jclass, jint, jstring)
 {
   // wpi::java::JStringRef displayNameRef{env, displayName};
   // HALSIM_SetDIODisplayName(index, displayNameRef.c_str());

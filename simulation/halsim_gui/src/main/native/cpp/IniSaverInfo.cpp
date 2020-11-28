@@ -14,7 +14,8 @@
 
 using namespace halsimgui;
 
-// void NameInfo::GetName(char* buf, size_t size, const char* defaultName) const {
+// void NameInfo::GetName(char* buf, size_t size, const char* defaultName) const
+// {
 //   if (m_name[0] != '\0') {
 //     std::snprintf(buf, size, "%s", m_name);
 //   } else {
@@ -41,18 +42,18 @@ using namespace halsimgui;
 // }
 
 void NameInfo::GetLabel(char* buf, size_t size, const char* defaultName) const {
-    std::snprintf(buf, size, "%s###Name%s", defaultName, defaultName);
+  std::snprintf(buf, size, "%s###Name%s", defaultName, defaultName);
 }
 
 void NameInfo::GetLabel(char* buf, size_t size, const char* defaultName,
                         int index) const {
-    std::snprintf(buf, size, "%s[%d]###Name%d", defaultName, index, index);
+  std::snprintf(buf, size, "%s[%d]###Name%d", defaultName, index, index);
 }
 
 void NameInfo::GetLabel(char* buf, size_t size, const char* defaultName,
                         int index, int index2) const {
-    std::snprintf(buf, size, "%s[%d,%d]###Name%d", defaultName, index, index2,
-                  index);
+  std::snprintf(buf, size, "%s[%d,%d]###Name%d", defaultName, index, index2,
+                index);
 }
 
 // bool NameInfo::ReadIni(wpi::StringRef name, wpi::StringRef value) {
@@ -111,7 +112,8 @@ void NameInfo::GetLabel(char* buf, size_t size, const char* defaultName,
 //   return rv;
 // }
 
-// bool NameInfo::InputTextName(const char* label_id, ImGuiInputTextFlags flags) {
+// bool NameInfo::InputTextName(const char* label_id, ImGuiInputTextFlags flags)
+// {
 //   return ImGui::InputText(label_id, m_name, sizeof(m_name), flags);
 // }
 

@@ -44,7 +44,7 @@ public class DIOSim {
   public DIOSim(int channel) {
     m_index = channel;
   }
-  
+
 
   public String getDisplayName() {
     return DIODataJNI.getDisplayName(m_index);

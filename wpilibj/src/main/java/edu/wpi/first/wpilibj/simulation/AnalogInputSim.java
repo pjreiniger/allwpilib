@@ -42,7 +42,7 @@ public class AnalogInputSim {
   public void setDisplayName(String displayName) {
     AnalogInDataJNI.setDisplayName(m_index, displayName);
   }
-  
+
 
   public CallbackStore registerInitializedCallback(NotifyCallback callback, boolean initialNotify) {
     int uid = AnalogInDataJNI.registerInitializedCallback(m_index, callback, initialNotify);

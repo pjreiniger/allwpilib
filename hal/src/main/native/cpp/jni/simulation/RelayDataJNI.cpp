@@ -7,11 +7,11 @@
 
 #include <jni.h>
 
+#include <iostream>
+
 #include "CallbackStore.h"
 #include "edu_wpi_first_hal_simulation_RelayDataJNI.h"
 #include "hal/simulation/RelayData.h"
-
-#include <iostream>
 
 using namespace hal;
 
@@ -22,25 +22,27 @@ extern "C" {
  * Method:    getDisplayName
  * Signature: (I)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_edu_wpi_first_hal_simulation_RelayDataJNI_getDisplayName
-  (JNIEnv * env, jclass, jint index)
+JNIEXPORT jstring JNICALL
+Java_edu_wpi_first_hal_simulation_RelayDataJNI_getDisplayName
+  (JNIEnv* env, jclass, jint index)
 {
   const char* displayName = HALSIM_GetRelayDisplayName(index);
   std::cout << "GETTING DISPLAY NAME: " << displayName << std::endl;
   return wpi::java::MakeJString(env, displayName);
 }
 
-
 /*
  * Class:     edu_wpi_first_hal_simulation_RelayDataJNI
  * Method:    setDisplayName
  * Signature: (ILjava/lang/String;)V
  */
-JNIEXPORT void JNICALL Java_edu_wpi_first_hal_simulation_RelayDataJNI_setDisplayName
-  (JNIEnv * env, jclass, jint index, jstring displayName)
+JNIEXPORT void JNICALL
+Java_edu_wpi_first_hal_simulation_RelayDataJNI_setDisplayName
+  (JNIEnv* env, jclass, jint index, jstring displayName)
 {
   wpi::java::JStringRef displayNameRef{env, displayName};
-  std::cout << "JNI SETTING DISPLAY NAME: " << displayNameRef.c_str() << std::endl;
+  std::cout << "JNI SETTING DISPLAY NAME: " << displayNameRef.c_str()
+            << std::endl;
   HALSIM_SetRelayDisplayName(index, displayNameRef.c_str());
 }
 

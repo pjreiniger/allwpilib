@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <memory>
 
 #include <wpi/Compiler.h>
@@ -15,8 +16,6 @@
 
 #include "hal/simulation/NotifyListener.h"
 #include "hal/simulation/SimCallbackRegistry.h"
-
-#include <iostream>
 
 namespace hal {
 

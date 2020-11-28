@@ -47,7 +47,6 @@ class EncoderSim {
    * @return Simulated object
    */
   static EncoderSim CreateForIndex(int index);
-  
 
   void setDisplayName(const char* displayName);
   const char* getDisplayName();

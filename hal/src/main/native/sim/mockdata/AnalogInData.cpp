@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/* Copyright (c) 2017-2019 FIRST. All Rights Reserved.                        */
+/* Copyright (c) 2017-2020 FIRST. All Rights Reserved.                        */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in the root directory of */
 /* the project.                                                               */
@@ -47,20 +47,22 @@ HAL_SimDeviceHandle HALSIM_GetAnalogInSimDevice(int32_t index) {
   HAL_SIMDATAVALUE_DEFINE_CAPI(TYPE, HALSIM, AnalogIn##CAPINAME, \
                                SimAnalogInData, LOWERNAME)
 
-const char* HALSIM_GetAnalogInDisplayName(int32_t index) 
-{ 
-  if(SimAnalogInData[index].displayName[0] != '\0') {
+const char* HALSIM_GetAnalogInDisplayName(int32_t index) {
+  if (SimAnalogInData[index].displayName[0] != '\0') {
     return SimAnalogInData[index].displayName;
   }
 
-  std::snprintf(SimAnalogInData[index].displayName, 256, "AnalogIn [%d]", index);
+  std::snprintf(SimAnalogInData[index].displayName, sizeof(SimAnalogInData[index].displayName), "AnalogIn [%d]",
+                index);
   return SimAnalogInData[index].displayName;
-} 
-void HALSIM_SetAnalogInDisplayName(int32_t index, const char* displayName) 
-{ 
-  std::cout << "Setting display name for " << "SimAnalogInData" << ", port " << index << " -> " << displayName << std::endl; 
-  std::strncpy(SimAnalogInData[index].displayName, displayName, sizeof(SimAnalogInData[index].displayName) - 1); 
-  *(std::end(SimAnalogInData[index].displayName) - 1) = '\0'; 
+}
+void HALSIM_SetAnalogInDisplayName(int32_t index, const char* displayName) {
+  std::cout << "Setting display name for "
+            << "SimAnalogInData"
+            << ", port " << index << " -> " << displayName << std::endl;
+  std::strncpy(SimAnalogInData[index].displayName, displayName,
+               sizeof(SimAnalogInData[index].displayName) - 1);
+  *(std::end(SimAnalogInData[index].displayName) - 1) = '\0';
 }
 DEFINE_CAPI(HAL_Bool, Initialized, initialized)
 DEFINE_CAPI(int32_t, AverageBits, averageBits)

@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/* Copyright (c) 2017-2019 FIRST. All Rights Reserved.                        */
+/* Copyright (c) 2017-2020 FIRST. All Rights Reserved.                        */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in the root directory of */
 /* the project.                                                               */
@@ -50,21 +50,24 @@ DEFINE_CAPI(HAL_Bool, ClosedLoopEnabled, closedLoopEnabled)
 DEFINE_CAPI(HAL_Bool, PressureSwitch, pressureSwitch)
 DEFINE_CAPI(double, CompressorCurrent, compressorCurrent)
 
-const char* HALSIM_GetSolenoidDisplayName(int32_t index, int32_t channel)
-{
-  if(SimPCMData[index].solenoidDisplayName[channel][0] != '\0') {
+const char* HALSIM_GetSolenoidDisplayName(int32_t index, int32_t channel) {
+  if (SimPCMData[index].solenoidDisplayName[channel][0] != '\0') {
     return SimPCMData[index].solenoidDisplayName[channel];
   }
 
-  std::snprintf(SimPCMData[index].solenoidDisplayName[channel], 256, "Solenoid [%d][%d]", index, channel);
+  std::snprintf(SimPCMData[index].solenoidDisplayName[channel], sizeof(SimPCMData[index].solenoidDisplayName[channel],
+                "Solenoid [%d][%d]", index, channel);
   return SimPCMData[index].solenoidDisplayName[channel];
 }
 
-void HALSIM_SetSolenoidDisplayName(int32_t index, int32_t channel, const char* displayName)
-{
-  std::cout << "Setting display name for " << "Solenoid" << ", port " << index << " -> " << displayName << std::endl; 
-  std::strncpy(SimPCMData[index].solenoidDisplayName[channel], displayName, sizeof(SimPCMData[index].solenoidDisplayName[channel]) - 1); 
-  *(std::end(SimPCMData[index].solenoidDisplayName[channel]) - 1) = '\0'; 
+void HALSIM_SetSolenoidDisplayName(int32_t index, int32_t channel,
+                                   const char* displayName) {
+  std::cout << "Setting display name for "
+            << "Solenoid"
+            << ", port " << index << " -> " << displayName << std::endl;
+  std::strncpy(SimPCMData[index].solenoidDisplayName[channel], displayName,
+               sizeof(SimPCMData[index].solenoidDisplayName[channel]) - 1);
+  *(std::end(SimPCMData[index].solenoidDisplayName[channel]) - 1) = '\0';
 }
 
 void HALSIM_GetPCMAllSolenoids(int32_t index, uint8_t* values) {

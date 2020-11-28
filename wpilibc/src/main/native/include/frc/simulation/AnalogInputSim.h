@@ -35,7 +35,7 @@ class AnalogInputSim {
    * @param channel Channel number
    */
   explicit AnalogInputSim(int channel);
-  
+
   void setDisplayName(const char* displayName);
   const char* getDisplayName();
 

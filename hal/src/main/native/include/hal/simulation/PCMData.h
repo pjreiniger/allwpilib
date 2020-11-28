@@ -16,9 +16,9 @@ extern "C" {
 
 void HALSIM_ResetPCMData(int32_t index);
 
-
 const char* HALSIM_GetSolenoidDisplayName(int32_t index, int32_t channel);
-void HALSIM_SetSolenoidDisplayName(int32_t index, int32_t channel, const char* displayName);
+void HALSIM_SetSolenoidDisplayName(int32_t index, int32_t channel,
+                                   const char* displayName);
 
 int32_t HALSIM_RegisterPCMSolenoidInitializedCallback(
     int32_t index, int32_t channel, HAL_NotifyCallback callback, void* param,

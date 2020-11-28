@@ -15,28 +15,28 @@ using namespace hal;
 
 extern "C" {
 
-
 /*
  * Class:     edu_wpi_first_hal_simulation_AnalogGyroDataJNI
  * Method:    getDisplayName
  * Signature: (I)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_edu_wpi_first_hal_simulation_AnalogGyroDataJNI_getDisplayName
-  (JNIEnv * env, jclass, jint index)
+JNIEXPORT jstring JNICALL
+Java_edu_wpi_first_hal_simulation_AnalogGyroDataJNI_getDisplayName
+  (JNIEnv* env, jclass, jint index)
 {
   // const char* displayName = HALSIM_GetAnalogGyroDisplayName(index);
   // return wpi::java::MakeJString(env, displayName);
   return NULL;
 }
 
-
 /*
  * Class:     edu_wpi_first_hal_simulation_AnalogGyroDataJNI
  * Method:    setDisplayName
  * Signature: (ILjava/lang/String;)V
  */
-JNIEXPORT void JNICALL Java_edu_wpi_first_hal_simulation_AnalogGyroDataJNI_setDisplayName
-  (JNIEnv *, jclass, jint, jstring)
+JNIEXPORT void JNICALL
+Java_edu_wpi_first_hal_simulation_AnalogGyroDataJNI_setDisplayName
+  (JNIEnv*, jclass, jint, jstring)
 {
   // wpi::java::JStringRef displayNameRef{env, displayName};
   // HALSIM_SetDIODisplayName(index, displayNameRef.c_str());
