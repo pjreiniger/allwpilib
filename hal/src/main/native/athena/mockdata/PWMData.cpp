@@ -15,7 +15,7 @@ void HALSIM_ResetPWMData(int32_t index) {}
 #define DEFINE_CAPI(TYPE, CAPINAME, RETURN) \
   HAL_SIMDATAVALUE_STUB_CAPI(TYPE, HALSIM, PWM##CAPINAME, RETURN)
 
-const char* HALSIM_GePWMDisplayName(int32_t index) { return ""; }
+const char* HALSIM_GetPWMDisplayName(int32_t index) { return ""; }
 void HALSIM_SetPWMDisplayName(int32_t index, const char* displayName) {}
 DEFINE_CAPI(HAL_Bool, Initialized, false)
 DEFINE_CAPI(int32_t, RawValue, 0)
