@@ -21,7 +21,6 @@ SimDeviceSim::SimDeviceSim(const char* name)
 
 const char* SimDeviceSim::GetDisplayName() const {
   return HALSIM_GetSimDeviceDisplayName(m_handle);
-
 }
 void SimDeviceSim::SetDisplayName(const char* displayName) {
   HALSIM_SetSimDeviceDisplayName(m_handle, displayName);

@@ -5,9 +5,10 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
+#include <wpi/Twine.h>
+
 #include "../PortsInternal.h"
 #include "PCMDataInternal.h"
-#include <wpi/Twine.h>
 
 using namespace hal;
 

@@ -5,9 +5,10 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
+#include <wpi/Twine.h>
+
 #include "../PortsInternal.h"
 #include "RelayDataInternal.h"
-#include <wpi/Twine.h>
 
 using namespace hal;
 
@@ -40,7 +41,7 @@ const char* HALSIM_GetRelayDisplayName(int32_t index) {
   return SimRelayData[index].displayName.Get();
 }
 void HALSIM_SetRelayDisplayName(int32_t index, const char* displayName) {
-   SimRelayData[index].displayName.Set(displayName);
+  SimRelayData[index].displayName.Set(displayName);
 }
 
 DEFINE_CAPI(HAL_Bool, InitializedForward, initializedForward)

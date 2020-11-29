@@ -32,16 +32,15 @@ struct ElementInfo : public OpenInfo {
     if (OpenInfo::ReadIni(name, value)) return true;
     return false;
   }
-  void WriteIni(ImGuiTextBuffer* out) {
-    OpenInfo::WriteIni(out);
-  }
-  
+  void WriteIni(ImGuiTextBuffer* out) { OpenInfo::WriteIni(out); }
+
   // void GetLabel(char* buf, size_t size, const char* defaultName) const
   // {
   //   std::snprintf(buf, size, "%s", defaultName);
   // }
-  
-  // void GetLabel(char* buf, size_t size, const char* defaultName, HAL_SimDeviceHandle handle) const
+
+  // void GetLabel(char* buf, size_t size, const char* defaultName,
+  // HAL_SimDeviceHandle handle) const
   // {
   //       const char* displayName = HALSIM_GetSimDeviceDisplayName(handle);
   //       if (displayName[0] != '\0') {
@@ -50,18 +49,17 @@ struct ElementInfo : public OpenInfo {
   //           std::snprintf(buf, size, "%s", defaultName);
   //       }
   // }
-  
-  const char* GetDisplayName(const char* defaultName, HAL_SimDeviceHandle handle) const
-  {
-        const char* displayName = HALSIM_GetSimDeviceDisplayName(handle);
-        if (displayName[0] == '\0') {
-            return defaultName;
-        } else {
-            return displayName;
-        }
+
+  const char* GetDisplayName(const char* defaultName,
+                             HAL_SimDeviceHandle handle) const {
+    const char* displayName = HALSIM_GetSimDeviceDisplayName(handle);
+    if (displayName[0] == '\0') {
+      return defaultName;
+    } else {
+      return displayName;
+    }
   }
 
-  
   bool visible = true;  // not saved
 };
 
@@ -121,7 +119,8 @@ void SimDeviceGui::Add(std::function<void()> execute) {
   if (execute) gDeviceExecutors.emplace_back(std::move(execute));
 }
 
-bool SimDeviceGui::StartDevice(const char* label, const char* displayName, ImGuiTreeNodeFlags flags) {
+bool SimDeviceGui::StartDevice(const char* label, const char* displayName,
+                               ImGuiTreeNodeFlags flags) {
   auto& element = gElements[label];
   if (!element.visible) return false;
 
@@ -129,7 +128,8 @@ bool SimDeviceGui::StartDevice(const char* label, const char* displayName, ImGui
   // element.GetLabel(name, sizeof(name), label, handle);
 
   bool open = ImGui::CollapsingHeader(
-      displayName, flags | (element.IsOpen() ? ImGuiTreeNodeFlags_DefaultOpen : 0));
+      displayName,
+      flags | (element.IsOpen() ? ImGuiTreeNodeFlags_DefaultOpen : 0));
   element.SetOpen(open);
 
   if (open) ImGui::PushID(label);

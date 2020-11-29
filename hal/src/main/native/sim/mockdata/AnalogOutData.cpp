@@ -5,9 +5,10 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
+#include <wpi/Twine.h>
+
 #include "../PortsInternal.h"
 #include "AnalogOutDataInternal.h"
-#include <wpi/Twine.h>
 
 using namespace hal;
 
@@ -40,7 +41,7 @@ const char* HALSIM_GetAnalogOutDisplayName(int32_t index) {
   return SimAnalogOutData[index].displayName.Get();
 }
 void HALSIM_SetAnalogOutDisplayName(int32_t index, const char* displayName) {
-   SimAnalogOutData[index].displayName.Set(displayName);
+  SimAnalogOutData[index].displayName.Set(displayName);
 }
 DEFINE_CAPI(double, Voltage, voltage)
 DEFINE_CAPI(HAL_Bool, Initialized, initialized)

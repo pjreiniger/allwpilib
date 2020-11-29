@@ -14,7 +14,6 @@
 
 using namespace halsimgui;
 
-
 void NameInfo::GetName(char* buf, size_t size, const char* defaultName) const {
   if (m_name[0] != '\0') {
     std::snprintf(buf, size, "%s", m_name);

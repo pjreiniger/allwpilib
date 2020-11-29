@@ -190,7 +190,8 @@ class SimDeviceData {
   const char* GetDeviceName(HAL_SimDeviceHandle handle);
 
   const char* GetDeviceDisplayName(HAL_SimDeviceHandle handle);
-  void SetDeviceDisplayName(HAL_SimDeviceHandle handle, const char* newDeviceName);
+  void SetDeviceDisplayName(HAL_SimDeviceHandle handle,
+                            const char* newDeviceName);
 
   void EnumerateDevices(const char* prefix, void* param,
                         HALSIM_SimDeviceCallback callback);

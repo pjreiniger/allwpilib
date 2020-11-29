@@ -261,7 +261,8 @@ const char* SimDeviceData::GetDeviceDisplayName(HAL_SimDeviceHandle handle) {
   return deviceImpl->displayName.c_str();
 }
 
-void SimDeviceData::SetDeviceDisplayName(HAL_SimDeviceHandle handle, const char* newDeviceName) {
+void SimDeviceData::SetDeviceDisplayName(HAL_SimDeviceHandle handle,
+                                         const char* newDeviceName) {
   std::scoped_lock lock(m_mutex);
 
   // look up device
@@ -269,7 +270,6 @@ void SimDeviceData::SetDeviceDisplayName(HAL_SimDeviceHandle handle, const char*
   if (deviceImpl) {
     deviceImpl->name = newDeviceName;
   }
-
 }
 
 void SimDeviceData::EnumerateDevices(const char* prefix, void* param,
@@ -424,13 +424,12 @@ const char* HALSIM_GetSimDeviceName(HAL_SimDeviceHandle handle) {
   return SimSimDeviceData->GetDeviceName(handle);
 }
 
-const char* HALSIM_GetSimDeviceDisplayName(HAL_SimDeviceHandle handle)
-{
+const char* HALSIM_GetSimDeviceDisplayName(HAL_SimDeviceHandle handle) {
   return SimSimDeviceData->GetDeviceDisplayName(handle);
 }
-void HALSIM_SetSimDeviceDisplayName(HAL_SimDeviceHandle handle, const char* displayName)
-{
-SimSimDeviceData->SetDeviceDisplayName(handle, displayName);
+void HALSIM_SetSimDeviceDisplayName(HAL_SimDeviceHandle handle,
+                                    const char* displayName) {
+  SimSimDeviceData->SetDeviceDisplayName(handle, displayName);
 }
 
 HAL_SimDeviceHandle HALSIM_GetSimValueDeviceHandle(HAL_SimValueHandle handle) {

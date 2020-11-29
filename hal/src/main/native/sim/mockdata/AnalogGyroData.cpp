@@ -5,9 +5,10 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
+#include <wpi/Twine.h>
+
 #include "../PortsInternal.h"
 #include "AnalogGyroDataInternal.h"
-#include <wpi/Twine.h>
 
 using namespace hal;
 
@@ -41,7 +42,7 @@ const char* HALSIM_GetAnalogGyroDisplayName(int32_t index) {
   return SimAnalogGyroData[index].displayName.Get();
 }
 void HALSIM_SetAnalogGyroDisplayName(int32_t index, const char* displayName) {
-   SimAnalogGyroData[index].displayName.Set(displayName);
+  SimAnalogGyroData[index].displayName.Set(displayName);
 }
 
 DEFINE_CAPI(double, Angle, angle)

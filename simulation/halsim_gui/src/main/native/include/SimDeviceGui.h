@@ -96,7 +96,8 @@ class SimDeviceGui {
    * @param flags ImGuiTreeNodeFlags flags
    * @return True if expanded
    */
-  static bool StartDevice(const char* label, const char* displayName, ImGuiTreeNodeFlags flags = 0);
+  static bool StartDevice(const char* label, const char* displayName,
+                          ImGuiTreeNodeFlags flags = 0);
 
   /**
    * Finish a device block started with StartDevice().

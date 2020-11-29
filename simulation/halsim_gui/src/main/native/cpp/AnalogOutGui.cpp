@@ -26,16 +26,16 @@ namespace {
 HALSIMGUI_DATASOURCE_DOUBLE_INDEXED(AnalogOutVoltage, "AOut");
 
 class AnalogOutNameAccessor {
-  public:
-    void GetLabel(char* buf, size_t size, const char* defaultName, int index) const
-    {
-        const char* displayName = HALSIM_GetAnalogOutDisplayName(index);
-        if (displayName[0] != '\0') {
-            std::snprintf(buf, size, "%s", displayName);
-        } else {
-            std::snprintf(buf, size, "%s[%d]###Name%d", defaultName, index, index);
-        }
+ public:
+  void GetLabel(char* buf, size_t size, const char* defaultName,
+                int index) const {
+    const char* displayName = HALSIM_GetAnalogOutDisplayName(index);
+    if (displayName[0] != '\0') {
+      std::snprintf(buf, size, "%s", displayName);
+    } else {
+      std::snprintf(buf, size, "%s[%d]###Name%d", defaultName, index, index);
     }
+  }
 };
 }  // namespace
 

@@ -5,9 +5,10 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
+#include <wpi/Twine.h>
+
 #include "../PortsInternal.h"
 #include "AnalogInDataInternal.h"
-#include <wpi/Twine.h>
 
 using namespace hal;
 

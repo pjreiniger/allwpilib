@@ -7,15 +7,14 @@
 
 #pragma once
 
-#include <wpi/spinlock.h>
 #include <functional>
+
+#include <wpi/spinlock.h>
 
 namespace hal {
 
-class SimDisplayName
-{
-public:
-
+class SimDisplayName {
+ public:
   void Reset() {
     std::scoped_lock lock(m_mutex);
     displayName[0] = '\0';
@@ -28,14 +27,14 @@ public:
 
   void Set(const char* newDisplayName) {
     std::scoped_lock lock(m_mutex);
-    
+
     std::strncpy(displayName, newDisplayName, sizeof(displayName) - 1);
     *(std::end(displayName) - 1) = '\0';
   }
-    
-protected:
+
+ protected:
   mutable wpi::recursive_spinlock m_mutex;
   char displayName[256];
 };
 
-}
+}  // namespace hal

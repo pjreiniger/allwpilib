@@ -33,20 +33,20 @@ struct PCMSource {
   int initCount = 0;
 };
 
-
 class SolenoidNameAccessor {
-  public:
-    SolenoidNameAccessor();
+ public:
+  SolenoidNameAccessor();
 
-    void GetLabel(char* buf, size_t size, int pcmIndex, int solenoidIndex) const
-    {
-        const char* displayName = HALSIM_GetSolenoidDisplayName(pcmIndex, solenoidIndex);
-        if (displayName[0] != '\0') {
-            std::snprintf(buf, size, "%s", displayName);
-        } else {
-            std::snprintf(buf, size, "%s[%d]###Name%d", "Solenoid", solenoidIndex, solenoidIndex);
-        }
+  void GetLabel(char* buf, size_t size, int pcmIndex, int solenoidIndex) const {
+    const char* displayName =
+        HALSIM_GetSolenoidDisplayName(pcmIndex, solenoidIndex);
+    if (displayName[0] != '\0') {
+      std::snprintf(buf, size, "%s", displayName);
+    } else {
+      std::snprintf(buf, size, "%s[%d]###Name%d", "Solenoid", solenoidIndex,
+                    solenoidIndex);
     }
+  }
 };
 
 }  // namespace

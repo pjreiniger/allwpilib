@@ -5,9 +5,10 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
+#include <wpi/Twine.h>
+
 #include "../PortsInternal.h"
 #include "PWMDataInternal.h"
-#include <wpi/Twine.h>
 
 using namespace hal;
 
@@ -39,10 +40,10 @@ void HALSIM_ResetPWMData(int32_t index) { SimPWMData[index].ResetData(); }
                                LOWERNAME)
 
 const char* HALSIM_GetPWMDisplayName(int32_t index) {
-   return SimPWMData[index].displayName.Get();
+  return SimPWMData[index].displayName.Get();
 }
 void HALSIM_SetPWMDisplayName(int32_t index, const char* displayName) {
-   SimPWMData[index].displayName.Set(displayName);
+  SimPWMData[index].displayName.Set(displayName);
 }
 
 DEFINE_CAPI(HAL_Bool, Initialized, initialized)

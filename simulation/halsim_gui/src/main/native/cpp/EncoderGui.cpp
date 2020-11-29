@@ -24,19 +24,19 @@
 using namespace halsimgui;
 
 namespace {
-  
-class EncoderNameAccessor {
-  public:
 
-    void GetLabel(char* buf, size_t size, const char* defaultName, int index, int channelA, int channelB) const
-    {
-        const char* displayName = HALSIM_GetEncoderDisplayName(index);
-        if (displayName[0] != '\0') {
-            std::snprintf(buf, size, "%s", displayName);
-        } else {
-            std::snprintf(buf, size, "%s[%d,%d]###Name%d", defaultName, channelA, channelB, index);
-        }
+class EncoderNameAccessor {
+ public:
+  void GetLabel(char* buf, size_t size, const char* defaultName, int index,
+                int channelA, int channelB) const {
+    const char* displayName = HALSIM_GetEncoderDisplayName(index);
+    if (displayName[0] != '\0') {
+      std::snprintf(buf, size, "%s", displayName);
+    } else {
+      std::snprintf(buf, size, "%s[%d,%d]###Name%d", defaultName, channelA,
+                    channelB, index);
     }
+  }
 };
 
 struct EncoderInfo : public EncoderNameAccessor, public OpenInfo {
@@ -44,9 +44,7 @@ struct EncoderInfo : public EncoderNameAccessor, public OpenInfo {
     if (OpenInfo::ReadIni(name, value)) return true;
     return false;
   }
-  void WriteIni(ImGuiTextBuffer* out) {
-    OpenInfo::WriteIni(out);
-  }
+  void WriteIni(ImGuiTextBuffer* out) { OpenInfo::WriteIni(out); }
 };
 
 class EncoderSource {

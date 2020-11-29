@@ -29,16 +29,16 @@ HALSIMGUI_DATASOURCE_BOOLEAN_INDEXED(RelayForward, "RelayFwd");
 HALSIMGUI_DATASOURCE_BOOLEAN_INDEXED(RelayReverse, "RelayRev");
 
 class RelayNameAccessor {
-  public:
-    void GetLabel(char* buf, size_t size, const char* defaultName, int index) const
-    {
-        const char* displayName = HALSIM_GetRelayDisplayName(index);
-        if (displayName[0] != '\0') {
-            std::snprintf(buf, size, "%s", displayName);
-        } else {
-            std::snprintf(buf, size, "%s[%d]###Name%d", defaultName, index, index);
-        }
+ public:
+  void GetLabel(char* buf, size_t size, const char* defaultName,
+                int index) const {
+    const char* displayName = HALSIM_GetRelayDisplayName(index);
+    if (displayName[0] != '\0') {
+      std::snprintf(buf, size, "%s", displayName);
+    } else {
+      std::snprintf(buf, size, "%s[%d]###Name%d", defaultName, index, index);
     }
+  }
 };
 }  // namespace
 
@@ -92,7 +92,7 @@ static void DisplayRelays() {
       }
 
       auto& info = gRelays[i];
-      
+
       char label[128];
       info.GetLabel(label, sizeof(label), "Relay", i);
       ImGui::Text(label);

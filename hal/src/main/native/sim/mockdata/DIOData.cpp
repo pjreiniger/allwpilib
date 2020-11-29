@@ -5,10 +5,11 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
+#include <wpi/Twine.h>
+
 #include "../PortsInternal.h"
 #include "DIODataInternal.h"
 #include "EncoderDataInternal.h"
-#include <wpi/Twine.h>
 
 using namespace hal;
 
@@ -44,11 +45,10 @@ HAL_SimDeviceHandle HALSIM_GetDIOSimDevice(int32_t index) {
                                LOWERNAME)
 
 const char* HALSIM_GetDIODisplayName(int32_t index) {
-  
-   return SimDIOData[index].displayName.Get();
+  return SimDIOData[index].displayName.Get();
 }
 void HALSIM_SetDIODisplayName(int32_t index, const char* displayName) {
-   SimDIOData[index].displayName.Set(displayName);
+  SimDIOData[index].displayName.Set(displayName);
 }
 
 DEFINE_CAPI(HAL_Bool, Initialized, initialized)
