@@ -64,11 +64,11 @@ void HALSIM_ResetAddressableLEDData(int32_t index) {
   SimAddressableLEDData[index].ResetData();
 }
 
-const char* HALSIM_GetAddressableLEDDDisplayName(int32_t index) {
+const char* HALSIM_GetAddressableLEDDisplayName(int32_t index) {
   return SimAddressableLEDData[index].displayName.Get();
 }
-void HALSIM_SetAddressableLEDDDisplayName(int32_t index,
-                                          const char* displayName) {
+void HALSIM_SetAddressableLEDDisplayName(int32_t index,
+                                         const char* displayName) {
   SimAddressableLEDData[index].displayName.Set(displayName);
 }
 
