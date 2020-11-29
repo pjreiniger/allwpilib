@@ -164,14 +164,14 @@ publishing {
 
             artifactId = "${baseArtifactIdJava}"
             groupId artifactGroupIdJava
-            version 'pj_local_dev'
+            version wpilibVersioning.version.get()
         }
         cpp(MavenPublication) {
             artifact zipCppDocs
 
             artifactId = "${baseArtifactIdCpp}"
             groupId artifactGroupIdCpp
-            version 'pj_local_dev'
+            version wpilibVersioning.version.get()
         }
     }
 }

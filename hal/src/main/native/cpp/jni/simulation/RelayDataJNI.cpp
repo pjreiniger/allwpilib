@@ -7,8 +7,6 @@
 
 #include <jni.h>
 
-#include <iostream>
-
 #include "CallbackStore.h"
 #include "edu_wpi_first_hal_simulation_RelayDataJNI.h"
 #include "hal/simulation/RelayData.h"

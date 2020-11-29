@@ -26,8 +26,6 @@ HAL_Bool HALSIMGUI_DeviceTreeDisplayValue(const char* name, HAL_Bool readonly,
                                           struct HAL_Value* value,
                                           const char** options,
                                           int32_t numOptions);
-// HAL_Bool HALSIMGUI_DeviceTreeStartDevice(const char* label, int32_t flags);
-// void HALSIMGUI_DeviceTreeFinishDevice(void);
 
 }  // extern "C"
 

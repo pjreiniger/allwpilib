@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <cstring>
 #include <functional>
 
 #include <wpi/spinlock.h>

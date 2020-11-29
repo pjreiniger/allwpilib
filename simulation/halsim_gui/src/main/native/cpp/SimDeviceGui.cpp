@@ -309,10 +309,5 @@ HAL_Bool HALSIMGUI_DeviceTreeDisplayValue(const char* name, HAL_Bool readonly,
   return SimDeviceGui::DisplayValue(name, readonly, value, options, numOptions);
 }
 
-// HAL_Bool HALSIMGUI_DeviceTreeStartDevice(const char* label, int32_t flags) {
-//   return SimDeviceGui::StartDevice(label, flags);
-// }
-
-// void HALSIMGUI_DeviceTreeFinishDevice(void) { SimDeviceGui::FinishDevice(); }
 
 }  // extern "C"

@@ -99,7 +99,7 @@ model {
 
                 artifactId = "${baseArtifactId}-cpp"
                 groupId artifactGroupId
-                version 'pj_local_dev'
+                version wpilibVersioning.version.get()
             }
             jni(MavenPublication) {
                 jniTaskList.each {
@@ -108,7 +108,7 @@ model {
 
                 artifactId = "${baseArtifactId}-jni"
                 groupId artifactGroupId
-                version 'pj_local_dev'
+                version wpilibVersioning.version.get()
             }
         }
 
@@ -141,7 +141,7 @@ model {
 
                     artifactId = "${baseArtifactId}-jnicvstatic"
                     groupId artifactGroupId
-                    version 'pj_local_dev'
+                    version wpilibVersioning.version.get()
                 }
             }
         }

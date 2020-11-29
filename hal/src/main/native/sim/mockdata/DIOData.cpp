@@ -5,11 +5,8 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-#include <wpi/Twine.h>
-
 #include "../PortsInternal.h"
 #include "DIODataInternal.h"
-#include "EncoderDataInternal.h"
 
 using namespace hal;
 
