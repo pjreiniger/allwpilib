@@ -7,6 +7,7 @@
 
 #include "../PortsInternal.h"
 #include "AnalogInDataInternal.h"
+#include <wpi/Twine.h>
 
 using namespace hal;
 
@@ -48,7 +49,7 @@ HAL_SimDeviceHandle HALSIM_GetAnalogInSimDevice(int32_t index) {
                                SimAnalogInData, LOWERNAME)
 
 const char* HALSIM_GetAnalogInDisplayName(int32_t index) {
-  return SimAnalogInData[index].displayName.Get([index]() { return "In"; });
+  return SimAnalogInData[index].displayName.Get([index]() { return (wpi::Twine{"In ["} + wpi::Twine{index} + wpi::Twine{']'}).str().c_str(); });
 }
 void HALSIM_SetAnalogInDisplayName(int32_t index, const char* displayName) {
   SimAnalogInData[index].displayName.Set(displayName);

@@ -7,6 +7,7 @@
 
 #include "../PortsInternal.h"
 #include "EncoderDataInternal.h"
+#include <wpi/Twine.h>
 
 using namespace hal;
 
@@ -54,7 +55,9 @@ const char* HALSIM_GetEncoderDisplayName(int32_t index) {
 
   // std::snprintf(SimEncoderData[index].displayName, sizeof(SimEncoderData[index].displayName), "Encoder [%d]", index);
   // return SimEncoderData[index].displayName;
-  return SimEncoderData[index].displayName.Get([]() { return "Encoder"; });
+  return SimEncoderData[index].displayName.Get([index]() { 
+    return (wpi::Twine{"Encoder ["} + wpi::Twine{index} + wpi::Twine{']'}).str().c_str(); 
+  });
 }
 void HALSIM_SetEncoderDisplayName(int32_t index, const char* displayName) {
   // std::cout << "Setting display name for "

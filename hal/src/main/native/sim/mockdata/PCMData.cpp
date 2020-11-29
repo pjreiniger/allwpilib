@@ -7,6 +7,7 @@
 
 #include "../PortsInternal.h"
 #include "PCMDataInternal.h"
+#include <wpi/Twine.h>
 
 using namespace hal;
 
@@ -24,7 +25,7 @@ void PCMData::ResetData() {
   for (int i = 0; i < kNumSolenoidChannels; i++) {
     solenoidInitialized[i].Reset(false);
     solenoidOutput[i].Reset(false);
-    solenoidDisplayName[i][0] = '\0';
+    solenoidDisplayName[i].Reset();
   }
   compressorInitialized.Reset(false);
   compressorOn.Reset(false);
@@ -51,23 +52,14 @@ DEFINE_CAPI(HAL_Bool, PressureSwitch, pressureSwitch)
 DEFINE_CAPI(double, CompressorCurrent, compressorCurrent)
 
 const char* HALSIM_GetSolenoidDisplayName(int32_t index, int32_t channel) {
-  if (SimPCMData[index].solenoidDisplayName[channel][0] != '\0') {
-    return SimPCMData[index].solenoidDisplayName[channel];
-  }
-
-  std::snprintf(SimPCMData[index].solenoidDisplayName[channel], sizeof(SimPCMData[index].solenoidDisplayName[channel]),
-                "Solenoid[%d]", channel);
-  return SimPCMData[index].solenoidDisplayName[channel];
+  return SimPCMData[index].solenoidDisplayName[channel].Get([channel]() {
+    return (wpi::Twine{"Solenoid["} + wpi::Twine{channel} + wpi::Twine{']'}).str().c_str();
+  });
 }
 
 void HALSIM_SetSolenoidDisplayName(int32_t index, int32_t channel,
                                    const char* displayName) {
-  std::cout << "Setting display name for "
-            << "Solenoid"
-            << ", port " << index << " -> " << displayName << std::endl;
-  std::strncpy(SimPCMData[index].solenoidDisplayName[channel], displayName,
-               sizeof(SimPCMData[index].solenoidDisplayName[channel]) - 1);
-  *(std::end(SimPCMData[index].solenoidDisplayName[channel]) - 1) = '\0';
+  SimPCMData[index].solenoidDisplayName[channel].Set(displayName);
 }
 
 void HALSIM_GetPCMAllSolenoids(int32_t index, uint8_t* values) {

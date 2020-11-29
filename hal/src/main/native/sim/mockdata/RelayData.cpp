@@ -7,6 +7,7 @@
 
 #include "../PortsInternal.h"
 #include "RelayDataInternal.h"
+#include <wpi/Twine.h>
 
 using namespace hal;
 
@@ -42,16 +43,9 @@ const char* HALSIM_GetRelayDisplayName(int32_t index) {
 
   // std::snprintf(SimRelayData[index].displayName, sizeof(SimRelayData[index].displayName), "Relay [%d]", index);
   // return SimRelayData[index].displayName;
-  return SimRelayData[index].displayName.Get([]() { return ""; });
+  return SimRelayData[index].displayName.Get([index]() { return (wpi::Twine{"Relay ["} + wpi::Twine{index} + wpi::Twine{']'}).str().c_str(); });
 }
 void HALSIM_SetRelayDisplayName(int32_t index, const char* displayName) {
-  // std::cout << "Setting display name for "
-  //           << "Relay"
-  //           << ", port " << index << " -> " << displayName << std::endl;
-  // std::strncpy(SimRelayData[index].displayName, displayName,
-  //              sizeof(SimRelayData[index].displayName) - 1);
-  // *(std::end(SimRelayData[index].displayName) - 1) = '\0';
-  
    SimRelayData[index].displayName.Set(displayName);
 }
 

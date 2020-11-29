@@ -7,6 +7,7 @@
 
 #include "../PortsInternal.h"
 #include "AnalogOutDataInternal.h"
+#include <wpi/Twine.h>
 
 using namespace hal;
 
@@ -36,14 +37,7 @@ void HALSIM_ResetAnalogOutData(int32_t index) {
                                SimAnalogOutData, LOWERNAME)
 
 const char* HALSIM_GetAnalogOutDisplayName(int32_t index) {
-  // if (SimAnalogOutData[index].displayName[0] != '\0') {
-  //   return SimAnalogOutData[index].displayName;
-  // }
-
-  // std::snprintf(SimAnalogOutData[index].displayName, sizeof(SimAnalogOutData[index].displayName), "Out[%d]",
-  //               index);
-  // return SimAnalogOutData[index].displayName;
-  return SimAnalogOutData[index].displayName.Get([]() { return "Out"; });
+  return SimAnalogOutData[index].displayName.Get([index]() { return (wpi::Twine{"Out ["} + wpi::Twine{index} + wpi::Twine{']'}).str().c_str(); });
 }
 void HALSIM_SetAnalogOutDisplayName(int32_t index, const char* displayName) {
    SimAnalogOutData[index].displayName.Set(displayName);

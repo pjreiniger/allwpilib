@@ -8,6 +8,7 @@
 #include "../PortsInternal.h"
 #include "DIODataInternal.h"
 #include "EncoderDataInternal.h"
+#include <wpi/Twine.h>
 
 using namespace hal;
 
@@ -43,58 +44,15 @@ HAL_SimDeviceHandle HALSIM_GetDIOSimDevice(int32_t index) {
                                LOWERNAME)
 
 const char* HALSIM_GetDIODisplayName(int32_t index) {
-  // if (SimDIOData[index].displayName[0] != '\0') {
-  //   return SimDIOData[index].displayName;
-  // }
-
-  // std::cout << "Getting DIO name" << std::endl;
   
-  // for (int i = 0; i < kNumEncoders; ++i) {
-  //   std::cout << "Checking enc: " << i << std::endl;
-  //   int encoderChannel = -1;
-  //   if (HALSIM_GetEncoderInitialized(i)) {
-  //     int channel;
-  //     channel = HALSIM_GetEncoderDigitalChannelA(i);
-  //     if (channel >= 0 && channel < kNumDigitalChannels) {
-  //       encoderChannel = i;
-  //       std::cout << "  Got something? " << encoderChannel << std::endl;
-  //     } 
-  //     channel = HALSIM_GetEncoderDigitalChannelB(i);
-  //     if (channel >= 0 && channel < kNumDigitalChannels) {
-  //       encoderChannel = i;
-  //       std::cout << "  Got something2? " << encoderChannel << std::endl;
-  //     }
-  //   }
-  //   if(encoderChannel >= 0)
-  //   {
-  //     std::cout << "HHHHH " << std::endl;
-  //     std::snprintf(SimDIOData[index].displayName, sizeof(SimDIOData[index].displayName), 
-  //                         HALSIM_GetEncoderDisplayName(encoderChannel));
-  //     return SimDIOData[index].displayName;
-  //   }
-  // }
-
-  // if(HALSIM_GetDIOIsInput(index))
-  // {
-  //   std::snprintf(SimDIOData[index].displayName, sizeof(SimDIOData[index].displayName), "In [%d]", index);
-  // }
-  // else
-  // {
-  //   std::snprintf(SimDIOData[index].displayName, sizeof(SimDIOData[index].displayName), "Out [%d]", index);
-  // }
-  
-  // return SimDIOData[index].displayName;
-  
-   return SimDIOData[index].displayName.Get([]() { return "DIO"; });
+   return SimDIOData[index].displayName.Get([index]() {
+     if(HALSIM_GetDIOIsInput(index)) {
+        return (wpi::Twine{"AnalogGyro ["} + wpi::Twine{index} + wpi::Twine{']'}).str().c_str();
+     }
+     return (wpi::Twine{"AnalogGyro ["} + wpi::Twine{index} + wpi::Twine{']'}).str().c_str();
+   });
 }
 void HALSIM_SetDIODisplayName(int32_t index, const char* displayName) {
-  // std::cout << "Setting display name for "
-  //           << "DIO"
-  //           << ", port " << index << " -> " << displayName << std::endl;
-  // std::strncpy(SimDIOData[index].displayName, displayName,
-  //              sizeof(SimDIOData[index].displayName) - 1);
-  // *(std::end(SimDIOData[index].displayName) - 1) = '\0';
-  
    SimDIOData[index].displayName.Set(displayName);
 }
 

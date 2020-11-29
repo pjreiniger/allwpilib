@@ -7,6 +7,7 @@
 
 #include "../PortsInternal.h"
 #include "AnalogGyroDataInternal.h"
+#include <wpi/Twine.h>
 
 using namespace hal;
 
@@ -37,14 +38,7 @@ void HALSIM_ResetAnalogGyroData(int32_t index) {
                                SimAnalogGyroData, LOWERNAME)
 
 const char* HALSIM_GetAnalogGyroDisplayName(int32_t index) {
-  // if (SimAnalogGyroData[index].displayName[0] != '\0') {
-  //   return SimAnalogGyroData[index].displayName;
-  // }
-
-  // std::snprintf(SimAnalogGyroData[index].displayName, sizeof(SimAnalogGyroData[index].displayName), "AnalogGryo [%d]",
-  //               index);
-  // return SimAnalogGyroData[index].displayName;
-  return SimAnalogGyroData[index].displayName.Get([]() { return "AnalogGyro"; });
+  return SimAnalogGyroData[index].displayName.Get([index]() { return (wpi::Twine{"AnalogGyro ["} + wpi::Twine{index} + wpi::Twine{']'}).str().c_str(); });
 }
 void HALSIM_SetAnalogGyroDisplayName(int32_t index, const char* displayName) {
    SimAnalogGyroData[index].displayName.Set(displayName);

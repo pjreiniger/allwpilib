@@ -10,6 +10,7 @@
 #include "../PortsInternal.h"
 #include "hal/simulation/PCMData.h"
 #include "hal/simulation/SimDataValue.h"
+#include "hal/simulation/SimDisplayName.h"
 
 namespace hal {
 class PCMData {
@@ -31,7 +32,7 @@ class PCMData {
   }
 
  public:
-  char solenoidDisplayName[kNumSolenoidChannels][256];
+  SimDisplayName solenoidDisplayName[kNumSolenoidChannels];
 
   SimDataValue<HAL_Bool, HAL_MakeBoolean, GetSolenoidInitializedName,
                GetSolenoidInitializedDefault>
