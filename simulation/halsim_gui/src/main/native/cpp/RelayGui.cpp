@@ -51,6 +51,7 @@ static void UpdateRelaySources() {
       if (!source) {
         source = std::make_unique<RelayReverseSource>(i);
         // source->SetName(gRelays[i].GetName());
+        // source->SetName("HelloWorld");
       }
     } else {
       source.reset();
@@ -81,16 +82,7 @@ static void DisplayRelays() {
       }
 
       auto& info = gRelays[i];
-      // info.PushEditNameId(i);
-      // if (info.HasName())
-      //   ImGui::Text("%s [%d]", info.GetName(), i);
-      // else
-      //   ImGui::Text("Relay[%d]", i);
-      ImGui::PopID();
-      // if (info.PopupEditName(i)) {
-      //   if (forwardSource) forwardSource->SetName(info.GetName());
-      //   if (reverseSource) reverseSource->SetName(info.GetName());
-      // }
+      ImGui::Text(HALSIM_GetRelayDisplayName(i));
       ImGui::SameLine();
 
       // show forward and reverse as LED indicators

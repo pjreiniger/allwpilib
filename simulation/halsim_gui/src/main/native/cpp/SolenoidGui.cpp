@@ -99,7 +99,7 @@ static void DisplaySolenoids() {
       for (int j = 0; j < numChannels; ++j) {
         if (!pcmSource.solenoids[j]) continue;
         auto& info = gSolenoids[i * numChannels + j];
-        info.GetLabel(name, sizeof(name), "Solenoid", j);
+        info.GetLabel(name, sizeof(name), HALSIM_GetSolenoidDisplayName(i, j));
         ImGui::PushID(j);
         pcmSource.solenoids[j]->LabelText(name, "%s",
                                           channels[j] == 1 ? "On" : "Off");

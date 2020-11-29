@@ -9,6 +9,7 @@
 
 #include "hal/simulation/DIOData.h"
 #include "hal/simulation/SimDataValue.h"
+#include "hal/simulation/SimDisplayName.h"
 
 namespace hal {
 class DIOData {
@@ -19,7 +20,7 @@ class DIOData {
   HAL_SIMDATAVALUE_DEFINE_NAME(FilterIndex)
 
  public:
-  char displayName[256];
+  SimDisplayName displayName;
   SimDataValue<HAL_Bool, HAL_MakeBoolean, GetInitializedName> initialized{
       false};
   std::atomic<HAL_SimDeviceHandle> simDevice;

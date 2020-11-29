@@ -55,8 +55,8 @@ const char* HALSIM_GetSolenoidDisplayName(int32_t index, int32_t channel) {
     return SimPCMData[index].solenoidDisplayName[channel];
   }
 
-  std::snprintf(SimPCMData[index].solenoidDisplayName[channel], sizeof(SimPCMData[index].solenoidDisplayName[channel],
-                "Solenoid [%d][%d]", index, channel);
+  std::snprintf(SimPCMData[index].solenoidDisplayName[channel], sizeof(SimPCMData[index].solenoidDisplayName[channel]),
+                "Solenoid[%d]", channel);
   return SimPCMData[index].solenoidDisplayName[channel];
 }
 

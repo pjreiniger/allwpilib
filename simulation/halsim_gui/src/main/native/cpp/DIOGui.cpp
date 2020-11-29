@@ -153,9 +153,7 @@ static void DisplayDIO() {
           LabelSimDevice(label, simDevice);
         } else {
           ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(96, 96, 96, 255));
-          ImGui::LabelText(label, "Encoder[%d,%d]",
-                           HALSIM_GetEncoderDigitalChannelA(encoderMap[i] - 1),
-                           HALSIM_GetEncoderDigitalChannelB(encoderMap[i] - 1));
+          ImGui::LabelText(label, HALSIM_GetEncoderDisplayName(encoderMap[i] - 1));
           ImGui::PopStyleColor();
         }
       } else if (dutyCycleMap[i] > 0) {
@@ -170,7 +168,7 @@ static void DisplayDIO() {
             HALSIM_SetDutyCycleOutput(dutyCycleMap[i] - 1, val);
         }
       } else if (!HALSIM_GetDIOIsInput(i)) {
-        info.GetLabel(label, sizeof(label), "Out", i);
+        info.GetLabel(label, sizeof(label), HALSIM_GetDIODisplayName(i));
         if (auto simDevice = HALSIM_GetDIOSimDevice(i)) {
           LabelSimDevice(label, simDevice);
         } else {
@@ -178,7 +176,7 @@ static void DisplayDIO() {
               label, "%s", dioSource->GetValue() != 0 ? "1 (high)" : "0 (low)");
         }
       } else {
-        info.GetLabel(label, sizeof(label), " In", i);
+        info.GetLabel(label, sizeof(label), HALSIM_GetDIODisplayName(i));
         if (auto simDevice = HALSIM_GetDIOSimDevice(i)) {
           LabelSimDevice(label, simDevice);
         } else {

@@ -23,7 +23,7 @@ AnalogOutData* hal::SimAnalogOutData;
 void AnalogOutData::ResetData() {
   voltage.Reset(0.0);
   initialized.Reset(0);
-  displayName[0] = '\0';
+  displayName.Reset();
 }
 
 extern "C" {
@@ -36,21 +36,17 @@ void HALSIM_ResetAnalogOutData(int32_t index) {
                                SimAnalogOutData, LOWERNAME)
 
 const char* HALSIM_GetAnalogOutDisplayName(int32_t index) {
-  if (SimAnalogOutData[index].displayName[0] != '\0') {
-    return SimAnalogOutData[index].displayName;
-  }
+  // if (SimAnalogOutData[index].displayName[0] != '\0') {
+  //   return SimAnalogOutData[index].displayName;
+  // }
 
-  std::snprintf(SimAnalogOutData[index].displayName, sizeof(SimAnalogOutData[index].displayName), "AnalogOut [%d]",
-                index);
-  return SimAnalogOutData[index].displayName;
+  // std::snprintf(SimAnalogOutData[index].displayName, sizeof(SimAnalogOutData[index].displayName), "Out[%d]",
+  //               index);
+  // return SimAnalogOutData[index].displayName;
+  return SimAnalogOutData[index].displayName.Get([]() { return "Out"; });
 }
 void HALSIM_SetAnalogOutDisplayName(int32_t index, const char* displayName) {
-  std::cout << "Setting display name for "
-            << "SimAnalogOutData"
-            << ", port " << index << " -> " << displayName << std::endl;
-  std::strncpy(SimAnalogOutData[index].displayName, displayName,
-               sizeof(SimAnalogOutData[index].displayName) - 1);
-  *(std::end(SimAnalogOutData[index].displayName) - 1) = '\0';
+   SimAnalogOutData[index].displayName.Set(displayName);
 }
 DEFINE_CAPI(double, Voltage, voltage)
 DEFINE_CAPI(HAL_Bool, Initialized, initialized)

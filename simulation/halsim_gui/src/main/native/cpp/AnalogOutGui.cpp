@@ -58,7 +58,7 @@ static void DisplayAnalogOutputs() {
 
         auto& info = gAnalogOuts[i];
         char label[128];
-        info.GetLabel(label, sizeof(label), "Out", i);
+        info.GetLabel(label, sizeof(label), HALSIM_GetAnalogOutDisplayName(i));
         HAL_Value value = HAL_MakeDouble(source->GetValue());
         SimDeviceGui::DisplayValueSource(label, true, &value, source);
 

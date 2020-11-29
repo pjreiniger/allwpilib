@@ -77,7 +77,7 @@ static void DisplayPWMs() {
 
       auto& info = gPWM[i];
       char label[128];
-      info.GetLabel(label, sizeof(label), "PWM", i);
+      info.GetLabel(label, sizeof(label), HALSIM_GetPWMDisplayName(i));
       if (ledMap[i] > 0) {
         ImGui::LabelText(label, "LED[%d]", ledMap[i] - 1);
       } else {

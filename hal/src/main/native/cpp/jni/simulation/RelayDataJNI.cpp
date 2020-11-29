@@ -27,7 +27,6 @@ Java_edu_wpi_first_hal_simulation_RelayDataJNI_getDisplayName
   (JNIEnv* env, jclass, jint index)
 {
   const char* displayName = HALSIM_GetRelayDisplayName(index);
-  std::cout << "GETTING DISPLAY NAME: " << displayName << std::endl;
   return wpi::java::MakeJString(env, displayName);
 }
 
@@ -41,8 +40,6 @@ Java_edu_wpi_first_hal_simulation_RelayDataJNI_setDisplayName
   (JNIEnv* env, jclass, jint index, jstring displayName)
 {
   wpi::java::JStringRef displayNameRef{env, displayName};
-  std::cout << "JNI SETTING DISPLAY NAME: " << displayNameRef.c_str()
-            << std::endl;
   HALSIM_SetRelayDisplayName(index, displayNameRef.c_str());
 }
 

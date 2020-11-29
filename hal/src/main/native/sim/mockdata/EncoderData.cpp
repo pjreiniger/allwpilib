@@ -33,7 +33,7 @@ void EncoderData::ResetData() {
   reverseDirection.Reset(false);
   samplesToAverage.Reset(0);
   distancePerPulse.Reset(1);
-  displayName[0] = '\0';
+  displayName.Reset();
 }
 
 extern "C" {
@@ -48,20 +48,23 @@ int32_t HALSIM_FindEncoderForChannel(int32_t channel) {
 }
 
 const char* HALSIM_GetEncoderDisplayName(int32_t index) {
-  if (SimEncoderData[index].displayName[0] != '\0') {
-    return SimEncoderData[index].displayName;
-  }
+  // if (SimEncoderData[index].displayName[0] != '\0') {
+  //   return SimEncoderData[index].displayName;
+  // }
 
-  std::snprintf(SimEncoderData[index].displayName, sizeof(SimEncoderData[index].displayName), "Encoder [%d]", index);
-  return SimEncoderData[index].displayName;
+  // std::snprintf(SimEncoderData[index].displayName, sizeof(SimEncoderData[index].displayName), "Encoder [%d]", index);
+  // return SimEncoderData[index].displayName;
+  return SimEncoderData[index].displayName.Get([]() { return "Encoder"; });
 }
 void HALSIM_SetEncoderDisplayName(int32_t index, const char* displayName) {
-  std::cout << "Setting display name for "
-            << "AnalogGyro"
-            << ", port " << index << " -> " << displayName << std::endl;
-  std::strncpy(SimEncoderData[index].displayName, displayName,
-               sizeof(SimEncoderData[index].displayName) - 1);
-  *(std::end(SimEncoderData[index].displayName) - 1) = '\0';
+  // std::cout << "Setting display name for "
+  //           << "AnalogGyro"
+  //           << ", port " << index << " -> " << displayName << std::endl;
+  // std::strncpy(SimEncoderData[index].displayName, displayName,
+  //              sizeof(SimEncoderData[index].displayName) - 1);
+  // *(std::end(SimEncoderData[index].displayName) - 1) = '\0';
+  
+   SimEncoderData[index].displayName.Set(displayName);
 }
 
 void HALSIM_ResetEncoderData(int32_t index) {

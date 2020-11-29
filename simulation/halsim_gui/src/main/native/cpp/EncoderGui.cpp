@@ -207,8 +207,7 @@ static void DisplayEncoders() {
 
         // build header name
         auto& info = gEncoders[chA];
-        char name[128];
-        info.GetLabel(name, sizeof(name), "Encoder", chA, chB);
+        const char* name = HALSIM_GetEncoderDisplayName(i);
 
         // header
         bool open = ImGui::CollapsingHeader(

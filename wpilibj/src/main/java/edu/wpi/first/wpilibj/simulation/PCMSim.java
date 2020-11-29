@@ -43,12 +43,10 @@ public class PCMSim {
     m_index = compressor.getModule();
   }
 
-  public String getSolenoidDisplayName(int channel)
-  {
+  public String getSolenoidDisplayName(int channel) {
     return PCMDataJNI.getSolenoidDisplayName(m_index, channel);
   }
-  public void setSolenoidDisplayName(int channel, String displayName)
-  {
+  public void setSolenoidDisplayName(int channel, String displayName) {
     PCMDataJNI.setSolenoidDisplayName(m_index, channel, displayName);
   }
 

@@ -31,7 +31,7 @@ void AnalogInData::ResetData() {
   accumulatorCount.Reset(0);
   accumulatorCenter.Reset(0);
   accumulatorDeadband.Reset(0);
-  displayName[0] = '\0';
+  displayName.Reset();
 }
 
 extern "C" {
@@ -48,21 +48,10 @@ HAL_SimDeviceHandle HALSIM_GetAnalogInSimDevice(int32_t index) {
                                SimAnalogInData, LOWERNAME)
 
 const char* HALSIM_GetAnalogInDisplayName(int32_t index) {
-  if (SimAnalogInData[index].displayName[0] != '\0') {
-    return SimAnalogInData[index].displayName;
-  }
-
-  std::snprintf(SimAnalogInData[index].displayName, sizeof(SimAnalogInData[index].displayName), "AnalogIn [%d]",
-                index);
-  return SimAnalogInData[index].displayName;
+  return SimAnalogInData[index].displayName.Get([index]() { return "In"; });
 }
 void HALSIM_SetAnalogInDisplayName(int32_t index, const char* displayName) {
-  std::cout << "Setting display name for "
-            << "SimAnalogInData"
-            << ", port " << index << " -> " << displayName << std::endl;
-  std::strncpy(SimAnalogInData[index].displayName, displayName,
-               sizeof(SimAnalogInData[index].displayName) - 1);
-  *(std::end(SimAnalogInData[index].displayName) - 1) = '\0';
+  SimAnalogInData[index].displayName.Set(displayName);
 }
 DEFINE_CAPI(HAL_Bool, Initialized, initialized)
 DEFINE_CAPI(int32_t, AverageBits, averageBits)

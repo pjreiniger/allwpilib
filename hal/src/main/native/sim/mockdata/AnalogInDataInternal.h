@@ -9,6 +9,7 @@
 
 #include "hal/simulation/AnalogInData.h"
 #include "hal/simulation/SimDataValue.h"
+#include "hal/simulation/SimDisplayName.h"
 
 namespace hal {
 class AnalogInData {
@@ -23,7 +24,7 @@ class AnalogInData {
   HAL_SIMDATAVALUE_DEFINE_NAME(AccumulatorDeadband)
 
  public:
-  char displayName[256];
+  SimDisplayName displayName;
   SimDataValue<HAL_Bool, HAL_MakeBoolean, GetInitializedName> initialized{
       false};
   std::atomic<HAL_SimDeviceHandle> simDevice;

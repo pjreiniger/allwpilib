@@ -65,7 +65,7 @@ static void DisplayAnalogInputs() {
       auto& info = gAnalogInputs[i];
       // build label
       char label[128];
-      info.GetLabel(label, sizeof(label), "In", i);
+      info.GetLabel(label, sizeof(label), HALSIM_GetAnalogInDisplayName(i));
 
       if (i < numAccum && HALSIM_GetAnalogGyroInitialized(i)) {
         ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(96, 96, 96, 255));
