@@ -95,7 +95,7 @@ static void DisplayRelays() {
 
       char label[128];
       info.GetLabel(label, sizeof(label), "Relay", i);
-      ImGui::Text(label);
+      ImGui::Text("%s", label);
       ImGui::SameLine();
 
       // show forward and reverse as LED indicators

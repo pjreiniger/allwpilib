@@ -130,10 +130,10 @@ static void DisplaySolenoids() {
 
 void SolenoidGui::Initialize() {
   gPCMs.Initialize();
-  // gSolenoids.Initialize();
   const int numModules = HAL_GetNumPCMModules();
   const int numChannels = HAL_GetNumSolenoidChannels();
   gPCMSources.reserve(numModules);
+  gSolenoids.resize(numModules * numChannels);
   for (int i = 0; i < numModules; ++i) gPCMSources.emplace_back(numChannels);
 
   HALSimGui::AddExecute(UpdateSolenoidSources);

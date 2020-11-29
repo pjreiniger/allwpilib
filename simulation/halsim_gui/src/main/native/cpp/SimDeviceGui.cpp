@@ -34,22 +34,6 @@ struct ElementInfo : public OpenInfo {
   }
   void WriteIni(ImGuiTextBuffer* out) { OpenInfo::WriteIni(out); }
 
-  // void GetLabel(char* buf, size_t size, const char* defaultName) const
-  // {
-  //   std::snprintf(buf, size, "%s", defaultName);
-  // }
-
-  // void GetLabel(char* buf, size_t size, const char* defaultName,
-  // HAL_SimDeviceHandle handle) const
-  // {
-  //       const char* displayName = HALSIM_GetSimDeviceDisplayName(handle);
-  //       if (displayName[0] != '\0') {
-  //           std::snprintf(buf, size, "%s", displayName);
-  //       } else {
-  //           std::snprintf(buf, size, "%s", defaultName);
-  //       }
-  // }
-
   const char* GetDisplayName(const char* defaultName,
                              HAL_SimDeviceHandle handle) const {
     const char* displayName = HALSIM_GetSimDeviceDisplayName(handle);
@@ -123,9 +107,6 @@ bool SimDeviceGui::StartDevice(const char* label, const char* displayName,
                                ImGuiTreeNodeFlags flags) {
   auto& element = gElements[label];
   if (!element.visible) return false;
-
-  // char name[128];
-  // element.GetLabel(name, sizeof(name), label, handle);
 
   bool open = ImGui::CollapsingHeader(
       displayName,
@@ -308,6 +289,5 @@ HAL_Bool HALSIMGUI_DeviceTreeDisplayValue(const char* name, HAL_Bool readonly,
                                           int32_t numOptions) {
   return SimDeviceGui::DisplayValue(name, readonly, value, options, numOptions);
 }
-
 
 }  // extern "C"
