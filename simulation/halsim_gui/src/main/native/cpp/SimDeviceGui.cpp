@@ -36,10 +36,32 @@ struct ElementInfo : public OpenInfo {
     OpenInfo::WriteIni(out);
   }
   
-  void GetLabel(char* buf, size_t size, const char* defaultName) const
+  // void GetLabel(char* buf, size_t size, const char* defaultName) const
+  // {
+  //   std::snprintf(buf, size, "%s", defaultName);
+  // }
+  
+  // void GetLabel(char* buf, size_t size, const char* defaultName, HAL_SimDeviceHandle handle) const
+  // {
+  //       const char* displayName = HALSIM_GetSimDeviceDisplayName(handle);
+  //       if (displayName[0] != '\0') {
+  //           std::snprintf(buf, size, "%s", displayName);
+  //       } else {
+  //           std::snprintf(buf, size, "%s", defaultName);
+  //       }
+  // }
+  
+  const char* GetDisplayName(const char* defaultName, HAL_SimDeviceHandle handle) const
   {
-    // TODO
+        const char* displayName = HALSIM_GetSimDeviceDisplayName(handle);
+        if (displayName[0] == '\0') {
+            return defaultName;
+        } else {
+            return displayName;
+        }
   }
+
+  
   bool visible = true;  // not saved
 };
 
@@ -99,15 +121,15 @@ void SimDeviceGui::Add(std::function<void()> execute) {
   if (execute) gDeviceExecutors.emplace_back(std::move(execute));
 }
 
-bool SimDeviceGui::StartDevice(const char* label, ImGuiTreeNodeFlags flags) {
+bool SimDeviceGui::StartDevice(const char* label, const char* displayName, ImGuiTreeNodeFlags flags) {
   auto& element = gElements[label];
   if (!element.visible) return false;
 
-  char name[128];
-  element.GetLabel(name, sizeof(name), label);
+  // char name[128];
+  // element.GetLabel(name, sizeof(name), label, handle);
 
   bool open = ImGui::CollapsingHeader(
-      name, flags | (element.IsOpen() ? ImGuiTreeNodeFlags_DefaultOpen : 0));
+      displayName, flags | (element.IsOpen() ? ImGuiTreeNodeFlags_DefaultOpen : 0));
   element.SetOpen(open);
 
   if (open) ImGui::PushID(label);
@@ -247,7 +269,9 @@ static void SimDeviceDisplayDevice(const char* name, void*,
   auto it = gElements.find(name);
   if (it != gElements.end() && !it->second.visible) return;
 
-  if (SimDeviceGui::StartDevice(name)) {
+  const char* displayName = it->second.GetDisplayName(name, handle);
+
+  if (SimDeviceGui::StartDevice(name, displayName)) {
     ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5f);
     HALSIM_EnumerateSimValues(handle, nullptr, SimDeviceDisplayValue);
     ImGui::PopItemWidth();
@@ -285,10 +309,10 @@ HAL_Bool HALSIMGUI_DeviceTreeDisplayValue(const char* name, HAL_Bool readonly,
   return SimDeviceGui::DisplayValue(name, readonly, value, options, numOptions);
 }
 
-HAL_Bool HALSIMGUI_DeviceTreeStartDevice(const char* label, int32_t flags) {
-  return SimDeviceGui::StartDevice(label, flags);
-}
+// HAL_Bool HALSIMGUI_DeviceTreeStartDevice(const char* label, int32_t flags) {
+//   return SimDeviceGui::StartDevice(label, flags);
+// }
 
-void HALSIMGUI_DeviceTreeFinishDevice(void) { SimDeviceGui::FinishDevice(); }
+// void HALSIMGUI_DeviceTreeFinishDevice(void) { SimDeviceGui::FinishDevice(); }
 
 }  // extern "C"

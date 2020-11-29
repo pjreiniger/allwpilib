@@ -39,14 +39,7 @@ void HALSIM_ResetPWMData(int32_t index) { SimPWMData[index].ResetData(); }
                                LOWERNAME)
 
 const char* HALSIM_GetPWMDisplayName(int32_t index) {
-   return SimPWMData[index].displayName.Get([index]() { 
-     auto z = wpi::Twine{"PWM ["} + wpi::Twine{index} + wpi::Twine{']'};
-     auto x = z.str().c_str();
-     std::cout << "GET DEFAULT PWM : " << index << " -> '" << x << "' '" << "'" << std::endl;
-     z.dump();
-    //  std::cout << z.str() << std::endl;
-     return x;
-    });
+   return SimPWMData[index].displayName.Get();
 }
 void HALSIM_SetPWMDisplayName(int32_t index, const char* displayName) {
    SimPWMData[index].displayName.Set(displayName);

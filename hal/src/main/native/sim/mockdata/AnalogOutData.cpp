@@ -37,7 +37,7 @@ void HALSIM_ResetAnalogOutData(int32_t index) {
                                SimAnalogOutData, LOWERNAME)
 
 const char* HALSIM_GetAnalogOutDisplayName(int32_t index) {
-  return SimAnalogOutData[index].displayName.Get([index]() { return (wpi::Twine{"Out ["} + wpi::Twine{index} + wpi::Twine{']'}).str().c_str(); });
+  return SimAnalogOutData[index].displayName.Get();
 }
 void HALSIM_SetAnalogOutDisplayName(int32_t index, const char* displayName) {
    SimAnalogOutData[index].displayName.Set(displayName);

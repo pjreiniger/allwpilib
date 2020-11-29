@@ -52,9 +52,7 @@ DEFINE_CAPI(HAL_Bool, PressureSwitch, pressureSwitch)
 DEFINE_CAPI(double, CompressorCurrent, compressorCurrent)
 
 const char* HALSIM_GetSolenoidDisplayName(int32_t index, int32_t channel) {
-  return SimPCMData[index].solenoidDisplayName[channel].Get([channel]() {
-    return (wpi::Twine{"Solenoid["} + wpi::Twine{channel} + wpi::Twine{']'}).str().c_str();
-  });
+  return SimPCMData[index].solenoidDisplayName[channel].Get();
 }
 
 void HALSIM_SetSolenoidDisplayName(int32_t index, int32_t channel,

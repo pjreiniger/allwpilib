@@ -24,9 +24,8 @@ JNIEXPORT jstring JNICALL
 Java_edu_wpi_first_hal_simulation_AnalogGyroDataJNI_getDisplayName
   (JNIEnv* env, jclass, jint index)
 {
-  // const char* displayName = HALSIM_GetAnalogGyroDisplayName(index);
-  // return wpi::java::MakeJString(env, displayName);
-  return NULL;
+  const char* displayName = HALSIM_GetAnalogGyroDisplayName(index);
+  return wpi::java::MakeJString(env, displayName);
 }
 
 /*
@@ -36,10 +35,10 @@ Java_edu_wpi_first_hal_simulation_AnalogGyroDataJNI_getDisplayName
  */
 JNIEXPORT void JNICALL
 Java_edu_wpi_first_hal_simulation_AnalogGyroDataJNI_setDisplayName
-  (JNIEnv*, jclass, jint, jstring)
+  (JNIEnv* env, jclass, jint index, jstring displayName)
 {
-  // wpi::java::JStringRef displayNameRef{env, displayName};
-  // HALSIM_SetDIODisplayName(index, displayNameRef.c_str());
+  wpi::java::JStringRef displayNameRef{env, displayName};
+  HALSIM_SetAnalogGyroDisplayName(index, displayNameRef.c_str());
 }
 
 /*

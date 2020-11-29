@@ -63,7 +63,7 @@ static void DisplayAnalogOutputs() {
 
   if (count == 0) return;
 
-  if (SimDeviceGui::StartDevice("Analog Outputs")) {
+  if (SimDeviceGui::StartDevice("Analog Outputs", "Analog Outputs")) {
     for (int i = 0, iend = gAnalogOutSources.size(); i < iend; ++i) {
       if (auto source = gAnalogOutSources[i].get()) {
         ImGui::PushID(i);

@@ -38,7 +38,7 @@ void HALSIM_ResetAnalogGyroData(int32_t index) {
                                SimAnalogGyroData, LOWERNAME)
 
 const char* HALSIM_GetAnalogGyroDisplayName(int32_t index) {
-  return SimAnalogGyroData[index].displayName.Get([index]() { return (wpi::Twine{"AnalogGyro ["} + wpi::Twine{index} + wpi::Twine{']'}).str().c_str(); });
+  return SimAnalogGyroData[index].displayName.Get();
 }
 void HALSIM_SetAnalogGyroDisplayName(int32_t index, const char* displayName) {
    SimAnalogGyroData[index].displayName.Set(displayName);

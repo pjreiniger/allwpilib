@@ -45,12 +45,7 @@ HAL_SimDeviceHandle HALSIM_GetDIOSimDevice(int32_t index) {
 
 const char* HALSIM_GetDIODisplayName(int32_t index) {
   
-   return SimDIOData[index].displayName.Get([index]() {
-     if(HALSIM_GetDIOIsInput(index)) {
-        return (wpi::Twine{"AnalogGyro ["} + wpi::Twine{index} + wpi::Twine{']'}).str().c_str();
-     }
-     return (wpi::Twine{"AnalogGyro ["} + wpi::Twine{index} + wpi::Twine{']'}).str().c_str();
-   });
+   return SimDIOData[index].displayName.Get();
 }
 void HALSIM_SetDIODisplayName(int32_t index, const char* displayName) {
    SimDIOData[index].displayName.Set(displayName);

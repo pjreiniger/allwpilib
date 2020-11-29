@@ -21,13 +21,9 @@ public:
     displayName[0] = '\0';
   }
 
-  const char* Get(std::function<const char*()> defaultNameGenerator) {
+  const char* Get() {
     std::scoped_lock lock(m_mutex);
-    if (displayName[0] != '\0') {
-        return displayName;
-    }
-
-    return defaultNameGenerator();
+    return displayName;
   }
 
   void Set(const char* newDisplayName) {

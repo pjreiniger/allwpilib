@@ -37,13 +37,7 @@ void HALSIM_ResetRelayData(int32_t index) { SimRelayData[index].ResetData(); }
                                LOWERNAME)
 
 const char* HALSIM_GetRelayDisplayName(int32_t index) {
-  // if (SimRelayData[index].displayName[0] != '\0') {
-  //   return SimRelayData[index].displayName;
-  // }
-
-  // std::snprintf(SimRelayData[index].displayName, sizeof(SimRelayData[index].displayName), "Relay [%d]", index);
-  // return SimRelayData[index].displayName;
-  return SimRelayData[index].displayName.Get([index]() { return (wpi::Twine{"Relay ["} + wpi::Twine{index} + wpi::Twine{']'}).str().c_str(); });
+  return SimRelayData[index].displayName.Get();
 }
 void HALSIM_SetRelayDisplayName(int32_t index, const char* displayName) {
    SimRelayData[index].displayName.Set(displayName);
