@@ -42,7 +42,7 @@ void IniSaverVector<Info>::ReadLine(ImGuiContext* ctx,
   auto [name, value] = line.split('=');
   name = name.trim();
   value = value.trim();
-  // element->ReadIni(name, value);
+  element->ReadIni(name, value);
 }
 
 template <typename Info>
@@ -52,7 +52,7 @@ void IniSaverVector<Info>::WriteAll(ImGuiContext* ctx,
   auto self = static_cast<IniSaverVector*>(handler->UserData);
   for (size_t i = 0; i < self->size(); ++i) {
     out_buf->appendf("[%s][%d]\n", self->m_typeName, static_cast<int>(i));
-    // (*self)[i].WriteIni(out_buf);
+    (*self)[i].WriteIni(out_buf);
     out_buf->append("\n");
   }
 }

@@ -56,6 +56,16 @@ void HALSIM_SetPDPAllCurrents(int32_t index, const double* currents) {
   }
 }
 
+const char* HALSIM_GetPDPDisplayName(int32_t index)
+{
+  return SimPDPData[index].displayName.Get([]() { return ""; });
+}
+
+void HALSIM_SetPDPDisplayName(int32_t index, const char* displayName)
+{
+
+}
+
 #define REGISTER(NAME) \
   SimPDPData[index].NAME.RegisterCallback(callback, param, initialNotify)
 

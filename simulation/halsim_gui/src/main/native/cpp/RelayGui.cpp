@@ -27,9 +27,22 @@ using namespace halsimgui;
 namespace {
 HALSIMGUI_DATASOURCE_BOOLEAN_INDEXED(RelayForward, "RelayFwd");
 HALSIMGUI_DATASOURCE_BOOLEAN_INDEXED(RelayReverse, "RelayRev");
+
+class RelayNameAccessor {
+  public:
+    void GetLabel(char* buf, size_t size, const char* defaultName, int index) const
+    {
+        const char* displayName = HALSIM_GetRelayDisplayName(index);
+        if (displayName[0] != '\0') {
+            std::snprintf(buf, size, "%s", displayName);
+        } else {
+            std::snprintf(buf, size, "%s[%d]###Name%d", defaultName, index, index);
+        }
+    }
+};
 }  // namespace
 
-static IniSaver<NameInfo> gRelays{"Relay"};
+static std::vector<RelayNameAccessor> gRelays;
 static std::vector<std::unique_ptr<RelayForwardSource>> gRelayForwardSources;
 static std::vector<std::unique_ptr<RelayReverseSource>> gRelayReverseSources;
 
@@ -39,7 +52,6 @@ static void UpdateRelaySources() {
     if (HALSIM_GetRelayInitializedForward(i)) {
       if (!source) {
         source = std::make_unique<RelayForwardSource>(i);
-        // source->SetName(gRelays[i].GetName());
       }
     } else {
       source.reset();
@@ -50,8 +62,6 @@ static void UpdateRelaySources() {
     if (HALSIM_GetRelayInitializedReverse(i)) {
       if (!source) {
         source = std::make_unique<RelayReverseSource>(i);
-        // source->SetName(gRelays[i].GetName());
-        // source->SetName("HelloWorld");
       }
     } else {
       source.reset();
@@ -82,7 +92,10 @@ static void DisplayRelays() {
       }
 
       auto& info = gRelays[i];
-      ImGui::Text(HALSIM_GetRelayDisplayName(i));
+      
+      char label[128];
+      info.GetLabel(label, sizeof(label), "Relay", i);
+      ImGui::Text(label);
       ImGui::SameLine();
 
       // show forward and reverse as LED indicators
@@ -101,8 +114,8 @@ static void DisplayRelays() {
 }
 
 void RelayGui::Initialize() {
-  gRelays.Initialize();
   int numRelays = HAL_GetNumRelayHeaders();
+  gRelays.resize(numRelays);
   gRelayForwardSources.resize(numRelays);
   gRelayReverseSources.resize(numRelays);
   HALSimGui::AddExecute(UpdateRelaySources);

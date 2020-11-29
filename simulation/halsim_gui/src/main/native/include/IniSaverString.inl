@@ -39,7 +39,7 @@ void IniSaverString<Info>::ReadLine(ImGuiContext* ctx,
   auto [name, value] = line.split('=');
   name = name.trim();
   value = value.trim();
-  // element->ReadIni(name, value);
+  element->ReadIni(name, value);
 }
 
 template <typename Info>
@@ -49,7 +49,7 @@ void IniSaverString<Info>::WriteAll(ImGuiContext* ctx,
   auto self = static_cast<IniSaverString*>(handler->UserData);
   for (auto&& it : self->m_map) {
     out_buf->appendf("[%s][%s]\n", self->m_typeName, it.getKey().data());
-    // it.second.WriteIni(out_buf);
+    it.second.WriteIni(out_buf);
     out_buf->append("\n");
   }
 }

@@ -209,7 +209,7 @@ void PlotSeries::AppendValue(double value) {
 }
 
 bool PlotSeries::ReadIni(wpi::StringRef name, wpi::StringRef value) {
-  // if (NameInfo::ReadIni(name, value)) return true;
+  if (NameInfo::ReadIni(name, value)) return true;
   if (OpenInfo::ReadIni(name, value)) return true;
   if (name == "yAxis") {
     int num;
@@ -246,7 +246,7 @@ bool PlotSeries::ReadIni(wpi::StringRef name, wpi::StringRef value) {
 }
 
 void PlotSeries::WriteIni(ImGuiTextBuffer* out) {
-  // NameInfo::WriteIni(out);
+  NameInfo::WriteIni(out);
   OpenInfo::WriteIni(out);
   out->appendf(
       "yAxis=%d\ncolor=%u\nmarker=%d\ndigital=%d\n"
@@ -256,10 +256,10 @@ void PlotSeries::WriteIni(ImGuiTextBuffer* out) {
 }
 
 void PlotSeries::GetLabel(char* buf, size_t size) const {
-  // const char* name = GetName();
-  // if (name[0] == '\0' && m_newValueConn.connected()) name =
-  // m_source->GetName(); if (name[0] == '\0') name = m_id.c_str();
-  // std::snprintf(buf, size, "%s###%s", name, m_id.c_str());
+  const char* name = GetName();
+  if (name[0] == '\0' && m_newValueConn.connected()) name = m_source->GetName();
+  if (name[0] == '\0') name = m_id.c_str();
+  std::snprintf(buf, size, "%s###%s", name, m_id.c_str());
 }
 
 bool PlotSeries::EmitPlot(double now, size_t i, size_t plotIndex) {
@@ -318,9 +318,9 @@ bool PlotSeries::EmitPlot(double now, size_t i, size_t plotIndex) {
   if (ImPlot::BeginLegendPopup(label)) {
     if (ImGui::Button("Close")) ImGui::CloseCurrentPopup();
     ImGui::Text("Edit name:");
-    // if (InputTextName("##edit", ImGuiInputTextFlags_EnterReturnsTrue)) {
-    //   ImGui::CloseCurrentPopup();
-    // }
+    if (InputTextName("##edit", ImGuiInputTextFlags_EnterReturnsTrue)) {
+      ImGui::CloseCurrentPopup();
+    }
     rv = EmitSettingsDetail(i);
     ImPlot::EndLegendPopup();
   }
@@ -331,10 +331,10 @@ bool PlotSeries::EmitPlot(double now, size_t i, size_t plotIndex) {
 void PlotSeries::EmitDragDropPayload(size_t i, size_t plotIndex) {
   PlotSeriesRef ref = {plotIndex, i};
   ImGui::SetDragDropPayload("PlotSeries", &ref, sizeof(ref));
-  // const char* name = GetName();
-  // if (name[0] == '\0' && m_newValueConn.connected()) name =
-  // m_source->GetName(); if (name[0] == '\0') name = m_id.c_str();
-  // ImGui::TextUnformatted(name);
+  const char* name = GetName();
+  if (name[0] == '\0' && m_newValueConn.connected()) name = m_source->GetName();
+  if (name[0] == '\0') name = m_id.c_str();
+  ImGui::TextUnformatted(name);
 }
 
 static void MovePlotSeries(size_t fromPlotIndex, size_t fromSeriesIndex,
@@ -385,7 +385,7 @@ bool PlotSeries::EmitSettings(size_t i, size_t plotIndex) {
   }
 
   SetOpen(open);
-  // PopupEditName(i);
+  PopupEditName(i);
   if (!open) return false;
 
   return EmitSettingsDetail(i);
@@ -452,7 +452,7 @@ Plot::Plot() {
 }
 
 bool Plot::ReadIni(wpi::StringRef name, wpi::StringRef value) {
-  // if (NameInfo::ReadIni(name, value)) return true;
+  if (NameInfo::ReadIni(name, value)) return true;
   if (OpenInfo::ReadIni(name, value)) return true;
   if (name == "visible") {
     int num;
@@ -529,7 +529,7 @@ bool Plot::ReadIni(wpi::StringRef name, wpi::StringRef value) {
 }
 
 void Plot::WriteIni(ImGuiTextBuffer* out) {
-  // NameInfo::WriteIni(out);
+  NameInfo::WriteIni(out);
   OpenInfo::WriteIni(out);
   out->appendf(
       "visible=%d\nlockPrevX=%d\nlegend=%d\nyaxis2=%d\nyaxis3=%d\n"
@@ -549,21 +549,21 @@ void Plot::WriteIni(ImGuiTextBuffer* out) {
 }
 
 void Plot::GetLabel(char* buf, size_t size, int index) const {
-  // const char* name = NameInfo::GetName();
-  // if (name[0] != '\0') {
-  //   std::snprintf(buf, size, "%s##Plot%d", name, index);
-  // } else {
-  //   std::snprintf(buf, size, "Plot %d##Plot%d", index, index);
-  // }
+  const char* name = NameInfo::GetName();
+  if (name[0] != '\0') {
+    std::snprintf(buf, size, "%s##Plot%d", name, index);
+  } else {
+    std::snprintf(buf, size, "Plot %d##Plot%d", index, index);
+  }
 }
 
 void Plot::GetName(char* buf, size_t size, int index) const {
-  // const char* name = NameInfo::GetName();
-  // if (name[0] != '\0') {
-  //   std::snprintf(buf, size, "%s", name);
-  // } else {
-  //   std::snprintf(buf, size, "Plot %d", index);
-  // }
+  const char* name = NameInfo::GetName();
+  if (name[0] != '\0') {
+    std::snprintf(buf, size, "%s", name);
+  } else {
+    std::snprintf(buf, size, "Plot %d", index);
+  }
 }
 
 void Plot::DragDropTarget(size_t i, bool inPlot) {
@@ -757,7 +757,7 @@ void Plot::EmitSettings(size_t i) {
   }
   DragDropTarget(i, false);
   SetOpen(open);
-  // PopupEditName(i);
+  PopupEditName(i);
   if (!open) return;
   ImGui::PushID(i);
 #if 0

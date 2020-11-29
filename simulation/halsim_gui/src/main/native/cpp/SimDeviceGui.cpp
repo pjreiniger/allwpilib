@@ -27,15 +27,18 @@ using namespace halsimgui;
 
 namespace {
 
-struct ElementInfo : public NameInfo, public OpenInfo {
+struct ElementInfo : public OpenInfo {
   bool ReadIni(wpi::StringRef name, wpi::StringRef value) {
-    // if (NameInfo::ReadIni(name, value)) return true;
     if (OpenInfo::ReadIni(name, value)) return true;
     return false;
   }
   void WriteIni(ImGuiTextBuffer* out) {
-    // NameInfo::WriteIni(out);
     OpenInfo::WriteIni(out);
+  }
+  
+  void GetLabel(char* buf, size_t size, const char* defaultName) const
+  {
+    // TODO
   }
   bool visible = true;  // not saved
 };
@@ -106,7 +109,6 @@ bool SimDeviceGui::StartDevice(const char* label, ImGuiTreeNodeFlags flags) {
   bool open = ImGui::CollapsingHeader(
       name, flags | (element.IsOpen() ? ImGuiTreeNodeFlags_DefaultOpen : 0));
   element.SetOpen(open);
-  // element.PopupEditName(label);
 
   if (open) ImGui::PushID(label);
   return open;
