@@ -35,8 +35,6 @@ struct PCMSource {
 
 class SolenoidNameAccessor {
  public:
-  SolenoidNameAccessor();
-
   void GetLabel(char* buf, size_t size, int pcmIndex, int solenoidIndex) const {
     const char* displayName =
         HALSIM_GetSolenoidDisplayName(pcmIndex, solenoidIndex);
