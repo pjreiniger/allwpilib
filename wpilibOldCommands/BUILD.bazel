@@ -1,0 +1,50 @@
+
+load("//bazel_scripts/rules:cc.bzl", "wpilib_cc_library", "wpilib_cc_test")
+load("//bazel_scripts/rules:java.bzl", "wpilib_java_library", "wpilib_java_test")
+
+wpilib_java_library(
+    name = "wpilibOldCommands-java",
+    deps = [
+        "//hal:wpiHal-java",
+        "//wpilibj:wpilibj",
+        "//cameraserver:cameraserver-java",
+        "//cscore:cscore-java",
+        "//ntcore:ntcore-java",
+        "//wpimath:wpimath-java",
+
+    ]
+)
+
+
+# wpilib_java_test(
+#     name = "wpilibOldCommands-java-test",
+#     deps = [
+#         ":wpilibOldCommands-java",
+#
+#         #"//ntcore:ntcorejni-jar",
+#         #"//hal:wpiHaljni-jar"
+#     ],
+#     jni_deps = [
+#     ],
+# )
+
+
+wpilib_cc_library(
+    name="wpilibOldCommands-cpp",
+    deps=[
+        "//hal:wpiHal-cpp",
+        "//wpilibc:wpilibc-cpp",
+        "//ntcore:ntcore-cpp",
+        "//cscore:cscore-cpp",
+        "//cameraserver:cameraserver-cpp",
+        "//wpimath:wpimath-cpp",
+    ],
+    srcs=glob(["src/main/native/cpp/**/*.cpp", "src/main/native/cppcs/**/*.cpp"]),
+    visibility=["//visibility:public"],
+)
+
+wpilib_cc_test(
+    name = "wpilibOldCommands-cpp-test",
+    deps=[":wpilibOldCommands-cpp"],
+    includes=["test/native/include"],
+)

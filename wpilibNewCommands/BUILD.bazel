@@ -1,0 +1,52 @@
+
+load("//bazel_scripts/rules:cc.bzl", "wpilib_cc_library", "wpilib_cc_test")
+load("//bazel_scripts/rules:java.bzl", "wpilib_java_library", "wpilib_java_test")
+
+wpilib_java_library(
+    name = "wpilibNewCommands-java",
+    deps = [
+        "//hal:wpiHal-java",
+        "//wpilibj:wpilibj",
+        "//cameraserver:cameraserver-java",
+        "//cscore:cscore-java",
+        "//ntcore:ntcore-java",
+        "//wpimath:wpimath-java",
+
+    ],
+    visibility=["//visibility:public"],
+)
+
+wpilib_java_test(
+    name = "wpilibNewCommands-java-test",
+    deps = [
+        ":wpilibNewCommands-java",
+
+            "@big_maven//:com_google_guava_guava",
+            "@big_maven//:org_mockito_mockito_core",
+    ],
+    jni_deps = [
+        "//ntcore:ntcorejni",
+        "//hal:wpiHaljni"
+    ],
+    lib_directory = "wpilibNewCommands",
+)
+
+
+wpilib_cc_library(
+    name="wpilibNewCommands-cpp",
+    deps=[
+        "//hal:wpiHal-cpp",
+        "//wpilibc:wpilibc-cpp",
+        "//ntcore:ntcore-cpp",
+        "//cscore:cscore-cpp",
+        "//cameraserver:cameraserver-cpp",
+        "//wpimath:wpimath-cpp",
+    ],
+    srcs=glob(["src/main/native/cpp/**/*.cpp"]),
+    visibility=["//visibility:public"],
+)
+
+wpilib_cc_test(
+    name = "wpilibNewCommands-cpp-test",
+    deps=[":wpilibNewCommands-cpp"],
+)

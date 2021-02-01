@@ -1,0 +1,10 @@
+
+load("//bazel_scripts/rules:plugin.bzl", "wpilib_hal_plugin")
+
+wpilib_hal_plugin(
+    name="halsim_ws_server",
+    deps = [
+        "//simulation/halsim_ws_core:halsim_ws_core",
+        "//glass:glassnt",
+    ],
+)

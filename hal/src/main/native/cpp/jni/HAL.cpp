@@ -12,7 +12,6 @@
 #include <wpi/jni_util.h>
 
 #include "HALUtil.h"
-#include "edu_wpi_first_hal_HAL.h"
 #include "hal/DriverStation.h"
 #include "hal/Main.h"
 

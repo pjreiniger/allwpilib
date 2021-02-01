@@ -1,0 +1,97 @@
+
+load("//bazel_scripts/rules:jni.bzl", "wpilib_jni_library")
+load("//bazel_scripts/rules:java.bzl", "wpilib_java_test")
+load("//bazel_scripts/rules:cc.bzl",  "wpilib_cc_test", "DEFAULT_CC_SRC_PATTERN", "DEFAULT_CC_INCLUDES", "DEFAULT_CC_HDR_PATTERN", "DEFAULT_CC_TEST_INCLUDE_PATTERN")
+
+WIN_SRCS = glob([
+        "src/main/native/windows/*.cpp",
+        "src/main/native/libuv/src/win/*.cpp",
+
+])
+
+UNIX_UV_SRCS = [
+    'src/main/native/libuv/src/unix/async.cpp',
+    'src/main/native/libuv/src/unix/core.cpp',
+    'src/main/native/libuv/src/unix/dl.cpp',
+    'src/main/native/libuv/src/unix/fs.cpp',
+    'src/main/native/libuv/src/unix/getaddrinfo.cpp',
+    'src/main/native/libuv/src/unix/getnameinfo.cpp',
+    'src/main/native/libuv/src/unix/loop-watcher.cpp',
+    'src/main/native/libuv/src/unix/loop.cpp',
+    'src/main/native/libuv/src/unix/pipe.cpp',
+    'src/main/native/libuv/src/unix/poll.cpp',
+    'src/main/native/libuv/src/unix/process.cpp',
+    'src/main/native/libuv/src/unix/signal.cpp',
+    'src/main/native/libuv/src/unix/stream.cpp',
+    'src/main/native/libuv/src/unix/tcp.cpp',
+    'src/main/native/libuv/src/unix/thread.cpp',
+    # 'main/native/libuv/src/unix/timer.cpp',
+    'src/main/native/libuv/src/unix/tty.cpp',
+    'src/main/native/libuv/src/unix/udp.cpp',
+]
+
+UNIX_BASE_SRCS = glob(['src/main/native/unix/**/*.cpp'])
+
+MAC_UV_SRCS = [
+    'src/main/native/libuv/src/unix/bsd-ifaddrs.cpp',
+    'src/main/native/libuv/src/unix/darwin.cpp',
+    'src/main/native/libuv/src/unix/darwin-proctitle.cpp',
+    'src/main/native/libuv/src/unix/fsevents.cpp',
+    'src/main/native/libuv/src/unix/kqueue.cpp',
+    'src/main/native/libuv/src/unix/proctitle.cpp'
+]
+
+LINUX_UV_SRCS = [
+    'src/main/native/libuv/src/unix/linux-core.cpp',
+    'src/main/native/libuv/src/unix/linux-inotify.cpp',
+    'src/main/native/libuv/src/unix/linux-syscalls.cpp',
+    'src/main/native/libuv/src/unix/procfs-exepath.cpp',
+    'src/main/native/libuv/src/unix/proctitle.cpp',
+    'src/main/native/libuv/src/unix/sysinfo-loadavg.cpp',
+]
+
+LINUX_SRCS = UNIX_UV_SRCS + UNIX_BASE_SRCS + LINUX_UV_SRCS
+MAC_SRCS = UNIX_UV_SRCS + UNIX_BASE_SRCS + MAC_UV_SRCS
+
+wpilib_jni_library(
+    name="wpiutil",
+    cpp_srcs = glob(DEFAULT_CC_SRC_PATTERN + [
+        "src/main/native/cpp/llvm/*.cpp",
+        "src/main/native/cpp/uv/*.cpp",
+        "src/main/native/libuv/src/*.cpp",
+        ], exclude=["src/main/native/cpp/**/jni/**"])  +
+
+        select({
+            "@bazel_tools//src/conditions:windows": WIN_SRCS,
+            "@bazel_tools//src/conditions:linux_x86_64": LINUX_SRCS,
+            "@bazel_tools//src/conditions:darwin": MAC_SRCS,
+        }),
+    cpp_hdrs = glob(DEFAULT_CC_HDR_PATTERN + [
+        "src/main/native/libuv/include/**/*.h",
+        "src/main/native/libuv/src/*.h",
+        "src/main/native/libuv/src/unix/*.h",
+    ]),
+    includes = DEFAULT_CC_INCLUDES + ['src/main/native/libuv/include', 'src/main/native/libuv/src'] + select({
+        "@bazel_tools//src/conditions:windows": ["src/main/native/windows"],
+        "@bazel_tools//src/conditions:linux_x86_64": ["src/main/native/unix"],
+        "@bazel_tools//src/conditions:darwin": ["src/main/native/unix"],
+    }),
+    java_deps = [
+        "@big_maven//:com_fasterxml_jackson_core_jackson_annotations",
+        "@big_maven//:com_fasterxml_jackson_core_jackson_core",
+        "@big_maven//:com_fasterxml_jackson_core_jackson_databind",
+    ],
+    visibility=["//visibility:public"],
+)
+
+wpilib_java_test(
+    name = "wpiutil-java-test",
+    deps=[":wpiutil-java"],
+    jni_deps = [":wpiutiljni"],
+    lib_directory = "wpiutil",
+)
+
+wpilib_cc_test(
+    name = "wpiutil-cpp-test",
+    deps=[":wpiutil-cpp"],
+)

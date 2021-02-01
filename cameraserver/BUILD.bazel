@@ -1,0 +1,25 @@
+
+
+load("//bazel_scripts/rules:java.bzl", "wpilib_java_library")
+load("//bazel_scripts/rules:cc.bzl", "wpilib_cc_library")
+
+wpilib_java_library(
+    name="cameraserver-java",
+    deps = [
+        "//wpiutil:wpiutil-java",
+        "//cscore:cscore-java",
+        "//ntcore:ntcore-java",
+        "@opencv//:edu_wpi_first_thirdparty_frc2021_opencv_opencv_java",
+    ],
+    visibility=["//visibility:public"],
+)
+
+wpilib_cc_library(
+    name="cameraserver-cpp",
+    deps=[
+        "//wpiutil:wpiutil-cpp",
+        "//cscore:cscore-cpp",
+        "//ntcore:ntcore-cpp",
+    ],
+    visibility=["//visibility:public"],
+)

@@ -1,0 +1,45 @@
+
+load("//bazel_scripts/rules:cc.bzl", "wpilib_cc_library")
+
+WIN_SRCS = glob(["src/main/native/directx11/**/*.cpp"])
+WIN_LINKER = []
+
+LINUX_SRCS = glob(["src/main/native/opengl3/**/*.cpp"])
+LINUX_LINKER = ["-lX11"]
+
+MAC_SRCS = []
+MAC_LINKER = ['-framework', 'Metal', '-framework', 'MetalKit', '-framework', 'Cocoa', '-framework', 'IOKit', '-framework', 'CoreFoundation', '-framework', 'CoreVideo', '-framework', 'QuartzCore']
+
+wpilib_cc_library(
+    name = "wpigui",
+    srcs = glob([
+        "src/main/native/cpp/**/*.cpp",
+    ]) +
+
+        select({
+            "@bazel_tools//src/conditions:windows": WIN_SRCS,
+            "@bazel_tools//src/conditions:linux_x86_64": LINUX_SRCS,
+            "@bazel_tools//src/conditions:darwin": MAC_SRCS,
+        })
+
+    ,
+    hdrs = glob([
+        "src/main/native/include/**/*.h",
+    ]),
+    includes = ["src/main/native/include"],
+    linkopts = select({
+            "@bazel_tools//src/conditions:windows": WIN_LINKER,
+            "@bazel_tools//src/conditions:linux_x86_64": LINUX_LINKER,
+            "@bazel_tools//src/conditions:darwin": MAC_LINKER,
+	}),
+    deps=[
+        "//wpiutil:wpiutil-cpp",
+        "@imgui-headers//:headers",
+    ] + select({
+            "@bazel_tools//src/conditions:windows": ["@imgui-windowsx86-64-libs//:libs"],
+            "@bazel_tools//src/conditions:linux_x86_64": ["@imgui-linuxx86-64-libs//:libs"],
+            "@bazel_tools//src/conditions:darwin": ["@imgui-osxx86-64-libs//:libs"],
+    }),
+    visibility=["//visibility:public"],
+    tags = ['no-roborio', 'no-bionic', 'no-raspbian'],
+)

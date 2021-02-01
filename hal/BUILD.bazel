@@ -1,0 +1,57 @@
+
+load("//bazel_scripts/rules:jni.bzl", "wpilib_jni_library", "get_default_jni_cc_srcs")
+load("//bazel_scripts/rules:cc.bzl",  "wpilib_cc_test", "DEFAULT_CC_HDR_PATTERN")
+
+ATHENA_SRCS = glob(["src/main/native/athena/**/*.cpp"])
+ATHENA_HDRS = glob(["src/main/native/athena/**/*.h"])
+ATHENA_DEPS = [
+    "@netcomm-headers//:headers",
+    "@chipobject-headers//:headers",
+    "@visa-headers//:headers",
+]
+
+SIM_SRCS = glob(["src/main/native/sim/**/*.cpp"])
+SIM_HDRS = glob(["src/main/native/sim/**/*.h"])
+SIM_DEPS = []
+
+
+genrule(
+  name = "java-usage-gen",
+  outs = ["FRCNetComm.java"],
+  cmd = "$(locations //hal/src/generate:generate-java-resources) $@",
+  tools = ["//hal/src/generate:generate-java-resources"],
+)
+
+genrule(
+  name = "cpp-usage-gen",
+  outs = ["hal/FRCUsageReporting.h"],
+  cmd = "$(locations //hal/src/generate:generate-java-resources) $@",
+  tools = ["//hal/src/generate:generate-java-resources"],
+)
+
+cc_library(
+    name = "gen-cpp",
+    hdrs = [":cpp-usage-gen"],
+    includes = ['.', './hal']
+)
+
+
+wpilib_jni_library(
+    name="wpiHal",
+    cpp_srcs = get_default_jni_cc_srcs() + SIM_SRCS,
+    cpp_hdrs = glob(DEFAULT_CC_HDR_PATTERN) + SIM_HDRS,
+    cpp_deps=["//wpiutil:wpiutil-cpp", ":gen-cpp"] + SIM_DEPS,
+    java_deps = ["//wpiutil:wpiutil-java"],
+    java_gen = [":java-usage-gen"],
+    visibility=["//visibility:public"],
+    copts = select({
+        "@bazel_tools//src/conditions:windows": ["/UNOMINMAX"],
+        "//conditions:default": [],
+    }),
+)
+
+wpilib_cc_test(
+    name = "hal-cpp-test",
+    deps=[":wpiHal-cpp"],
+    includes=["test/native/include"],
+)

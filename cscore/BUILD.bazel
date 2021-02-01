@@ -1,0 +1,79 @@
+
+load("//bazel_scripts/rules:jni.bzl", "wpilib_jni_library", "get_default_jni_cc_srcs")
+load("//bazel_scripts/rules:java.bzl", "wpilib_java_test")
+load("//bazel_scripts/rules:cc.bzl",  "wpilib_cc_test", "DEFAULT_CC_HDR_PATTERN")
+load("//bazel_scripts/rules/gen:flat_copy_files.bzl",  "flat_copy_files")
+
+
+WIN_SRCS = glob(["src/main/native/windows/**/*.cpp"])
+WIN_HDRS = glob(["src/main/native/windows/**/*.h"])
+
+LINUX_SRCS = glob(["src/main/native/linux/**/*.cpp"])
+LINUX_HDRS = glob(["src/main/native/linux/**/*.h"])
+
+MAC_SRCS = glob(["src/main/native/osx/**/*.cpp"])
+MAC_HDRS = glob(["src/main/native/osx/**/*.h"])
+
+
+wpilib_jni_library(
+    name="cscore",
+    cpp_srcs = get_default_jni_cc_srcs() +
+
+        select({
+            "@bazel_tools//src/conditions:windows": WIN_SRCS,
+            "@bazel_tools//src/conditions:linux_x86_64": LINUX_SRCS,
+            "@bazel_tools//src/conditions:darwin": MAC_SRCS,
+        }),
+    cpp_hdrs = glob(DEFAULT_CC_HDR_PATTERN) +
+        select({
+            "@bazel_tools//src/conditions:windows": WIN_HDRS,
+            "@bazel_tools//src/conditions:linux_x86_64": LINUX_HDRS,
+            "@bazel_tools//src/conditions:darwin": MAC_HDRS,
+        }),
+    cpp_deps=[
+        "//wpiutil:wpiutil-cpp",
+        "@opencv-cpp-headers//:headers",
+    ] + select({
+            "@bazel_tools//src/conditions:windows": ["@opencv-cpp-windowsx86-64-libs//:libs"],
+            "@bazel_tools//src/conditions:linux_x86_64": ["@opencv-cpp-linuxx86-64-libs//:libs"],
+            "@bazel_tools//src/conditions:darwin": ["@opencv-cpp-osxx86-64-libs//:libs"],
+        }),
+    java_deps = [
+        "//wpiutil:wpiutil-java",
+        "@opencv//:edu_wpi_first_thirdparty_frc2021_opencv_opencv_java",
+    ],
+    visibility=["//visibility:public"],
+)
+
+wpilib_java_test(
+    name = "cscore-java-test",
+    deps=[":cscore-java"],
+    jni_deps = [
+        ":cscorejni",
+    ] + select({
+            "@bazel_tools//src/conditions:windows": ["@opencv-cpp-windowsx86-64-libs//:shared_libs"],
+            "@bazel_tools//src/conditions:linux_x86_64": ["@opencv-cpp-linuxx86-64-libs//:shared_libs"],
+            "@bazel_tools//src/conditions:darwin": ["@opencv-cpp-osxx86-64-libs//:shared_libs"],
+        }),
+    lib_directory = "cscore",
+)
+
+flat_copy_files(
+    name = "copy_opencv",
+    targeted_filegroups = select({
+            "@bazel_tools//src/conditions:windows": ["@opencv-cpp-windowsx86-64-libs//:shared_libs"],
+            "@bazel_tools//src/conditions:linux_x86_64": ["@opencv-cpp-linuxx86-64-libs//:shared_libs"],
+            "@bazel_tools//src/conditions:darwin": ["@opencv-cpp-osxx86-64-libs//:shared_libs"],
+        }),
+    output_directory = select({
+        "@bazel_tools//src/conditions:windows": "cscore-cpp-test.exe.runfiles/__main__",
+        "//conditions:default": "cscore-cpp-test.exe.runfiles/__main__",
+    }),
+)
+
+wpilib_cc_test(
+    name = "cscore-cpp-test",
+    deps=[":cscore-cpp"],
+    data= [":copy_opencv"],
+    includes = ["test/native/cpp"],
+)

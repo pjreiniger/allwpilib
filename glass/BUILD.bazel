@@ -1,0 +1,44 @@
+
+load("//bazel_scripts/rules:cc.bzl",  "wpilib_cc_binary",  "wpilib_cc_library")
+load("//bazel_scripts/rules/gen:gen-version-file.bzl",  "generate_version_file")
+#load("//bazel_scripts/rules/gen:gen-stb.bzl",  "generate_stb_file")
+load("//bazel_scripts/rules/gen:gen-resources.bzl",  "generate_resources")
+
+wpilib_cc_library(
+    name = "glass",
+    srcs = glob(["src/lib/native/cpp/**/*.cpp"]),
+    hdrs = glob(["src/lib/native/include/**/*.h", "src/lib/native/include/**/*.inl"]),
+    includes = ["src/lib/native/include"],
+    deps=[
+        "//wpiutil:wpiutil-cpp",
+        "//wpimath:wpimath-cpp",
+        "//wpigui:wpigui",
+        "@imgui-headers//:headers",
+    ],
+    tags = ['no-roborio', 'no-bionic', 'no-raspbian'],
+)
+
+wpilib_cc_library(
+    name = "glassnt",
+    srcs = glob(["src/libnt/native/cpp/**/*.cpp"]),
+    hdrs = glob(["src/libnt/native/include/**/*.h", "src/lib/native/include/**/*.inc"]),
+    includes = ["src/libnt/native/include"],
+    deps=[
+        ":glass",
+        "//ntcore:ntcore-cpp",
+        # "@imgui-headers//:headers",
+    ],
+    visibility=["//visibility:public"],
+    tags = ['no-roborio', 'no-bionic', 'no-raspbian'],
+)
+
+generate_version_file(
+    name = "generate-version",
+    output_file="WPILibVersion.cpp",
+    template = "src/app/generate/WPILibVersion.cpp.in",
+)
+
+generate_resources(
+    name = "generate-resources",
+    resource_files=glob(["src/app/native/resources/*"]),
+)

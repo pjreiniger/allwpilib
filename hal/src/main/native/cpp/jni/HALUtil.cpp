@@ -16,7 +16,6 @@
 #include <wpi/jni_util.h>
 #include <wpi/raw_ostream.h>
 
-#include "edu_wpi_first_hal_HALUtil.h"
 #include "hal/CAN.h"
 #include "hal/DriverStation.h"
 #include "hal/Errors.h"

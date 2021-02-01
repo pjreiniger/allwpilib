@@ -1,0 +1,101 @@
+name: Bazel
+
+on: [pull_request, push]
+
+jobs:
+  build-windows:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            architecture: x64
+            config: "" #"--config=release"
+          # - os: windows-latest
+          #   architecture: x64
+          #   config: "--config=debug"
+    name: "Build - Win${{ matrix.architecture }} ${{ matrix.config }}"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Build (Windows only)
+        run: ./temp_bazel.exe test ${{ matrix.config }} //...
+
+  build-mac:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            architecture: x64
+            config: "" # release
+          # - os: macos-latest
+          #   architecture: x64
+          #   config: debug
+    name: "Build - Mac ${{ matrix.architecture }} ${{ matrix.config }}"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup Bazel
+        uses: abhinavsingh/setup-bazel@v3
+        with: { version: 4.0.0 }
+      - name: Build
+        run: bazel build ${{ matrix.config }} //... || true
+      - name: Test
+        run: bazel test  ${{ matrix.config }} //... --sandbox_debug
+
+  build-docker:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - container: wpilib/ubuntu-base:18.04
+            artifact-name: Linux Release
+            config: "" #--config=release
+          #- container: wpilib/ubuntu-base:18.04
+          #  artifact-name: Linux Debug
+          #  config: --config=debug
+    runs-on: ubuntu-latest
+    name: "Build - ${{ matrix.artifact-name }}${{ matrix.architecture }} ${{ matrix.config }}"
+    container: ${{ matrix.container }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup Bazel
+        uses: abhinavsingh/setup-bazel@v3
+        with: { version: 4.0.0 }
+      - name: Build
+        run: bazel build ${{ matrix.config }} //...
+      - name: Test
+        run: bazel test  ${{ matrix.config }} //... 
+
+  build-coverage:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-latest
+    container: wpilib/ubuntu-base:18.04
+    name: "Code Coverage"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup Bazel
+        uses: abhinavsingh/setup-bazel@v3
+        with: { version: 4.0.0 }
+      - name: Build
+        run: bazel coverage //... -k || true
+      - name: Run Coverage
+        run: bazel coverage //...
+      - name: genhtml
+        run: apt-get update && apt-get install -y lcov && genhtml bazel-out/_coverage/_coverage_report.dat -o coverage
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: "Coverage"
+          path: coverage_report

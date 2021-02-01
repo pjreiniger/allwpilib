@@ -1,0 +1,36 @@
+
+load("//bazel_scripts/rules:java.bzl", "wpilib_java_library", "wpilib_java_test")
+load("//bazel_scripts/rules/gen:gen-version-file.bzl",  "generate_version_file")
+
+generate_version_file(
+    name = "generate-version",
+    output_file="WPILibVersion.java",
+    template = "src/generate/WPILibVersion.java.in",
+)
+
+wpilib_java_library(
+    name = "wpilibj",
+    generated_srcs = [":generate-version"],
+    deps = [
+        "//hal:wpiHal-java",
+        "//cameraserver:cameraserver-java",
+        "//cscore:cscore-java",
+        "//ntcore:ntcore-java",
+        "//wpimath:wpimath-java",
+
+    ],
+    visibility=["//visibility:public"],
+)
+
+wpilib_java_test(
+    name = "wpilibj-test",
+    deps = [":wpilibj"],
+    jni_deps = [
+        "//cscore:cscorejni",
+        "//ntcore:ntcorejni",
+        "//wpimath:wpimathjni",
+        "//wpiutil:wpiutiljni",
+        "//hal:wpiHaljni",
+        ],
+    lib_directory = "wpilibj",
+)

@@ -1,0 +1,55 @@
+
+load("//bazel_scripts/rules:jni.bzl", "wpilib_jni_library")
+load("//bazel_scripts/rules:java.bzl", "wpilib_java_test")
+load("//bazel_scripts/rules:cc.bzl",  "wpilib_cc_test", "DEFAULT_CC_TEST_INCLUDE_PATTERN", "DEFAULT_CC_TEST_SRC_PATTERN")
+load("@rules_python//python:defs.bzl", "py_binary")
+
+
+py_binary(
+    name="generate_numbers",
+    srcs=["generate_numbers.py"],
+    data=glob(["src/generate/*.in"]),
+    visibility=["//visibility:public"],
+)
+
+genrule(
+  name = "gen-nat",
+  outs = ["Nat.java"] + ["N{}.java".format(i) for i in range(20 + 1)],
+  cmd = "$(locations :generate_numbers) $(OUTS)",
+  tools = [":generate_numbers"],
+)
+
+wpilib_jni_library(
+    name="wpimath",
+    cpp_hdrs = glob([
+        "src/main/native/include/**/*",
+        "src/main/native/eigeninclude/**/*"]),
+    cpp_deps=[
+        "//wpiutil:wpiutil-cpp",
+    ],
+    java_srcs = glob(["src/main/java/**/*.java"]) + [":gen-nat"],
+    java_deps = [
+        "@big_maven//:org_ejml_ejml_simple",
+        "@big_maven//:com_fasterxml_jackson_core_jackson_annotations",
+        "@big_maven//:com_fasterxml_jackson_core_jackson_core",
+        "@big_maven//:com_fasterxml_jackson_core_jackson_databind",
+        "//wpiutil:wpiutil-java",
+    ],
+    visibility=["//visibility:public"],
+    includes = ["src/main/native/include", "src/main/native/eigeninclude"],
+)
+
+wpilib_java_test(
+    name = "wpimath-java-test",
+    deps=[":wpimath-java"],
+    jni_deps = [":wpimathjni"],
+    lib_directory = "wpimath",
+)
+
+
+wpilib_cc_test(
+    name = "wpimath-cpp-test",
+    deps=[":wpimath-cpp"],
+    srcs = glob(DEFAULT_CC_TEST_SRC_PATTERN + ["src/test/native/include/**/*.h"]),
+    includes = DEFAULT_CC_TEST_INCLUDE_PATTERN + ["src/test/native/include"],
+)

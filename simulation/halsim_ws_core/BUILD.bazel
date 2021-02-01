@@ -1,0 +1,8 @@
+
+load("//bazel_scripts/rules:cc.bzl", "wpilib_cc_library")
+
+wpilib_cc_library(
+    name="halsim_ws_core",
+    deps=["//hal:wpiHal-cpp"],
+    visibility=["//visibility:public"],
+)

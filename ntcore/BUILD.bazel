@@ -1,0 +1,25 @@
+
+load("//bazel_scripts/rules:jni.bzl", "wpilib_jni_library")
+load("//bazel_scripts/rules:java.bzl", "wpilib_java_test")
+load("//bazel_scripts/rules:cc.bzl",  "wpilib_cc_test")
+
+wpilib_jni_library(
+    name="ntcore",
+    cpp_deps=["//wpiutil:wpiutil-cpp"],
+    java_deps = ["//wpiutil:wpiutil-java"],
+    visibility=["//visibility:public"],
+)
+
+wpilib_java_test(
+    name = "ntcore-java-test",
+    deps=[":ntcore-java"],
+    jni_deps = [":ntcorejni"],
+    lib_directory = "ntcore",
+)
+
+
+wpilib_cc_test(
+    name = "ntcore-cpp-test",
+    deps=[":ntcore-cpp"],
+    includes = ["src/test/native/cpp"],
+)

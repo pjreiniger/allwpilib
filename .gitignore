@@ -224,3 +224,11 @@ compile_commands.json
 .clangd/
 
 imgui.ini
+
+
+/bazel-*
+coverage_report
+
+#TEMP
+!temp_bazel.exe
+!bazel.exe
