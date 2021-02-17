@@ -1,4 +1,3 @@
-package(default_visibility = ["//visibility:public"])
 
 genrule(
     name = "copy_link_jni_md_header",
@@ -20,6 +19,14 @@ genrule(
 
 cc_library(
     name = "copy_jni_hdr_lib",
-    hdrs = [":copy_link_jni_header", ":copy_link_jni_md_header"],
-    includes = ["."],
+    hdrs = select({
+        "@bazel_tools//src/conditions:windows": [":copy_link_jni_header", ":copy_link_jni_md_header"],
+        "@bazel_tools//src/conditions:linux_x86_64": [":copy_link_jni_header", ":copy_link_jni_md_header"],
+        "@bazel_tools//src/conditions:darwin": [":copy_link_jni_header", ":copy_link_jni_md_header"],
+        "//bazel_scripts/toolchains:roborio": glob(["*.h"]),
+        "//bazel_scripts/toolchains:bionic": glob(["*.h"]),
+        "//bazel_scripts/toolchains:raspbian": glob(["*.h"]),
+    }),
+    includes = ['.'],
+    visibility = ["//visibility:public"],
 )

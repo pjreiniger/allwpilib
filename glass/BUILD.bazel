@@ -42,3 +42,28 @@ generate_resources(
     name = "generate-resources",
     resource_files=glob(["src/app/native/resources/*"]),
 )
+
+wpilib_cc_binary(
+    name = "glassApp",
+    srcs = glob(["src/app/native/cpp/**/*.cpp", "src/app/native/cpp/**/*.h"]) + [":generate-version", ":generate-resources"],
+    includes = ["src/app/native/include", "src/app/native/cpp", "src/generated/"],
+    deps=[
+        ":glassnt",
+        "//ntcore:ntcore-cpp",
+    ] + select({
+            "@bazel_tools//src/conditions:windows": ["@imgui-windowsx86-64-libs//:libs"],
+            "@bazel_tools//src/conditions:linux_x86_64": ["@imgui-linuxx86-64-libs//:libs"],
+            "@bazel_tools//src/conditions:darwin": ["@imgui-osxx86-64-libs//:libs"],
+    }),
+    linkopts = select({
+        "@bazel_tools//src/conditions:windows": [
+            '-DEFAULTLIB:Gdi32.lib',
+            '-DEFAULTLIB:Shell32.lib',
+            '-DEFAULTLIB:d3d11.lib',
+            '-DEFAULTLIB:d3dcompiler.lib',
+            "-SUBSYSTEM:WINDOWS",
+        ],
+        "//conditions:default": [],
+        }),
+    tags = ['no-roborio', 'no-bionic', 'no-raspbian'],
+)

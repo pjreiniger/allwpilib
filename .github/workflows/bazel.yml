@@ -11,9 +11,15 @@ jobs:
           - os: windows-latest
             architecture: x64
             config: "" #"--config=release"
-          # - os: windows-latest
-          #   architecture: x64
-          #   config: "--config=debug"
+          - os: windows-latest
+            architecture: Bionic
+            config: "--config=bionic"
+          - os: windows-latest
+            architecture: Raspbian
+            config: "--config=raspbian"
+          - os: windows-latest
+            architecture: Roborio
+            config: "--config=roborio"
     name: "Build - Win${{ matrix.architecture }} ${{ matrix.config }}"
     runs-on: ${{ matrix.os }}
     steps:
@@ -55,8 +61,8 @@ jobs:
       matrix:
         include:
           - container: wpilib/ubuntu-base:18.04
-            artifact-name: Linux Release
-            config: "" #--config=release
+            artifact-name: Linux
+            config: ""
           #- container: wpilib/ubuntu-base:18.04
           #  artifact-name: Linux Debug
           #  config: --config=debug

@@ -65,6 +65,9 @@ wpilib_jni_library(
             "@bazel_tools//src/conditions:windows": WIN_SRCS,
             "@bazel_tools//src/conditions:linux_x86_64": LINUX_SRCS,
             "@bazel_tools//src/conditions:darwin": MAC_SRCS,
+            "//bazel_scripts/toolchains:raspbian": LINUX_SRCS,
+            "//bazel_scripts/toolchains:bionic": LINUX_SRCS,
+            "//bazel_scripts/toolchains:roborio": LINUX_SRCS,
         }),
     cpp_hdrs = glob(DEFAULT_CC_HDR_PATTERN + [
         "src/main/native/libuv/include/**/*.h",

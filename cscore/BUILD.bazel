@@ -23,12 +23,20 @@ wpilib_jni_library(
             "@bazel_tools//src/conditions:windows": WIN_SRCS,
             "@bazel_tools//src/conditions:linux_x86_64": LINUX_SRCS,
             "@bazel_tools//src/conditions:darwin": MAC_SRCS,
+
+            "//bazel_scripts/toolchains:roborio": LINUX_SRCS,
+            "//bazel_scripts/toolchains:bionic": LINUX_SRCS,
+            "//bazel_scripts/toolchains:raspbian": LINUX_SRCS,
         }),
     cpp_hdrs = glob(DEFAULT_CC_HDR_PATTERN) +
         select({
             "@bazel_tools//src/conditions:windows": WIN_HDRS,
             "@bazel_tools//src/conditions:linux_x86_64": LINUX_HDRS,
             "@bazel_tools//src/conditions:darwin": MAC_HDRS,
+
+            "//bazel_scripts/toolchains:roborio": LINUX_HDRS,
+            "//bazel_scripts/toolchains:bionic": LINUX_HDRS,
+            "//bazel_scripts/toolchains:raspbian": LINUX_HDRS,
         }),
     cpp_deps=[
         "//wpiutil:wpiutil-cpp",
@@ -37,6 +45,10 @@ wpilib_jni_library(
             "@bazel_tools//src/conditions:windows": ["@opencv-cpp-windowsx86-64-libs//:libs"],
             "@bazel_tools//src/conditions:linux_x86_64": ["@opencv-cpp-linuxx86-64-libs//:libs"],
             "@bazel_tools//src/conditions:darwin": ["@opencv-cpp-osxx86-64-libs//:libs"],
+
+            "//bazel_scripts/toolchains:roborio": ["@opencv-cpp-linuxathena-libs//:libs"],
+            "//bazel_scripts/toolchains:bionic": ["@opencv-cpp-linuxaarch64bionic-libs//:libs"],
+            "//bazel_scripts/toolchains:raspbian": ["@opencv-cpp-linuxraspbian-libs//:libs"],
         }),
     java_deps = [
         "//wpiutil:wpiutil-java",

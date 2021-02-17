@@ -6,9 +6,9 @@ build --strict_java_deps=OFF
 build --javacopt="-XepDisableAllChecks"
 build --nojava_header_compilation
 
-coverage --instrument_test_targets 
-coverage --experimental_cc_coverage 
-coverage --combined_report=lcov 
+coverage --instrument_test_targets
+coverage --experimental_cc_coverage
+coverage --combined_report=lcov
 coverage --coverage_report_generator=@bazel_tools//tools/test/CoverageOutputGenerator/java/com/google/devtools/coverageoutputgenerator:Main
 
 test --test_output=errors
@@ -41,3 +41,25 @@ build:ubsan --copt -O1
 build:ubsan --copt -fno-omit-frame-pointer
 build:ubsan --linkopt -fsanitize=undefined
 build:ubsan --linkopt -lubsan
+
+# Compiler flags
+# Use our custom-configured c++ toolchain.
+build:roborio --crosstool_top=//bazel_scripts/toolchains:roborio_suite
+build:roborio --cpu=roborio
+build:roborio --host_crosstool_top=@bazel_tools//tools/cpp:toolchain
+build:roborio --build_tag_filters=-no-roborio
+build:roborio --test_tag_filters=-no-roborio
+
+build:raspbian --crosstool_top=//bazel_scripts/toolchains:raspbian_suite
+build:raspbian --cpu=raspbian
+build:raspbian --host_crosstool_top=@bazel_tools//tools/cpp:toolchain
+build:raspbian --build_tag_filters=-no-raspbian
+build:raspbian --test_tag_filters=-no-raspbian
+
+build:bionic --crosstool_top=//bazel_scripts/toolchains:bionic_suite
+build:bionic --cpu=bionic
+build:bionic --host_crosstool_top=@bazel_tools//tools/cpp:toolchain
+build:bionic --build_tag_filters=-no-bionic
+build:bionic --test_tag_filters=-no-bionic
+
+

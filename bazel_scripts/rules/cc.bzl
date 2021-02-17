@@ -53,6 +53,9 @@ def _get_default_cxx_opts():
             "@bazel_tools//src/conditions:windows": WINDOWS_COMPILER_ARGS + WINDOWS_WARNING_ARGS + WINDOWS_WARNINGS_AS_ERROR_ARGS,
             "@bazel_tools//src/conditions:linux_x86_64": LINUX_CROSS_COMPILER_ARGS + UNIX_WARNING_ARGS + UNIX_WARNINGS_AS_ERROR_ARGS,
             "@bazel_tools//src/conditions:darwin": MAC_COMPILER_ARGS, #  + UNIX_WARNING_ARGS + UNIX_WARNINGS_AS_ERROR_ARGS,
+            "//bazel_scripts/toolchains:roborio": LINUX_CROSS_COMPILER_ARGS + UNIX_WARNING_ARGS + UNIX_WARNINGS_AS_ERROR_ARGS,
+            "//bazel_scripts/toolchains:bionic": LINUX_CROSS_COMPILER_ARGS + UNIX_WARNING_ARGS + UNIX_WARNINGS_AS_ERROR_ARGS,
+            "//bazel_scripts/toolchains:raspbian": LINUX_CROSS_COMPILER_ARGS + UNIX_WARNING_ARGS + UNIX_WARNINGS_AS_ERROR_ARGS,
         })
 
 def _get_default_linker_opts():
@@ -60,6 +63,9 @@ def _get_default_linker_opts():
             "@bazel_tools//src/conditions:windows": WINDOWS_LINKER_ARGS,
             "@bazel_tools//src/conditions:linux_x86_64": LINUX_CROSS_LINKER_ARGS,
             "@bazel_tools//src/conditions:darwin": MAC_LINKER_ARGS,
+            "//bazel_scripts/toolchains:roborio": LINUX_CROSS_LINKER_ARGS,
+            "//bazel_scripts/toolchains:bionic": LINUX_CROSS_LINKER_ARGS,
+            "//bazel_scripts/toolchains:raspbian": LINUX_CROSS_LINKER_ARGS,
         })
 
 def wpilib_cc_library(name, srcs = [], gen_scrs = [], hdrs = [], includes = [] , copts = [], linkopts = [], **kwargs):
@@ -93,7 +99,7 @@ def wpilib_cc_test(name, srcs = [], includes = [], deps = [], tags = [], **kwarg
         copts = _get_default_cxx_opts(),
         linkopts = _get_default_linker_opts(),
         deps = deps + ["@gtest//:gtest"],
-        tags = ['no-roborio'],
+        tags = ['no-roborio', 'no-bionic', 'no-raspbian'],
         **kwargs,
     )
 

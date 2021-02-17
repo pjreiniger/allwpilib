@@ -57,6 +57,7 @@ def wpilib_java_test(name, lib_directory = "", deps=[], srcs = [], resources = [
                 "@bazel_tools//src/conditions:windows": [],
                 "//conditions:default": ["-Djava.library.path=" + lib_directory + "/" + name + ".runfiles/__main__"],
             }),
+        tags = ['no-roborio', 'no-bionic', 'no-raspbian'],
         **kwargs,
 
     )

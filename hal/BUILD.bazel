@@ -38,9 +38,18 @@ cc_library(
 
 wpilib_jni_library(
     name="wpiHal",
-    cpp_srcs = get_default_jni_cc_srcs() + SIM_SRCS,
-    cpp_hdrs = glob(DEFAULT_CC_HDR_PATTERN) + SIM_HDRS,
-    cpp_deps=["//wpiutil:wpiutil-cpp", ":gen-cpp"] + SIM_DEPS,
+    cpp_srcs = get_default_jni_cc_srcs() + select({
+		"//bazel_scripts/toolchains:roborio": ATHENA_SRCS,
+        "//conditions:default": SIM_SRCS,
+	}),
+    cpp_hdrs = glob(DEFAULT_CC_HDR_PATTERN) + select({
+		"//bazel_scripts/toolchains:roborio": ATHENA_HDRS,
+        "//conditions:default": SIM_HDRS,
+	}),
+    cpp_deps=["//wpiutil:wpiutil-cpp", ":gen-cpp"] + select({
+		"//bazel_scripts/toolchains:roborio": ATHENA_DEPS,
+        "//conditions:default": SIM_DEPS,
+	}),
     java_deps = ["//wpiutil:wpiutil-java"],
     java_gen = [":java-usage-gen"],
     visibility=["//visibility:public"],
