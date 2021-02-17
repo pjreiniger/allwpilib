@@ -1,7 +1,10 @@
 
 filegroup(
     name = "gcc",
-    srcs = ["frc2021/roborio/bin/arm-frc2021-linux-gnueabi-gcc.exe"],
+    srcs = select({
+		"@bazel_tools//src/conditions:windows": ["frc2021/roborio/bin/arm-frc2021-linux-gnueabi-gcc.exe"],
+        "//conditions:default": ["frc2021/roborio/bin/arm-frc2021-linux-gnueabi-gcc"],
+	}),
     visibility = ["//visibility:public"],
 )
 

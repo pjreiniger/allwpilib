@@ -4,9 +4,9 @@ import os
 def main():
 
     toolchains = []
-    toolchains.append(("bionic", "bionic-compiler-win/bionic/bin", "aarch64-bionic-linux-gnu-"))
-    toolchains.append(("roborio", "roborio-compiler-win/frc2021/roborio/bin", "arm-frc2021-linux-gnueabi-"))
-    toolchains.append(("raspbian", "raspbian-compiler-win/raspbian10/bin", "arm-raspbian10-linux-gnueabihf-"))
+    toolchains.append(("bionic", "bionic-compiler-%s/bionic/bin", "aarch64-bionic-linux-gnu-"))
+    toolchains.append(("roborio", "roborio-compiler-%s/frc2021/roborio/bin", "arm-frc2021-linux-gnueabi-"))
+    toolchains.append(("raspbian", "raspbian-compiler-%s/raspbian10/bin", "arm-raspbian10-linux-gnueabihf-"))
 
     tools = []
     tools.append("gcc")
@@ -25,8 +25,14 @@ def main():
 
         for tool in tools:
             tool_script = os.path.join(output_dir, tool + ".bat")
+            win_toolchain_path = toolchain_path % "win"
             with open(tool_script, 'w') as f:
-                f.write(f"@echo off\nexternal/{toolchain_path}/{binary_prefix}{tool}.exe %*".replace("/", "\\"))
+                f.write(f"@echo off\nexternal/{win_toolchain_path}/{binary_prefix}{tool}.exe %*".replace("/", "\\"))
+                
+            tool_script = os.path.join(output_dir, tool + ".sh")
+            linux_toolchain_path = toolchain_path % "linux"
+            with open(tool_script, 'w') as f:
+                f.write(f'external/{linux_toolchain_path}/{binary_prefix}{tool} "$@"')
         print(output_dir)
 
 

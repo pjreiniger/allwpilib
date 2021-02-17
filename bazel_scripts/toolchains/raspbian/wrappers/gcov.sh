@@ -1,0 +1,1 @@
+external/raspbian-compiler-linux/raspbian10/bin/arm-raspbian10-linux-gnueabihf-gcov "$@"

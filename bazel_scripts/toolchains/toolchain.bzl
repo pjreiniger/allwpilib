@@ -2,9 +2,16 @@ load(":cc-toolchain-config.bzl", "cc_toolchain_config")
 load("@rules_cc//cc:defs.bzl", "cc_toolchain", "cc_toolchain_suite")
 
 
-def create_cross_compile_toolchain(compiler_dep, cpu, compiler, sysroot_subfolder, suite_name):
+def create_cross_compile_toolchain(cpu, sysroot_subfolder):
 
-    # compiler = "Hello"
+    # compiler_dep = cpu + "-compiler-win"
+    # wrapper_extension = ".bat"
+    compiler_dep = cpu + "-compiler-linux"
+    wrapper_extension = ".sh"
+
+    suite_name = cpu + "_suite"
+
+    compiler = "Hello"
     tag = "{}_{}".format(suite_name, compiler)
 
 
@@ -30,7 +37,7 @@ def create_cross_compile_toolchain(compiler_dep, cpu, compiler, sysroot_subfolde
         toolchain_identifier = toolchain_name,
         builtin_sysroot = builtin_sysroot,
         wrapper_path=wrapper_path,
-        wrapper_extension=".bat")
+        wrapper_extension=wrapper_extension)
 
     native.filegroup(
         name = compiler_files_name,

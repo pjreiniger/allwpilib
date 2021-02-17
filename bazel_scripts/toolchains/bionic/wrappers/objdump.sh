@@ -1,0 +1,1 @@
+external/bionic-compiler-linux/bionic/bin/aarch64-bionic-linux-gnu-objdump "$@"
