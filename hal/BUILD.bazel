@@ -55,6 +55,9 @@ wpilib_jni_library(
     visibility=["//visibility:public"],
     copts = select({
         "@bazel_tools//src/conditions:windows": ["/UNOMINMAX"],
+        "//bazel_scripts/toolchains:raspbian": [],
+        "//bazel_scripts/toolchains:bionic": [],
+        "//bazel_scripts/toolchains:roborio": [],
         "//conditions:default": [],
     }),
 )
