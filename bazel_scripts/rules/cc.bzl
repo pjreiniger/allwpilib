@@ -21,11 +21,11 @@ WINDOWS_SYMBOL_ARG = "/Zi"
 # Linux
 LINUX_CROSS_COMPILER_ARGS = ["-std=c++17", "-Wformat=2", "-pedantic", "-Wno-psabi", "-Wno-unused-parameter", "-Wno-error=deprecated-declarations", "-fPIC", "-rdynamic", "-pthread"]
 LINUX_CROSS_C_COMPILER_ARGS = ["-Wformat=2", "-pedantic", "-Wno-psabi", "-Wno-unused-parameter", "-fPIC", "-rdynamic", "-pthread"]
-LINUX_CROSS_LINKER_ARGS = ["-rdynamic", "-pthread", "-ldl", "-latomic"]
+LINUX_CROSS_LINKER_ARGS = ["-rdynamic", "-pthread", "-latomic"]
 
 LINUX_COMPILER_ARGS = ["-std=c++17", "-Wformat=2", "-pedantic", "-Wno-psabi", "-Wno-unused-parameter", "-Wno-error=deprecated-declarations", "-fPIC", "-rdynamic", "-pthread"]
 LINUX_C_COMPILER_ARGS = ["-Wformat=2", "-pedantic", "-Wno-psabi", "-Wno-unused-parameter", "-fPIC", "-rdynamic", "-pthread"]
-LINUX_LINKER_ARGS = ["-rdynamic", "-pthread", "-ldl", "-latomic"]
+LINUX_LINKER_ARGS = ["-rdynamic", "-pthread", "-latomic"]
 
 # Make
 MAC_COMPILER_ARGS = ["-std=c++17", "-pedantic", "-fPIC",

@@ -1,7 +1,19 @@
 
 filegroup(
     name = "gcc",
-    srcs = ["raspbian10/bin/arm-raspbian10-linux-gnueabihf-gcc.exe"],
+    srcs = select({
+		"@bazel_tools//src/conditions:windows": ["raspbian10/bin/arm-raspbian10-linux-gnueabihf-gcc.exe"],
+        "//conditions:default": ["raspbian10/bin/arm-raspbian10-linux-gnueabihf-gcc"],
+	}),
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "ar",
+    srcs = select({
+		"@bazel_tools//src/conditions:windows": ["raspbian10/bin/arm-raspbian10-linux-gnueabihf-ar.exe"],
+        "//conditions:default": ["raspbian10/bin/arm-raspbian10-linux-gnueabihf-ar"],
+	}),
     visibility = ["//visibility:public"],
 )
 
@@ -21,7 +33,7 @@ filegroup(
 
 filegroup(
     name = "everything",
-    srcs = [":gcc", ":includes"],
+    srcs = [":ar", ":gcc", ":includes"],
     visibility = ["//visibility:public"],
 )
 

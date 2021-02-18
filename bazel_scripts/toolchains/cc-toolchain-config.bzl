@@ -18,6 +18,7 @@ def _impl(ctx):
     # Alias for readability
     wrapper_path = ctx.attr.wrapper_path
     wrapper_extension = ctx.attr.wrapper_extension
+    builtin_inculde_base = ctx.attr.builtin_inculde_base
 
     tool_paths = [ # NEW
         tool_path(name = "gcc",     path = wrapper_path + "/gcc" + wrapper_extension),
@@ -41,6 +42,9 @@ def _impl(ctx):
                          flag_group(
                              flags = [
                                  "-lstdc++",
+                                 #"-L" + builtin_inculde_base,
+                                   "-L/root/.cache/bazel/_bazel_root/ff29c1f9165945853fa31de8bcb64911/external/raspbian-compiler-linux/raspbian10/sys-root/usr/lib/arm-linux-gnueabihf",
+                                 # "-L/root/.cache/bazel/_bazel_root/ff29c1f9165945853fa31de8bcb64911/external/roborio-compiler-linux/frc2021/roborio/arm-frc2021-linux-gnueabi/usr/lib",
                              ],
                          ),
                      ]),
@@ -49,10 +53,16 @@ def _impl(ctx):
          ),
      ]
      
+    # builtin_inculde_base = '/root/.cache/bazel/_bazel_root/ff29c1f9165945853fa31de8bcb64911/external/roborio-compiler-linux/frc2021/roborio/arm-frc2021-linux-gnueabi/usr/lib/gcc/arm-frc2021-linux-gnueabi/7.3.0'
+
     return cc_common.create_cc_toolchain_config_info(
         ctx = ctx,
         features = features,
         toolchain_identifier = ctx.attr.toolchain_identifier,
+        cxx_builtin_include_directories = [
+          builtin_inculde_base + '/include',
+          builtin_inculde_base + '/include-fixed',
+        ],
         host_system_name = "arfsd",
         target_system_name = "arfsd",
         target_cpu = ctx.attr.cpu,
@@ -72,6 +82,7 @@ cc_toolchain_config = rule(
         "toolchain_identifier": attr.string(mandatory = True),
         "wrapper_path": attr.string(mandatory = True),
         "wrapper_extension": attr.string(mandatory = True),
+        "builtin_inculde_base": attr.string(mandatory = True),
     },
     provides = [CcToolchainConfigInfo],
     implementation = _impl,

@@ -16,6 +16,12 @@ def create_cross_compile_toolchain(cpu, sysroot_subfolder):
 
 
     builtin_sysroot = "external/{}/{}".format(compiler_dep, sysroot_subfolder)
+    # builtin_inculde_base = builtin_sysroot + "/usr/lib/gcc/arm-linux-gnueabihf/8"
+    builtin_inculde_base = "/root/.cache/bazel/_bazel_root/ff29c1f9165945853fa31de8bcb64911/external/raspbian-compiler-linux/raspbian10/sys-root" + "/usr/lib/gcc/arm-linux-gnueabihf/8"
+    # 
+    print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+    print(builtin_sysroot)
+    print(builtin_inculde_base)
 
     cc_toolchain_config_name = "cc-toolchain_config-{}".format(tag)
 
@@ -26,7 +32,7 @@ def create_cross_compile_toolchain(cpu, sysroot_subfolder):
 
     sysroot_everything = "@{}//:everything".format(compiler_dep)
 
-    wrapper_path = compiler_dep[:-13] + "/wrappers"
+    wrapper_path = cpu + "/wrappers"
 
     toolchain_key = cpu
     
@@ -37,7 +43,8 @@ def create_cross_compile_toolchain(cpu, sysroot_subfolder):
         toolchain_identifier = toolchain_name,
         builtin_sysroot = builtin_sysroot,
         wrapper_path=wrapper_path,
-        wrapper_extension=wrapper_extension)
+        wrapper_extension=wrapper_extension,
+        builtin_inculde_base=builtin_inculde_base)
 
     native.filegroup(
         name = compiler_files_name,

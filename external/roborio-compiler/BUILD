@@ -9,6 +9,15 @@ filegroup(
 )
 
 filegroup(
+    name = "ar",
+    srcs = select({
+		"@bazel_tools//src/conditions:windows": ["frc2021/roborio/bin/arm-frc2021-linux-gnueabi-ar.exe"],
+        "//conditions:default": ["frc2021/roborio/bin/arm-frc2021-linux-gnueabi-ar"],
+	}),
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
     name = "includes",
     srcs = glob([
         "frc2021/roborio/arm-frc2021-linux-gnueabi/usr/lib/gcc/arm-frc2021-linux-gnueabi/7.3.0/include/**",
@@ -25,6 +34,6 @@ filegroup(
 
 filegroup(
     name = "everything",
-    srcs = [":gcc", ":includes"],
+    srcs = [":ar", ":gcc", ":includes"],
     visibility = ["//visibility:public"],
 )
