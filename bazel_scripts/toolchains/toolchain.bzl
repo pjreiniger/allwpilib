@@ -2,7 +2,7 @@ load(":cc-toolchain-config.bzl", "cc_toolchain_config")
 load("@rules_cc//cc:defs.bzl", "cc_toolchain", "cc_toolchain_suite")
 
 
-def create_cross_compile_toolchain(cpu, sysroot_subfolder):
+def create_cross_compile_toolchain(cpu, sysroot_subfolder, builtin_include_dirs):
 
     # compiler_dep = cpu + "-compiler-win"
     # wrapper_extension = ".bat"
@@ -16,12 +16,6 @@ def create_cross_compile_toolchain(cpu, sysroot_subfolder):
 
 
     builtin_sysroot = "external/{}/{}".format(compiler_dep, sysroot_subfolder)
-    # builtin_inculde_base = builtin_sysroot + "/usr/lib/gcc/arm-linux-gnueabihf/8"
-    builtin_inculde_base = "/root/.cache/bazel/_bazel_root/ff29c1f9165945853fa31de8bcb64911/external/raspbian-compiler-linux/raspbian10/sys-root" + "/usr/lib/gcc/arm-linux-gnueabihf/8"
-    # 
-    print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-    print(builtin_sysroot)
-    print(builtin_inculde_base)
 
     cc_toolchain_config_name = "cc-toolchain_config-{}".format(tag)
 
@@ -44,7 +38,7 @@ def create_cross_compile_toolchain(cpu, sysroot_subfolder):
         builtin_sysroot = builtin_sysroot,
         wrapper_path=wrapper_path,
         wrapper_extension=wrapper_extension,
-        builtin_inculde_base=builtin_inculde_base)
+        builtin_include_dirs=builtin_include_dirs)
 
     native.filegroup(
         name = compiler_files_name,

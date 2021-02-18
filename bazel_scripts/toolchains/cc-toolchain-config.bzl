@@ -7,6 +7,20 @@ load(
      "tool_path",
  )
 
+
+all_compile_actions = [
+    ACTION_NAMES.c_compile,
+    ACTION_NAMES.cpp_compile,
+    ACTION_NAMES.linkstamp_compile,
+    ACTION_NAMES.assemble,
+    ACTION_NAMES.preprocess_assemble,
+    ACTION_NAMES.cpp_header_parsing,
+    ACTION_NAMES.cpp_module_compile,
+    ACTION_NAMES.cpp_module_codegen,
+    ACTION_NAMES.clif_match,
+    ACTION_NAMES.lto_backend,
+]
+
 all_link_actions = [ # NEW
      ACTION_NAMES.cpp_link_executable,
      ACTION_NAMES.cpp_link_dynamic_library,
@@ -18,7 +32,7 @@ def _impl(ctx):
     # Alias for readability
     wrapper_path = ctx.attr.wrapper_path
     wrapper_extension = ctx.attr.wrapper_extension
-    builtin_inculde_base = ctx.attr.builtin_inculde_base
+    builtin_include_dirs = ctx.attr.builtin_include_dirs
 
     tool_paths = [ # NEW
         tool_path(name = "gcc",     path = wrapper_path + "/gcc" + wrapper_extension),
@@ -31,38 +45,32 @@ def _impl(ctx):
         tool_path(name = "strip",   path = wrapper_path + "/strip" + wrapper_extension),
     ]
 
-    features = [ # NEW
-         feature(
-             name = "default_linker_flags",
-             enabled = True,
-             flag_sets = [
-                 flag_set(
-                     actions = all_link_actions,
-                     flag_groups = ([
-                         flag_group(
-                             flags = [
-                                 "-lstdc++",
-                                 #"-L" + builtin_inculde_base,
-                                   "-L/root/.cache/bazel/_bazel_root/ff29c1f9165945853fa31de8bcb64911/external/raspbian-compiler-linux/raspbian10/sys-root/usr/lib/arm-linux-gnueabihf",
-                                 # "-L/root/.cache/bazel/_bazel_root/ff29c1f9165945853fa31de8bcb64911/external/roborio-compiler-linux/frc2021/roborio/arm-frc2021-linux-gnueabi/usr/lib",
-                             ],
-                         ),
-                     ]),
-                 ),
-             ],
-         ),
-     ]
-     
-    # builtin_inculde_base = '/root/.cache/bazel/_bazel_root/ff29c1f9165945853fa31de8bcb64911/external/roborio-compiler-linux/frc2021/roborio/arm-frc2021-linux-gnueabi/usr/lib/gcc/arm-frc2021-linux-gnueabi/7.3.0'
+    system_include_flags = []
+    for d in builtin_include_dirs:
+        system_include_flags.extend(["-isystem", d])
+
+    sysroot_feature = feature(
+        name = "sysroot",
+        enabled = True,
+        flag_sets = [
+            flag_set(
+                actions = all_compile_actions,
+                flag_groups = [
+                    flag_group(
+                        flags = system_include_flags
+                    ),
+                ],
+            ),
+        ],
+    )
+
+    features = [sysroot_feature]
 
     return cc_common.create_cc_toolchain_config_info(
         ctx = ctx,
         features = features,
         toolchain_identifier = ctx.attr.toolchain_identifier,
-        cxx_builtin_include_directories = [
-          builtin_inculde_base + '/include',
-          builtin_inculde_base + '/include-fixed',
-        ],
+        cxx_builtin_include_directories = builtin_include_dirs,
         host_system_name = "arfsd",
         target_system_name = "arfsd",
         target_cpu = ctx.attr.cpu,
@@ -71,7 +79,7 @@ def _impl(ctx):
         abi_version = "unknown",
         abi_libc_version = "unknown",
         tool_paths = tool_paths, # NEW
-        builtin_sysroot = ctx.attr.builtin_sysroot,
+        builtin_sysroot = None, # ctx.attr.builtin_sysroot,
     )
 
 cc_toolchain_config = rule(
@@ -82,7 +90,7 @@ cc_toolchain_config = rule(
         "toolchain_identifier": attr.string(mandatory = True),
         "wrapper_path": attr.string(mandatory = True),
         "wrapper_extension": attr.string(mandatory = True),
-        "builtin_inculde_base": attr.string(mandatory = True),
+        "builtin_include_dirs": attr.string_list(mandatory = True),
     },
     provides = [CcToolchainConfigInfo],
     implementation = _impl,

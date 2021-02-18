@@ -18,6 +18,13 @@ filegroup(
 )
 
 filegroup(
+    name = "builtin_includes",
+    srcs = glob([
+        "raspbian10/sys-root/usr/lib/gcc/arm-linux-gnueabihf/8/include/**",
+        "raspbian10/sys-root/usr/lib/gcc/arm-linux-gnueabihf/8/include-fixed/**",]),
+)
+
+filegroup(
     name = "includes",    
     srcs = glob([
         "raspbian10/sys-root/usr/lib/gcc/arm-linux-gnueabihf/8/include/**",

@@ -11,15 +11,6 @@ jobs:
           - os: windows-latest
             architecture: x64
             config: "" #"--config=release"
-          - os: windows-latest
-            architecture: Bionic
-            config: "--config=bionic"
-          - os: windows-latest
-            architecture: Raspbian
-            config: "--config=raspbian"
-          - os: windows-latest
-            architecture: Roborio
-            config: "--config=roborio"
     name: "Build - Win${{ matrix.architecture }} ${{ matrix.config }}"
     runs-on: ${{ matrix.os }}
     steps:
@@ -29,6 +20,30 @@ jobs:
 
       - name: Build (Windows only)
         run: ./temp_bazel.exe test ${{ matrix.config }} //...
+
+  build-windows-cross:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            architecture: Bionic
+            config: "--config=bionic"
+          - os: windows-latest
+            architecture: Raspbian
+            config: "--config=raspbian"
+          - os: windows-latest
+            architecture: Roborio
+            config: "--config=roborio"
+    name: "WinCross - ${{ matrix.architecture }} ${{ matrix.config }}"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Build (Windows only)
+        run: ./temp_bazel.exe build ${{ matrix.config }} //...
 
   build-mac:
     strategy:
@@ -55,7 +70,7 @@ jobs:
       - name: Test
         run: bazel test  ${{ matrix.config }} //... --sandbox_debug
 
-  build-docker:
+  build-linux:
     strategy:
       fail-fast: false
       matrix:
@@ -63,9 +78,6 @@ jobs:
           - container: wpilib/ubuntu-base:18.04
             artifact-name: Linux
             config: ""
-          #- container: wpilib/ubuntu-base:18.04
-          #  artifact-name: Linux Debug
-          #  config: --config=debug
     runs-on: ubuntu-latest
     name: "Build - ${{ matrix.artifact-name }}${{ matrix.architecture }} ${{ matrix.config }}"
     container: ${{ matrix.container }}
@@ -80,6 +92,33 @@ jobs:
         run: bazel build ${{ matrix.config }} //...
       - name: Test
         run: bazel test  ${{ matrix.config }} //... 
+
+  build-linux-cross:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - container: wpilib/ubuntu-base:18.04
+            artifact-name: Bionic
+            config: "--config=bionic"
+          - container: wpilib/ubuntu-base:18.04
+            artifact-name: Raspbian
+            config: "--config=raspbian"
+          - container: wpilib/ubuntu-base:18.04
+            artifact-name: Roborio
+            config: "--config=roborio"
+    runs-on: ubuntu-latest
+    name: "Linux Cross - ${{ matrix.artifact-name }}${{ matrix.architecture }} ${{ matrix.config }}"
+    container: ${{ matrix.container }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup Bazel
+        uses: abhinavsingh/setup-bazel@v3
+        with: { version: 4.0.0 }
+      - name: Build
+        run: bazel build ${{ matrix.config }} //...
 
   build-coverage:
     strategy:

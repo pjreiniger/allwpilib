@@ -43,25 +43,23 @@ MAC_UV_SRCS = [
 
 LINUX_UV_SRCS = [
     'src/main/native/libuv/src/unix/linux-core.cpp',
-    #'src/main/native/libuv/src/unix/linux-inotify.cpp',
-    #'src/main/native/libuv/src/unix/linux-syscalls.cpp',
-    #'src/main/native/libuv/src/unix/procfs-exepath.cpp',
-    #'src/main/native/libuv/src/unix/proctitle.cpp',
-    #'src/main/native/libuv/src/unix/sysinfo-loadavg.cpp',
+    'src/main/native/libuv/src/unix/linux-inotify.cpp',
+    'src/main/native/libuv/src/unix/linux-syscalls.cpp',
+    'src/main/native/libuv/src/unix/procfs-exepath.cpp',
+    'src/main/native/libuv/src/unix/proctitle.cpp',
+    'src/main/native/libuv/src/unix/sysinfo-loadavg.cpp',
 ]
 
-#LINUX_SRCS = UNIX_UV_SRCS + UNIX_BASE_SRCS + LINUX_UV_SRCS
-LINUX_SRCS = LINUX_UV_SRCS
+LINUX_SRCS = UNIX_UV_SRCS + UNIX_BASE_SRCS + LINUX_UV_SRCS
 MAC_SRCS = UNIX_UV_SRCS + UNIX_BASE_SRCS + MAC_UV_SRCS
 
 wpilib_jni_library(
     name="wpiutil",
-    cpp_srcs = 
-        #glob(DEFAULT_CC_SRC_PATTERN + [
-        #"src/main/native/cpp/llvm/*.cpp",
-        #"src/main/native/cpp/uv/*.cpp",
-        #"src/main/native/libuv/src/*.cpp",
-        #], exclude=["src/main/native/cpp/**/jni/**"])  +
+    cpp_srcs = glob(DEFAULT_CC_SRC_PATTERN + [
+        "src/main/native/cpp/llvm/*.cpp",
+        "src/main/native/cpp/uv/*.cpp",
+        "src/main/native/libuv/src/*.cpp",
+        ], exclude=["src/main/native/cpp/**/jni/**"])  +
 
         select({
             "@bazel_tools//src/conditions:windows": WIN_SRCS,
