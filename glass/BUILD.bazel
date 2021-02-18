@@ -63,7 +63,27 @@ wpilib_cc_binary(
             '-DEFAULTLIB:d3dcompiler.lib',
             "-SUBSYSTEM:WINDOWS",
         ],
+        "@bazel_tools//src/conditions:darwin": [
+            '-framework', 'Metal',
+            '-framework', 'MetalKit',
+            '-framework', 'Cocoa',
+            '-framework', 'IOKit',
+            '-framework', 'CoreFoundation',
+            '-framework', 'CoreVideo',
+            '-framework', 'QuartzCore'
+        ],
+
+        "@bazel_tools//src/conditions:linux_x86_64": [
+            '-lX11',
+        ],
         "//conditions:default": [],
         }),
     tags = ['no-roborio', 'no-bionic', 'no-raspbian'],
+    
+    # TODO mac doesn't link right
+    target_compatible_with = select({
+        "@platforms//os:windows": [],
+        "@platforms//os:linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )

@@ -27,7 +27,7 @@ LINUX_COMPILER_ARGS = ["-std=c++17", "-Wformat=2", "-pedantic", "-Wno-psabi", "-
 LINUX_C_COMPILER_ARGS = ["-Wformat=2", "-pedantic", "-Wno-psabi", "-Wno-unused-parameter", "-fPIC", "-rdynamic", "-pthread"]
 LINUX_LINKER_ARGS = ["-rdynamic", "-pthread", "-ldl", "-latomic"]
 
-# Make
+# Mac
 MAC_COMPILER_ARGS = ["-std=c++17", "-pedantic", "-fPIC",
     #"-Wno-unused-parameter", "-Wno-error=deprecated-declarations", "-Wno-missing-field-initializers", "-Wno-unused-private-field",
     "-Wno-unused-const-variable", "-Wno-error=c11-extensions", "-pthread"]
@@ -51,7 +51,7 @@ DEFAULT_CC_TEST_INCLUDE_PATTERN = ["src/test/native/cpp", "src/test/native/inclu
 def _get_default_cxx_opts():
     return select({
             "@bazel_tools//src/conditions:windows": WINDOWS_COMPILER_ARGS + WINDOWS_WARNING_ARGS + WINDOWS_WARNINGS_AS_ERROR_ARGS,
-            "@bazel_tools//src/conditions:linux_x86_64": LINUX_CROSS_COMPILER_ARGS + UNIX_WARNING_ARGS + UNIX_WARNINGS_AS_ERROR_ARGS,
+            "@bazel_tools//src/conditions:linux_x86_64": LINUX_COMPILER_ARGS + UNIX_WARNING_ARGS + UNIX_WARNINGS_AS_ERROR_ARGS,
             "@bazel_tools//src/conditions:darwin": MAC_COMPILER_ARGS, #  + UNIX_WARNING_ARGS + UNIX_WARNINGS_AS_ERROR_ARGS,
             "//bazel_scripts/toolchains:roborio": LINUX_CROSS_COMPILER_ARGS + UNIX_WARNING_ARGS + UNIX_WARNINGS_AS_ERROR_ARGS,
             "//bazel_scripts/toolchains:bionic": LINUX_CROSS_COMPILER_ARGS + UNIX_WARNING_ARGS + UNIX_WARNINGS_AS_ERROR_ARGS,
@@ -61,7 +61,7 @@ def _get_default_cxx_opts():
 def _get_default_linker_opts():
     return select({
             "@bazel_tools//src/conditions:windows": WINDOWS_LINKER_ARGS,
-            "@bazel_tools//src/conditions:linux_x86_64": LINUX_CROSS_LINKER_ARGS,
+            "@bazel_tools//src/conditions:linux_x86_64": LINUX_LINKER_ARGS,
             "@bazel_tools//src/conditions:darwin": MAC_LINKER_ARGS,
             "//bazel_scripts/toolchains:roborio": LINUX_CROSS_LINKER_ARGS,
             "//bazel_scripts/toolchains:bionic": LINUX_CROSS_LINKER_ARGS,

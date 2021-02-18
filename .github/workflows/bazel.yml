@@ -21,29 +21,29 @@ jobs:
       - name: Build (Windows only)
         run: ./temp_bazel.exe test ${{ matrix.config }} //...
 
-  build-windows-cross:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-latest
-            architecture: Bionic
-            config: "--config=bionic"
-          - os: windows-latest
-            architecture: Raspbian
-            config: "--config=raspbian"
-          - os: windows-latest
-            architecture: Roborio
-            config: "--config=roborio"
-    name: "WinCross - ${{ matrix.architecture }} ${{ matrix.config }}"
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: Build (Windows only)
-        run: ./temp_bazel.exe build ${{ matrix.config }} //...
+  # build-windows-cross:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - os: windows-latest
+  #           architecture: Bionic
+  #           config: "--config=bionic"
+  #         - os: windows-latest
+  #           architecture: Raspbian
+  #           config: "--config=raspbian"
+  #         - os: windows-latest
+  #           architecture: Roborio
+  #           config: "--config=roborio"
+  #   name: "WinCross - ${{ matrix.architecture }} ${{ matrix.config }}"
+  #   runs-on: ${{ matrix.os }}
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         fetch-depth: 0
+# 
+  #     - name: Build (Windows only)
+  #       run: ./temp_bazel.exe build ${{ matrix.config }} //...
 
   build-mac:
     strategy:
