@@ -1,20 +1,16 @@
 
 filegroup(
     name = "gcc",
-    srcs = select({
-		"@bazel_tools//src/conditions:windows": ["bionic/bin/aarch64-bionic-linux-gnu-gcc.exe"],
-        "//conditions:default": ["bionic/bin/aarch64-bionic-linux-gnu-gcc"],
-	}),
+    srcs = ["bionic/bin/aarch64-bionic-linux-gnu-gcc"],
     visibility = ["//visibility:public"],
+    tags = ["manual"],
 )
 
 filegroup(
     name = "ar",
-    srcs = select({
-		"@bazel_tools//src/conditions:windows": ["bionic/bin/aarch64-bionic-linux-gnu-ar.exe"],
-        "//conditions:default": ["bionic/bin/aarch64-bionic-linux-gnu-ar"],
-	}),
+    srcs = ["bionic/bin/aarch64-bionic-linux-gnu-ar"],
     visibility = ["//visibility:public"],
+    tags = ["manual"],
 )
 
 filegroup(

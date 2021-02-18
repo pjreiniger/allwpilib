@@ -1,20 +1,16 @@
 
 filegroup(
     name = "gcc",
-    srcs = select({
-		"@bazel_tools//src/conditions:windows": ["frc2021/roborio/bin/arm-frc2021-linux-gnueabi-gcc.exe"],
-        "//conditions:default": ["frc2021/roborio/bin/arm-frc2021-linux-gnueabi-gcc"],
-	}),
+    srcs = ["frc2021/roborio/bin/arm-frc2021-linux-gnueabi-gcc"],
     visibility = ["//visibility:public"],
+    tags = ["manual"],
 )
 
 filegroup(
     name = "ar",
-    srcs = select({
-		"@bazel_tools//src/conditions:windows": ["frc2021/roborio/bin/arm-frc2021-linux-gnueabi-ar.exe"],
-        "//conditions:default": ["frc2021/roborio/bin/arm-frc2021-linux-gnueabi-ar"],
-	}),
+    srcs = ["frc2021/roborio/bin/arm-frc2021-linux-gnueabi-ar"],
     visibility = ["//visibility:public"],
+    tags = ["manual"],
 )
 
 filegroup(
