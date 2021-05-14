@@ -1,0 +1,17 @@
+load("@wpi_bazel_rules//rules:cc.bzl", "wpilib_cc_library", "wpilib_cc_shared_library", "wpilib_cc_test")
+load("@wpi_bazel_rules//rules:java.bzl", "wpilib_junit5_test")
+
+wpilib_cc_library(
+    name = "halsim_ws_core",
+    srcs = glob(["src/main/native/cpp/*.cpp"]),
+    hdrs = glob([
+        "src/main/native/include/*.h",
+        "src/main/native/include/*.inl",
+    ]),
+    strip_include_prefix = "src/main/native/include",
+    visibility = ["//visibility:public"],
+    wpi_shared_deps = [
+        "//hal:wpiHal",
+        "//wpiutil:wpiutil",
+    ],
+)

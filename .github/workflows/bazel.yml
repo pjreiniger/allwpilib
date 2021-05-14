@@ -1,0 +1,149 @@
+name: Bazel
+
+on: [pull_request, push]
+
+jobs:
+  build-windows:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            architecture: x64
+            config: ""
+    name: "Build - Win${{ matrix.architecture }} ${{ matrix.config }}"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: bazelbuild/setup-bazelisk@v1
+      - name: Mount bazel cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            C:/users/runneradmin/_bazel_runneradmin/*/execroot/**
+            C:/users/runneradmin/_bazel_runneradmin/*/external/**
+            !C:/users/runneradmin/_bazel_runneradmin/**/*.a
+            !C:/users/runneradmin/_bazel_runneradmin/**/*.so
+            !C:/users/runneradmin/_bazel_runneradmin/**/*.lib
+            !C:/users/runneradmin/_bazel_runneradmin/**/*.dll
+            !C:/users/runneradmin/_bazel_runneradmin/**/*.pdb
+            !C:/users/runneradmin/_bazel_runneradmin/**/*.dylib
+          key: bazel-win-cache-${{ hashFiles('/private/var/tmp/**/*.o') }}
+          restore-keys: |
+            bazel-win-cache-${{ hashFiles('/private/var/tmp/**/*.o') }}
+
+      - name: Bazel Info
+        run: bazel info
+        shell: bash
+
+      - name: Build
+        run: bazel test ... -k --nojava_header_compilation || echo "Failed"
+#        run: bazel test wpimath:cpp-test || echo "Failed"
+        shell: bash
+
+  build-mac:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            architecture: x64
+    name: "Build - Mac ${{ matrix.architecture }}"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: bazelbuild/setup-bazelisk@v1
+
+      - name: Mount bazel cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            /private/var/tmp/_bazel_runner
+            !/private/var/tmp/_bazel_runner/**/*.a
+            !/private/var/tmp/_bazel_runner/**/*.so
+            !/private/var/tmp/_bazel_runner/**/*.lib
+            !/private/var/tmp/_bazel_runner/**/*.dll
+            !/private/var/tmp/_bazel_runner/**/*.pdb
+            !/private/var/tmp/_bazel_runner/**/*.dylib
+          key: bazel-darwin-cache-${{ hashFiles('/private/var/tmp/**/*.o') }}
+          restore-keys: |
+            bazel-darwin-cache-
+
+      - name: Bazel Info
+        run: bazel info
+
+      - name: Build and Test
+        run: bazel test  ... --nojava_header_compilation -k || true
+
+  build-docker:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - container: wpilib/ubuntu-base:18.04
+            artifact-name: Linux Release
+    runs-on: ubuntu-latest
+    name: "Build - ${{ matrix.artifact-name }}${{ matrix.architecture }}"
+    container: ${{ matrix.container }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: bazelbuild/setup-bazelisk@v1
+      - name: Mount bazel cache
+        uses: actions/cache@v2
+        with:
+          path: |
+             ~/.cache/bazel
+             !~/.cache/bazel/**/*.a
+             !~/.cache/bazel/**/*.so
+             !~/.cache/bazel/**/*.lib
+             !~/.cache/bazel/**/*.dll
+             !~/.cache/bazel/**/*.pdb
+             !~/.cache/bazel/**/*.dylib
+          key: bazel-linux-cache-${{ hashFiles('~/.cache/bazel/**/*.o') }}
+          restore-keys: |
+            bazel-linux-cache-
+
+      - name: Bazel Info
+        run: bazel info
+
+      - name: Build and Test
+        run: bazel test ... -k
+      - name: Inspect Cache
+        run: |
+            ls ~/.cache
+            ls ~/.cache/bazel
+            ls ~/.cache/bazel/_bazel_root
+            ls ~/.cache/bazel/_bazel_root/95c1a711d2dd79838a4bf5bba0956ea6
+            ls ~/.cache/bazel/_bazel_root/95c1a711d2dd79838a4bf5bba0956ea6
+            echo "Hello"
+#
+#  build-coverage:
+#    strategy:
+#      fail-fast: false
+#    runs-on: ubuntu-latest
+#    container: wpilib/ubuntu-base:18.04
+#    name: "Code Coverage"
+#    steps:
+#      - uses: actions/checkout@v2
+#        with:
+#          fetch-depth: 0
+#      - name: Setup Bazel
+#        uses: abhinavsingh/setup-bazel@v3
+#        with: { version: 4.0.0 }
+#      - name: Build
+#        run: bazel coverage //... -k || true
+#      - name: Run Coverage
+#        run: bazel coverage //...
+#      - name: genhtml
+#        run: apt-get update && apt-get install -y lcov && genhtml bazel-out/_coverage/_coverage_report.dat -o coverage
+#
+#      - uses: actions/upload-artifact@v2
+#        with:
+#          name: "Coverage"
+#          path: coverage_report

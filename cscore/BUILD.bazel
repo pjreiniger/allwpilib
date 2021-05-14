@@ -1,0 +1,47 @@
+load("@wpi_bazel_rules//rules:cc.bzl", "wpilib_cc_binary", "wpilib_cc_library", "wpilib_cc_shared_library", "wpilib_cc_test")
+load("@wpi_bazel_rules//rules:java.bzl", "wpilib_java_binary", "wpilib_junit5_test")
+load("@wpi_bazel_rules//rules:jni.bzl", "wpilib_jni_library")
+load("//cscore:build_examples.bzl", "build_cpp_examples", "build_java_examples")
+load("@wpi_bazel_rules//rules/projects:jni_project.bzl", "jni_project")
+
+WIN_SRCS = glob([
+    "src/main/native/windows/**/*.cpp",
+    "src/main/native/windows/**/*.h",
+])
+
+LINUX_SRCS = glob([
+    "src/main/native/linux/**/*.cpp",
+    "src/main/native/linux/**/*.h",
+])
+
+MAC_SRCS = glob(["src/main/native/osx/**/*.cpp"])
+
+filegroup(
+    name = "native-srcs",
+    srcs = select({
+        "@bazel_tools//src/conditions:windows": WIN_SRCS,
+        "@bazel_tools//src/conditions:linux_x86_64": LINUX_SRCS,
+        "@bazel_tools//src/conditions:darwin": MAC_SRCS,
+    }),
+)
+
+jni_project(
+    name = "cscore",
+    cc_additional_srcs = [":native-srcs"],
+    cc_includes = ["src/main/native/cpp"],
+    cc_raw_deps = [
+        "@local_opencv//:opencv-cpp",
+        "@local_opencv//:xxshared",
+    ],
+    cc_shared_deps = ["//wpiutil:wpiutil"],
+    java_deps = [
+        "//wpiutil:java",
+        "@local_opencv//:edu_wpi_first_thirdparty_opencv_opencv_java",
+    ],
+    java_dev_main_class = "edu.wpi.cscore.first.DevMain",
+    java_raw_jni_deps = ["@local_opencv//:opencv-cpp-shared-libs"],
+)
+
+build_cpp_examples()
+
+build_java_examples()
