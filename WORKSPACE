@@ -28,9 +28,9 @@ git_repository(
 
 git_repository(
     name = "wpi_bazel_rules",
-    commit = "9f49098a39165111493b3597e8b94a80006ba0e8",
+    commit = "24de3f15864fb18769c2bd13462c3197b528f2d0",
     remote = "https://github.com/bazelRio/wpi-bazel-rules",
-    shallow_since = "1621576927 -0400",
+    shallow_since = "1621583782 -0400",
 )
 
 load("@wpi_bazel_rules//toolchains:load_toolchains.bzl", "load_toolchains")

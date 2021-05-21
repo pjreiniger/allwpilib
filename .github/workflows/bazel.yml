@@ -71,9 +71,9 @@ jobs:
             !C:/users/runneradmin/_bazel_runneradmin/**/*.dll
             !C:/users/runneradmin/_bazel_runneradmin/**/*.pdb
             !C:/users/runneradmin/_bazel_runneradmin/**/*.dylib
-          key: bazel-roborio-cache-${{ hashFiles('/private/var/tmp/**/*.o') }}
+          key: bazel-roborioxx-cache-${{ hashFiles('/private/var/tmp/**/*.o') }}
           restore-keys: |
-            bazel-roborio-cache-${{ hashFiles('/private/var/tmp/**/*.o') }}
+            bazel-roborioxx-cache-${{ hashFiles('/private/var/tmp/**/*.o') }}
 
       - name: Bazel Info
         run: bazel info
@@ -148,9 +148,9 @@ jobs:
             !/private/var/tmp/_bazel_runner/**/*.dll
             !/private/var/tmp/_bazel_runner/**/*.pdb
             !/private/var/tmp/_bazel_runner/**/*.dylib
-          key: bazel-bionic-cache-${{ hashFiles('/private/var/tmp/**/*.o') }}
+          key: bazel-bionicxx-cache-${{ hashFiles('/private/var/tmp/**/*.o') }}
           restore-keys: |
-            bazel-bionic-cache-
+            bazel-bionicxx-cache-
 
       - name: Bazel Info
         run: bazel info
@@ -231,9 +231,9 @@ jobs:
             !~/.cache/bazel/**/*.dll
             !~/.cache/bazel/**/*.pdb
             !~/.cache/bazel/**/*.dylib
-          key: bazel-raspian-cache-${{ hashFiles('~/.cache/bazel/**/*.o') }}
+          key: bazel-raspianxx-cache-${{ hashFiles('~/.cache/bazel/**/*.o') }}
           restore-keys: |
-            bazel-raspian-cache-
+            bazel-raspianxx-cache-
 
       - name: Bazel Info
         run: bazel info
