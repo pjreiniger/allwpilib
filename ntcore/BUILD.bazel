@@ -1,6 +1,4 @@
-load("@wpi_bazel_rules//rules:cc.bzl", "wpilib_cc_binary", "wpilib_cc_library", "wpilib_cc_shared_library", "wpilib_cc_test")
-load("@wpi_bazel_rules//rules:java.bzl", "wpilib_java_binary", "wpilib_junit5_test")
-load("@wpi_bazel_rules//rules:jni.bzl", "wpilib_jni_library")
+load("@wpi_bazel_rules//rules:cc.bzl", "wpilib_cc_library")
 load("@wpi_bazel_rules//rules/projects:jni_project.bzl", "jni_project")
 
 wpilib_cc_library(
@@ -11,139 +9,10 @@ wpilib_cc_library(
 
 jni_project(
     name = "ntcore",
-    #    cc_additional_srcs = [":private_includes"],
     cc_raw_deps = [":private_includes"],
     cc_shared_deps = ["//wpiutil:wpiutil"],
     java_deps = [
         "//wpiutil:java",
-        #        "//bazel_scripts/third_party/edu_wpi_first_thirdparty_opencv:edu_wpi_first_thirdparty_opencv_opencv_java",
     ],
     java_dev_main_class = "edu.wpi.ntcore.first.DevMain",
-    #    java_raw_jni_deps = ["//bazel_scripts/third_party/edu_wpi_first_thirdparty_opencv:opencv-cpp-shared-libs"],
 )
-
-#filegroup(
-#    name = "private_includes",
-#    srcs = glob(["src/main/native/cpp/*.h"]),
-#)
-#
-#wpilib_cc_shared_library(
-#    name = "ntcore",
-#    srcs = [":private_includes"] + glob([
-#        "src/main/native/cpp/networktables/*.cpp",
-#        "src/main/native/cpp/*.cpp",
-#    ]),
-#    hdrs = glob([
-#        "src/main/native/include/networktables/*.h",
-#        "src/main/native/include/networktables/*.inl",
-#        "src/main/native/include/*.h",
-#    ]),
-#    includes = ["src/main/native/cpp"],
-#    strip_include_prefix = "src/main/native/include",
-#    visibility = ["//visibility:public"],
-#    wpi_shared_deps = ["//wpiutil:wpiutil"],
-#)
-
-#wpilib_cc_library(
-#    name = "manualTets-cpp",
-#    srcs = glob([
-#        "manualTests/native/*.cpp",
-#    ]),
-#    deps = [
-#        ":native"
-#    ],
-#)
-#
-#java_library(
-#    name = "java",
-#    srcs = glob([
-#        "src/main/java/edu/wpi/first/networktables/*.java",
-#        "src/main/java/edu/wpi/first/wpilibj/networktables/*.java",
-#        "src/main/java/edu/wpi/first/wpilibj/tables/*.java",
-#    ]),
-#    visibility = ["//visibility:public"],
-#    deps = [
-#        "//wpiutil:java",
-#    ],
-#)
-#
-#wpilib_jni_library(
-#    name = "ntcorejni",
-#    srcs = glob(["src/main/native/cpp/jni/*.cpp"]),
-#    java_lib = ":java",
-#    jni_files = glob(["src/main/java/**/*JNI.java"]),
-#    visibility = ["//visibility:public"],
-#    wpi_maybe_shared_deps = [":ntcore"],
-#)
-#
-##java_library(
-##    name = "manualTests-java",
-##    srcs = glob([
-##        "manualTests/java/*.java",
-##    ]),
-##    deps = [
-##        ":java"
-##    ],
-##)
-#
-##
-##load("@wpi_bazel_rules//rules:jni.bzl", "wpilib_jni_library")
-##load("@rules_java//java:defs.bzl", "java_library")
-##load("@wpi_bazel_rules//rules:cc.bzl","wpilib_cc_test")
-##
-#
-###wpilib_jni_library(
-###    name="ntcore",
-###    cpp_deps=["//wpiutil:wpiutil-cpp"],
-###    java_deps = ["//wpiutil:wpiutil-java"],
-###    visibility=["//visibility:public"],
-###)
-##
-#wpilib_junit5_test(
-#    name = "ntcore-java-test",
-#    srcs = glob([
-#        "src/test/java/edu/wpi/first/networktables/*.java",
-#    ]),
-#    wpi_shared_deps = [
-#        ":ntcore",
-#        ":ntcorejni",
-#        "//wpiutil:wpiutil",
-#    ],
-#    deps = [":java"],
-#)
-#
-#wpilib_cc_library(
-#    name = "private_headers_lib",
-#    hdrs = [":private_includes"],
-#    strip_include_prefix = "src/main/native/cpp",
-#)
-#
-#wpilib_cc_test(
-#    name = "cpp-test",
-#    srcs = [":private_includes"] + glob([
-#        "src/test/native/cpp/*.cpp",
-#        "src/test/native/cpp/*.h",
-#    ]),
-#    raw_deps = [":private_headers_lib"],
-#    wpi_shared_deps = [
-#        ":ntcore",
-#    ],
-#)
-#
-#wpilib_cc_binary(
-#    name = "DevMainCpp",
-#    srcs = ["src/dev/native/cpp/main.cpp"],
-#    wpi_shared_deps = [":ntcore"],
-#)
-#
-#wpilib_java_binary(
-#    name = "DevMainJava",
-#    srcs = ["src/dev/java/edu/wpi/first/ntcore/DevMain.java"],
-#    main_class = "edu.wpi.first.ntcore.DevMain",
-#    wpi_shared_deps = [
-#        ":ntcorejni",
-#        ":ntcore",
-#        "//wpiutil:wpiutil",
-#    ],
-#    deps = [":java"],
-#)

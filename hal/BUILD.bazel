@@ -1,7 +1,5 @@
-load("@wpi_bazel_rules//rules:cc.bzl", "wpilib_cc_binary", "wpilib_cc_library", "wpilib_cc_shared_library", "wpilib_cc_test")
-load("@wpi_bazel_rules//rules:cc.bzl", "wpilib_cc_test")
-load("@wpi_bazel_rules//rules:jni.bzl", "wpilib_jni_library")
-load("@wpi_bazel_rules//rules:java.bzl", "wpilib_java_binary", "wpilib_junit5_test")
+load("@rules_java//java:defs.bzl", "java_library")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@wpi_bazel_rules//rules/projects:jni_project.bzl", "jni_project")
 
 ATHENA_SRCS = glob([
@@ -15,9 +13,7 @@ ATHENA_SRCS = glob([
 ])
 
 ATHENA_DEPS = [
-    "@netcomm-headers//:headers",
-    "@chipobject-headers//:headers",
-    "@visa-headers//:headers",
+    "@local_ni//:ni-libraries",
 ]
 
 SIM_SRCS = glob([

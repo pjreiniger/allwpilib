@@ -19,6 +19,12 @@ def build_cpp_examples():
             ]),
             raw_deps = ["//wpigui:wpigui"],
             wpi_shared_deps = [":cscore"],
+            tags = [
+                "wpi-example",
+                "no-bionic",
+                "no-raspbian",
+                "no-roborio",
+            ],
         )
 
 def build_java_examples():
@@ -30,4 +36,5 @@ def build_java_examples():
         deps = [
             ":java",
         ],
+        tags = ["wpi-example"],
     )

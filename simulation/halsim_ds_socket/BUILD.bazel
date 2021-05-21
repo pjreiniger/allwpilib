@@ -1,5 +1,4 @@
 load("//simulation:plugin.bzl", "wpilib_hal_plugin")
-load("@wpi_bazel_rules//rules:cc.bzl", "wpilib_cc_binary", "wpilib_cc_shared_library", "wpilib_cc_test")
 
 wpilib_hal_plugin(
     name = "halsim_ds_socket",

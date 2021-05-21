@@ -5,7 +5,7 @@ wpilib_cc_binary(
     name = "cpp",
     srcs = ["src/main/native/cpp/main.cpp"],
     wpi_shared_deps = [
-        "//cameraserver:cameraserver",
+        "//cameraserver:cpp",
     ],
 )
 
@@ -14,7 +14,7 @@ wpilib_java_binary(
     srcs = ["src/main/java/edu/wpi/Main.java"],
     main_class = "edu.wpi.Main",
     deps = [
-        "//cameraserver:cameraserver-java",
+        "//cameraserver:java",
         "@maven//:com_google_code_gson_gson",
     ],
 )

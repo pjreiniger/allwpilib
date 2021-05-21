@@ -1,4 +1,4 @@
-load("@wpi_bazel_rules//rules:cc.bzl", "wpilib_cc_binary", "wpilib_cc_library", "wpilib_cc_test")
+load("@wpi_bazel_rules//rules:cc.bzl", "wpilib_cc_library")
 load("//simulation:plugin.bzl", "wpilib_hal_plugin")
 
 wpilib_hal_plugin(

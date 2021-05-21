@@ -1,4 +1,4 @@
-load("@wpi_bazel_rules//rules:cc.bzl", "wpilib_cc_binary", "wpilib_cc_library", "wpilib_cc_test")
+load("@wpi_bazel_rules//rules:cc.bzl", "wpilib_cc_library")
 load("@wpi_bazel_rules//rules:halsim_binary.bzl", "wpilib_cc_halsim_binary")
 
 EXAMPLE_FOLDERS = [
@@ -100,6 +100,7 @@ def build_examples(halsim_deps = []):
             name = folder + "-examples-headers",
             hdrs = native.glob(["src/main/cpp/examples/" + folder + "/include/**/*.h"]),
             strip_include_prefix = "src/main/cpp/examples/" + folder + "/include",
+            tags = ["wpi-example"],
         )
 
         wpilib_cc_halsim_binary(
@@ -130,6 +131,7 @@ def build_commands():
                 "//wpilibOldCommands:cpp",
             ],
             strip_include_prefix = "src/main/cpp/commands/" + folder,
+            tags = ["wpi-example"],
         )
 
 def build_templates():
@@ -144,4 +146,5 @@ def build_templates():
                 "//wpilibOldCommands:cpp",
             ],
             strip_include_prefix = "src/main/cpp/templates/" + folder + "/include",
+            tags = ["wpi-example"],
         )

@@ -1,5 +1,5 @@
 load("//wpilibjExamples:build_java_examples.bzl", "build_commands", "build_examples", "build_templates")
-load("@wpi_bazel_rules//rules:cc.bzl", "wpilib_cc_binary", "wpilib_cc_library", "wpilib_cc_shared_library", "wpilib_cc_test")
+load("@wpi_bazel_rules//rules:cc.bzl", "wpilib_cc_binary")
 
 halsim_deps = [
     "//simulation/halsim_ws_client:halsim_ws_client",
@@ -10,7 +10,7 @@ halsim_deps = [
 
 build_commands()
 
-build_examples(halsim_deps)
+build_examples(halsim_deps = halsim_deps)
 
 build_templates()
 

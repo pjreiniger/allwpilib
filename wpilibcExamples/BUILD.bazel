@@ -9,6 +9,6 @@ halsim_deps = [
 
 build_commands()
 
-build_examples(halsim_deps)
+build_examples(halsim_deps = halsim_deps)
 
 build_templates()

@@ -10,7 +10,7 @@
 #)
 
 load("//simulation:plugin.bzl", "wpilib_hal_plugin")
-load("@wpi_bazel_rules//rules:cc.bzl", "get_wpigui_linker_flags", "wpilib_cc_binary", "wpilib_cc_test")
+load("@wpi_bazel_rules//rules:cc.bzl", "get_wpigui_linker_flags")
 
 wpilib_hal_plugin(
     name = "halsim_gui",

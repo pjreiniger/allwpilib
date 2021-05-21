@@ -1,6 +1,3 @@
-load("@wpi_bazel_rules//rules:cc.bzl", "wpilib_cc_binary", "wpilib_cc_library", "wpilib_cc_shared_library", "wpilib_cc_test")
-load("@wpi_bazel_rules//rules:java.bzl", "wpilib_java_binary", "wpilib_junit5_test")
-load("@wpi_bazel_rules//rules:jni.bzl", "wpilib_jni_library")
 load("//cscore:build_examples.bzl", "build_cpp_examples", "build_java_examples")
 load("@wpi_bazel_rules//rules/projects:jni_project.bzl", "jni_project")
 
@@ -22,6 +19,9 @@ filegroup(
         "@bazel_tools//src/conditions:windows": WIN_SRCS,
         "@bazel_tools//src/conditions:linux_x86_64": LINUX_SRCS,
         "@bazel_tools//src/conditions:darwin": MAC_SRCS,
+        "@wpi_bazel_rules//toolchains/conditions:raspbian": LINUX_SRCS,
+        "@wpi_bazel_rules//toolchains/conditions:bionic": LINUX_SRCS,
+        "@wpi_bazel_rules//toolchains/conditions:roborio": LINUX_SRCS,
     }),
 )
 

@@ -25,6 +25,7 @@ NON_ATHENA_SRCS = glob([
 wpilib_cc_test(
     name = "cpp-test",
     srcs = select({
+        "@wpi_bazel_rules//toolchains/conditions:roborio": ATHENA_SRCS,
         "//conditions:default": NON_ATHENA_SRCS,
     }),
     raw_deps = [

@@ -1,6 +1,5 @@
 load("@rules_java//java:defs.bzl", "java_library")
-load("@wpi_bazel_rules//rules:java.bzl", "wpilib_junit5_test")
-load("@wpi_bazel_rules//rules:halsim_binary.bzl", "wpilib_cc_halsim_binary", "wpilib_java_halsim_binary")
+load("@wpi_bazel_rules//rules:halsim_binary.bzl", "wpilib_java_halsim_binary")
 
 EXAMPLES_FOLDERS = [
     "addressableled",
@@ -142,6 +141,7 @@ def build_commands():
                 "//wpilibNewCommands:java",
                 "//wpilibOldCommands:java",
             ],
+            tags = ["wpi-example"],
         )
 
 def build_templates():
@@ -154,4 +154,5 @@ def build_templates():
                 "//wpilibNewCommands:java",
                 "//wpilibOldCommands:java",
             ],
+            tags = ["wpi-example"],
         )

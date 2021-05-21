@@ -6,3 +6,8 @@ build --strict_java_deps=OFF
 build --javacopt="-XepDisableAllChecks"
 
 test --test_output=errors
+
+
+import .bazelrc-roborio
+import .bazelrc-bionic
+import .bazelrc-raspbian

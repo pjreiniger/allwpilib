@@ -2,7 +2,7 @@ load("@wpi_bazel_rules//rules/projects:java_project.bzl", "java_project")
 load("@wpi_bazel_rules//rules/projects:cc_project.bzl", "cc_project")
 
 java_project(
-    name = "cameraserver-java",
+    name = "java",
     dev_main_main_class = "edu.wpi.first.cameraserver.DevMain",
     has_test = False,
     wpi_shared_deps = [
@@ -18,7 +18,7 @@ java_project(
 )
 
 cc_project(
-    name = "cameraserver",
+    name = "cpp",
     build_as_shared = True,
     wpi_shared_deps = [
         "//cscore:cscore",

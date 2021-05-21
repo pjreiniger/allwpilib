@@ -25,7 +25,7 @@ java_project(
         "//hal:wpiHal",
     ],
     deps = [
-        "//cameraserver:cameraserver-java",
+        "//cameraserver:java",
         "//cscore:java",
         "//hal:java",
         "//ntcore:java",

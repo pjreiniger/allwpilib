@@ -1,6 +1,4 @@
 load("@rules_jvm_external//:defs.bzl", "maven_install")
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_jar")
-load("@bazel_tools//tools/build_defs/repo:jvm.bzl", "jvm_maven_import_external")
 load("@wpi_bazel_deps//third_party:org_juni_jupiter_junit5.bzl", "get_junit5_maven_deps")
 load("@wpi_bazel_deps//third_party:com_fasterxml_jackson_core.bzl", "get_fasterxml_maven_deps")
 load("@local_opencv//:repo.bzl", "third_party_opencv_java_version")

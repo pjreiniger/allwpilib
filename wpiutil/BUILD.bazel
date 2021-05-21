@@ -1,8 +1,4 @@
-load("@wpi_bazel_rules//rules:jni.bzl", "wpilib_jni_library")
-load("@rules_java//java:defs.bzl", "java_library")
-load("@wpi_bazel_rules//rules:cc.bzl", "default_wpilib_cc_dev_main", "wpilib_cc_binary", "wpilib_cc_library", "wpilib_cc_shared_library", "wpilib_cc_test")
-load("@wpi_bazel_rules//rules:java.bzl", "default_java_test", "wpilib_java_binary", "wpilib_junit5_test")
-load("@wpi_bazel_rules//rules:jni.bzl", "wpilib_jni_library")
+load("@wpi_bazel_rules//rules:cc.bzl", "wpilib_cc_binary", "wpilib_cc_library")
 load("@wpi_bazel_rules//rules/projects:jni_project.bzl", "jni_project")
 load("@wpi_bazel_rules//rules/gen:gen-resources.bzl", "generate_resources")
 
@@ -54,8 +50,11 @@ filegroup(
     name = "native-uv-srcs",
     srcs = select({
         "@bazel_tools//src/conditions:windows": WIN_UV_SRCS,
-        "@bazel_tools//src/conditions:linux_x86_64": UNIX_UV_SRCS + LINUX_UV_SRCS,
         "@bazel_tools//src/conditions:darwin": UNIX_UV_SRCS + MAC_UV_SRCS,
+        "@bazel_tools//src/conditions:linux_x86_64": UNIX_UV_SRCS + LINUX_UV_SRCS,
+        "@wpi_bazel_rules//toolchains/conditions:raspbian": UNIX_UV_SRCS + LINUX_UV_SRCS,
+        "@wpi_bazel_rules//toolchains/conditions:bionic": UNIX_UV_SRCS + LINUX_UV_SRCS,
+        "@wpi_bazel_rules//toolchains/conditions:roborio": UNIX_UV_SRCS + LINUX_UV_SRCS,
     }),
 )
 
@@ -66,6 +65,9 @@ filegroup(
             "src/main/native/cpp/llvm/Windows/Path.inc",
             "src/main/native/cpp/llvm/Windows/WindowsSupport.h",
         ],
+        "@wpi_bazel_rules//toolchains/conditions:raspbian": ["src/main/native/cpp/llvm/Unix/Path.inc"],
+        "@wpi_bazel_rules//toolchains/conditions:bionic": ["src/main/native/cpp/llvm/Unix/Path.inc"],
+        "@wpi_bazel_rules//toolchains/conditions:roborio": ["src/main/native/cpp/llvm/Unix/Path.inc"],
         "//conditions:default": ["src/main/native/cpp/llvm/Unix/Path.inc"],
     }),
 )
@@ -88,6 +90,9 @@ filegroup(
             "src/main/native/windows/*.cpp",
             "src/main/native/windows/*.h",
         ]),
+        "@wpi_bazel_rules//toolchains/conditions:raspbian": glob(["src/main/native/unix/*.cpp"]),
+        "@wpi_bazel_rules//toolchains/conditions:bionic": glob(["src/main/native/unix/*.cpp"]),
+        "@wpi_bazel_rules//toolchains/conditions:roborio": glob(["src/main/native/unix/*.cpp"]),
         "//conditions:default": glob(["src/main/native/unix/*.cpp"]),
     }),
 )
@@ -125,6 +130,9 @@ wpilib_cc_binary(
     srcs = ["src/netconsoleServer/native/cpp/main.cpp"],
     linkopts = select({
         "@bazel_tools//src/conditions:linux_x86_64": ["-lutil"],
+        "@wpi_bazel_rules//toolchains/conditions:raspbian": ["-lutil"],
+        "@wpi_bazel_rules//toolchains/conditions:bionic": ["-lutil"],
+        "@wpi_bazel_rules//toolchains/conditions:roborio": ["-lutil"],
         "//conditions:default": [],
     }),
     wpi_shared_deps = [":wpiutil"],
