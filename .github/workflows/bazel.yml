@@ -111,9 +111,9 @@ jobs:
             !/private/var/tmp/_bazel_runner/**/*.dll
             !/private/var/tmp/_bazel_runner/**/*.pdb
             !/private/var/tmp/_bazel_runner/**/*.dylib
-          key: bazel-darwin-cache-${{ hashFiles('/private/var/tmp/**/*.o') }}
+          key: bazel-darwinxx-cache-${{ hashFiles('/private/var/tmp/**/*.o') }}
           restore-keys: |
-            bazel-darwin-cache-
+            bazel-darwinxx-cache-
 
       - name: Bazel Info
         run: bazel info
