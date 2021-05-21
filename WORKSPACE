@@ -21,17 +21,23 @@ http_archive(
 #############################################
 git_repository(
     name = "wpi_bazel_deps",
-    commit = "265f7cd4f815aececd3d2942df0ebb5c7cb7a07d",
+    commit = "8224f3fc9b5356cad96ded3c7559cc8fbdd0a439",
     remote = "https://github.com/bazelRio/wpi-bazel-deps-rules",
-    shallow_since = "1621577064 -0400",
+    shallow_since = "1621618038 -0400",
 )
 
 git_repository(
     name = "wpi_bazel_rules",
-    commit = "24de3f15864fb18769c2bd13462c3197b528f2d0",
+    commit = "a6baba41f8fe71501670e37c64da97dcf15c8cb0",
     remote = "https://github.com/bazelRio/wpi-bazel-rules",
-    shallow_since = "1621583782 -0400",
+    shallow_since = "1621618104 -0400",
 )
+
+# local_repository(
+#     name = "wpi_bazel_rules",
+#    path = "C:/Users/PJ/Documents/GitHub/wpilib/original/bazel_rules/wpi-bazel-rules",
+#     # path = "/wpi-bazel-rules",
+# )
 
 load("@wpi_bazel_rules//toolchains:load_toolchains.bzl", "load_toolchains")
 
