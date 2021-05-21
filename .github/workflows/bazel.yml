@@ -148,9 +148,9 @@ jobs:
             !/private/var/tmp/_bazel_runner/**/*.dll
             !/private/var/tmp/_bazel_runner/**/*.pdb
             !/private/var/tmp/_bazel_runner/**/*.dylib
-          key: bazel-bionicxx-cache-${{ hashFiles('/private/var/tmp/**/*.o') }}
+          key: bazel-bionicyy-cache-${{ hashFiles('/private/var/tmp/**/*.o') }}
           restore-keys: |
-            bazel-bionicxx-cache-
+            bazel-bionicyy-cache-
 
       - name: Bazel Info
         run: bazel info
@@ -231,9 +231,9 @@ jobs:
             !~/.cache/bazel/**/*.dll
             !~/.cache/bazel/**/*.pdb
             !~/.cache/bazel/**/*.dylib
-          key: bazel-raspianxx-cache-${{ hashFiles('~/.cache/bazel/**/*.o') }}
+          key: bazel-raspianzz-cache-${{ hashFiles('~/.cache/bazel/**/*.o') }}
           restore-keys: |
-            bazel-raspianxx-cache-
+            bazel-raspianzz-cache-
 
       - name: Bazel Info
         run: bazel info

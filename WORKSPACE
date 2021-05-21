@@ -21,16 +21,16 @@ http_archive(
 #############################################
 git_repository(
     name = "wpi_bazel_deps",
-    commit = "8224f3fc9b5356cad96ded3c7559cc8fbdd0a439",
+    commit = "8a30cd98ea9e60f6fec1cb3c05403c32e065bd09",
     remote = "https://github.com/bazelRio/wpi-bazel-deps-rules",
-    shallow_since = "1621618038 -0400",
+    shallow_since = "1621631074 -0400",
 )
 
 git_repository(
     name = "wpi_bazel_rules",
-    commit = "a6baba41f8fe71501670e37c64da97dcf15c8cb0",
+    commit = "45455b5ae63b9b5aca13438abb1aca51829f6f1f",
     remote = "https://github.com/bazelRio/wpi-bazel-rules",
-    shallow_since = "1621618104 -0400",
+    shallow_since = "1621631233 -0400",
 )
 
 # local_repository(
@@ -49,15 +49,8 @@ configure_toolchains()
 
 #############################################
 
-load("@wpi_bazel_deps//third_party/edu_wpi_first_thirdparty_imgui:load_imgui.bzl", "load_imgui")
-load("@wpi_bazel_deps//third_party/edu_wpi_first_thirdparty_opencv:load_opencv.bzl", "load_opencv")
-load("@wpi_bazel_deps//third_party/com_ni_libraries:load_ni_libraries.bzl", "load_ni")
-
-load_imgui(year = 2021)
-
-load_opencv(year = 2021)
-
-load_ni("2020.10.1")
+load("//bazelThirdParty:load_repos.bzl", "load_repos")
+load_repos()
 
 load("//bazelThirdParty:repos.bzl", "wpilib_third_party_repositories")
 
