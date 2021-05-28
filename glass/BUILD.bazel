@@ -16,7 +16,7 @@ wpilib_cc_library(
         "src/lib/native/include/glass/hardware/*.h",
         "src/lib/native/include/glass/other/*.h",
         "src/lib/native/include/glass/support/*.h",
-        "src/lib/native/include/glass/support/*.inl",
+        "src/lib/native/include/glass/support/*.inc",
     ]),
     raw_deps = ["//wpigui:wpigui"],
     strip_include_prefix = "src/lib/native/include",

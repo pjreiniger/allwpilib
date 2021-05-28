@@ -62,7 +62,6 @@ filegroup(
     name = "native-llvm-srcs",
     srcs = select({
         "@bazel_tools//src/conditions:windows": [
-            "src/main/native/cpp/llvm/Windows/Path.inc",
             "src/main/native/cpp/llvm/Windows/WindowsSupport.h",
         ],
         "@wpi_bazel_rules//toolchains/conditions:raspbian": ["src/main/native/cpp/llvm/Unix/Path.inc"],

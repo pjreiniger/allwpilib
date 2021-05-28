@@ -26,18 +26,18 @@ git_repository(
     shallow_since = "1621648470 -0400",
 )
 
-git_repository(
-    name = "wpi_bazel_rules",
-    commit = "5891f8452d7dde2a7a214320d515574f00461af0",
-    remote = "https://github.com/bazelRio/wpi-bazel-rules",
-    shallow_since = "1621639589 -0400",
-)
+#git_repository(
+#    name = "wpi_bazel_rules",
+#    commit = "5891f8452d7dde2a7a214320d515574f00461af0",
+#    remote = "https://github.com/bazelRio/wpi-bazel-rules",
+#    shallow_since = "1621639589 -0400",
+#)
 
-# local_repository(
-#     name = "wpi_bazel_rules",
-#    path = "C:/Users/PJ/Documents/GitHub/wpilib/original/bazel_rules/wpi-bazel-rules",
-#     # path = "/wpi-bazel-rules",
-# )
+local_repository(
+    name = "wpi_bazel_rules",
+    path = "C:/Users/PJ/Documents/GitHub/wpilib/original/bazel_rules/wpi-bazel-rules",
+    # path = "/wpi-bazel-rules",
+)
 
 load("@wpi_bazel_rules//toolchains:load_toolchains.bzl", "load_toolchains")
 

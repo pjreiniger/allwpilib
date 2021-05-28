@@ -55,7 +55,7 @@ EXAMPLES_FOLDERS = [
     "statespaceflywheelsysid",
     "swervebot",
     "swervecontrollercommand",
-    "swervesdriveposeestimator",
+    "swervedriveposeestimator",
     "tankdrive",
     "tankdrivexboxcontroller",
     "ultrasonic",

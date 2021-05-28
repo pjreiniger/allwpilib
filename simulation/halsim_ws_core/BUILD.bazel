@@ -5,7 +5,7 @@ wpilib_cc_library(
     srcs = glob(["src/main/native/cpp/*.cpp"]),
     hdrs = glob([
         "src/main/native/include/*.h",
-        "src/main/native/include/*.inl",
+        "src/main/native/include/*.inc",
     ]),
     strip_include_prefix = "src/main/native/include",
     tags = [

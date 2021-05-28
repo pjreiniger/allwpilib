@@ -33,5 +33,8 @@ jni_project(
         "//wpiutil:java",
         "@maven//:org_ejml_ejml_simple",
     ],
+    java_shared_jni_deps = [
+        "//wpiutil:wpiutiljni",
+    ],
     java_dev_main_class = "edu.wpi.first.hal.DevMain",
 )
