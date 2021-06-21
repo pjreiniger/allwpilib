@@ -58,19 +58,6 @@ filegroup(
     }),
 )
 
-filegroup(
-    name = "native-llvm-srcs",
-    srcs = select({
-        "@bazel_tools//src/conditions:windows": [
-            "src/main/native/cpp/llvm/Windows/WindowsSupport.h",
-        ],
-        "@wpi_bazel_rules//toolchains/conditions:raspbian": ["src/main/native/cpp/llvm/Unix/Path.inc"],
-        "@wpi_bazel_rules//toolchains/conditions:bionic": ["src/main/native/cpp/llvm/Unix/Path.inc"],
-        "@wpi_bazel_rules//toolchains/conditions:roborio": ["src/main/native/cpp/llvm/Unix/Path.inc"],
-        "//conditions:default": ["src/main/native/cpp/llvm/Unix/Path.inc"],
-    }),
-)
-
 wpilib_cc_library(
     name = "libuv-headers",
     hdrs = glob([
@@ -116,7 +103,6 @@ jni_project(
     cc_additional_srcs = [
         ":native-srcs",
         ":native-uv-srcs",
-        ":native-llvm-srcs",
         ":generate-resources",
     ] + glob([
         "src/main/native/libuv/src/*.cpp",
