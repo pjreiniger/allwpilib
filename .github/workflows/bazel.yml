@@ -157,14 +157,28 @@ jobs:
           fetch-depth: 0
       - uses: bazelbuild/setup-bazelisk@v1
 
-      - name: Build
-        run: bazel coverage //... -k || true
+      - name: Install LCOV
+        run: apt-get update && apt-get install -y lcov
 
-      - name: Run Coverage
-        run: bazel coverage //...
+      - name: Build
+        run: bazel coverage //... -k --combined_report=lcov || true
+
+      - name: Debug
+        run: |
+          ls -al
+          ls bazel-out
+          ls bazel-out/_coverage
+          echo "Done"
 
       - name: genhtml
-        run: apt-get update && apt-get install -y lcov && genhtml bazel-out/_coverage/_coverage_report.dat -o coverage
+        run: genhtml bazel-out/_coverage/_coverage_report.dat -o coverage_report
+
+      - name: Debug
+        run: |
+          ls -al
+          ls coverage_report
+          ls coverage
+          echo "Done"
 
       - uses: actions/upload-artifact@v2
         with:

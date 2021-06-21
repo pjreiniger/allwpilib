@@ -229,3 +229,4 @@ imgui.ini
 /.ijwb/
 /bazel-*
 user.bazelrc
+coverage_report/
