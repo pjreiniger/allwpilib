@@ -1,0 +1,189 @@
+name: Bazel
+
+on: [pull_request, push]
+
+jobs:
+  build-windows:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            architecture: x64
+            config: ""
+    name: "Build - Win${{ matrix.architecture }} ${{ matrix.config }}"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: bazelbuild/setup-bazelisk@v1
+
+      - name: Bazel Info
+        run: bazel info
+        shell: bash
+
+      - name: Build
+        run: bazel test ... -k --nojava_header_compilation || echo "Failed"
+        shell: bash
+
+
+  build-roborio:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            architecture: x64
+            config: ""
+    name: "Build - Roborio${{ matrix.architecture }} ${{ matrix.config }}"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: bazelbuild/setup-bazelisk@v1
+
+      - name: Bazel Info
+        run: bazel info
+        shell: bash
+
+      - name: Build
+        run: bazel build --config=roborio ... -k --nojava_header_compilation
+        shell: bash
+
+
+  build-mac:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            architecture: x64
+    name: "Build - Mac ${{ matrix.architecture }}"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: bazelbuild/setup-bazelisk@v1
+
+      - name: Bazel Info
+        run: bazel info
+
+      - name: Build and Test
+        run: bazel test  ... --nojava_header_compilation -k
+
+
+  build-bionic:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            architecture: x64
+    name: "Build - Bionic ${{ matrix.architecture }}"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: bazelbuild/setup-bazelisk@v1
+
+      - name: Bazel Info
+        run: bazel info
+
+      - name: Build and Test
+        run: bazel build  --config=bionic ... --nojava_header_compilation -k
+
+
+
+  build-linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - container: wpilib/ubuntu-base:18.04
+            artifact-name: Linux Release
+    runs-on: ubuntu-latest
+    name: "Build - ${{ matrix.artifact-name }}${{ matrix.architecture }}"
+    container: ${{ matrix.container }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: bazelbuild/setup-bazelisk@v1
+
+      - name: Bazel Info
+        run: bazel info
+
+      - name: Build and Test
+        run: bazel test ... -k
+
+
+  build-raspbian:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - container: wpilib/ubuntu-base:18.04
+            artifact-name: Raspbain Release
+    runs-on: ubuntu-latest
+    name: "Build - ${{ matrix.artifact-name }}${{ matrix.architecture }}"
+    container: ${{ matrix.container }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: bazelbuild/setup-bazelisk@v1
+
+      - name: Bazel Info
+        run: bazel info
+
+      - name: Build and Test
+        run: bazel build --config=raspbian ... -k
+
+
+  build-coverage:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-latest
+    container: wpilib/ubuntu-base:18.04
+    name: "Code Coverage"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: bazelbuild/setup-bazelisk@v1
+
+      - name: Install LCOV
+        run: apt-get update && apt-get install -y lcov
+
+      - name: Build
+        run: bazel coverage //wpilibc:wpilibc-test //hal:cpp-test -k --combined_report=lcov || true
+
+      - name: Debug
+        run: |
+          ls -al
+          ls bazel-out
+          ls bazel-out/_coverage
+          echo "Done"
+
+      - name: genhtml
+        run: |
+          genhtml bazel-out/_coverage/_coverage_report.dat                            -o coverage_report/combined
+          genhtml bazel-out/k8-fastbuild/testlogs/wpilibc/wpilibc-test/coverage.dat   -o coverage_report/wpilibc
+          genhtml bazel-out/k8-fastbuild/testlogs/hal/cpp-test/coverage.dat           -o coverage_report/hal-cpp
+
+      - name: Debug
+        run: |
+          ls -al
+          ls coverage_report
+          ls coverage
+          echo "Done"
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: "Coverage"
+          path: coverage_report
