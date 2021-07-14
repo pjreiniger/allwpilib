@@ -161,7 +161,7 @@ jobs:
         run: apt-get update && apt-get install -y lcov
 
       - name: Build
-        run: bazel coverage //wpilibc:wpilibc-test //hal:cpp-test -k --combined_report=lcov || true
+        run: bazel coverage //wpilibc:wpilibc-test //wpilibj:java-test //wpimath:cpp-test //wpimath:java-test //hal:cpp-test -k --combined_report=lcov || true
 
       - name: Debug
         run: |
@@ -174,7 +174,11 @@ jobs:
         run: |
           genhtml bazel-out/_coverage/_coverage_report.dat                            -o coverage_report/combined
           genhtml bazel-out/k8-fastbuild/testlogs/wpilibc/wpilibc-test/coverage.dat   -o coverage_report/wpilibc
+          genhtml bazel-out/k8-fastbuild/testlogs/wpilibj/java-test/coverage.dat      -o coverage_report/wpilibj
+          genhtml bazel-out/k8-fastbuild/testlogs/wpimath/cpp-test/coverage.dat       -o coverage_report/wpimath-cpp
+          genhtml bazel-out/k8-fastbuild/testlogs/wpimath/java-test/coverage.dat      -o coverage_report/wpimath-java
           genhtml bazel-out/k8-fastbuild/testlogs/hal/cpp-test/coverage.dat           -o coverage_report/hal-cpp
+          echo "Dummy"
 
       - name: Debug
         run: |
