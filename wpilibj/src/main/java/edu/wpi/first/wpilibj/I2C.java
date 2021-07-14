@@ -19,7 +19,7 @@ import java.nio.ByteBuffer;
  * not be used directly.
  */
 public class I2C implements AutoCloseable {
-  public enum Port {
+    public enum Port {
     kOnboard(0),
     kMXP(1);
 
@@ -46,6 +46,14 @@ public class I2C implements AutoCloseable {
     I2CJNI.i2CInitialize((byte) port.value);
 
     HAL.report(tResourceType.kResourceType_I2C, deviceAddress);
+  }
+
+  public int getPort() {
+    return m_port;
+  }
+
+  public int getDeviceAddress() {
+    return m_deviceAddress;
   }
 
   @Override
