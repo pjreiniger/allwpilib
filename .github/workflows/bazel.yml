@@ -161,7 +161,7 @@ jobs:
         run: apt-get update && apt-get install -y lcov
 
       - name: Build, allow buildbudy failure
-        run: bazel coverage //wpilibc:wpilibc-test //wpilibj:java-test //wpimath:cpp-test //wpimath:java-test //hal:cpp-test -k --combined_report=lcov || true
+        run: bazel coverage --cache_test_results=no //wpilibc:wpilibc-test //wpilibj:java-test //wpimath:cpp-test //wpimath:java-test //hal:cpp-test -k --combined_report=lcov || true
 
       - name: Build, allow buildbudy failure
         run: bazel coverage //wpilibc:wpilibc-test //wpilibj:java-test //wpimath:cpp-test //wpimath:java-test //hal:cpp-test -k --combined_report=lcov
