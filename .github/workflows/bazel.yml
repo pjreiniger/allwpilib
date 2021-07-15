@@ -193,6 +193,7 @@ jobs:
 
       - name: Debug
         run: |
+          lcov --version
           ls -al
           echo "---bazel-out"
           ls bazel-out
