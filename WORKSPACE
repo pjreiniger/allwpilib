@@ -28,9 +28,9 @@ git_repository(
 
 git_repository(
     name = "wpi_bazel_rules",
-    commit = "30a81cf669def58a8aa9c3d1e0a033677cd53c85",
+    commit = "a39edec9024564fae724f7f968e28b6f072bc1aa",
     remote = "https://github.com/bazelRio/wpi-bazel-rules",
-    shallow_since = "1626238640 -0400",
+    shallow_since = "1626318301 -0400",
 )
 
 #local_repository(
