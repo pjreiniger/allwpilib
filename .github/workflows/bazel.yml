@@ -162,6 +162,8 @@ jobs:
         run: |
           bazel coverage -s \
             //wpiutil/... \
+            --instrument_test_targets \
+            --experimental_cc_coverage \
             --coverage_report_generator=@bazel_tools//tools/test/CoverageOutputGenerator/java/com/google/devtools/coverageoutputgenerator:Main \
             -k --cache_test_results=no || true
 
@@ -173,6 +175,8 @@ jobs:
             //wpimath:cpp-test \
             //wpimath:java-test \
             //hal:cpp-test \
+            --instrument_test_targets \
+            --experimental_cc_coverage \
             --coverage_report_generator=@bazel_tools//tools/test/CoverageOutputGenerator/java/com/google/devtools/coverageoutputgenerator:Main \
             -k --cache_test_results=no --combined_report=lcov || true
 
