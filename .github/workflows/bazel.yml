@@ -164,12 +164,14 @@ jobs:
         run: bazel coverage --cache_test_results=no //wpilibc:wpilibc-test //wpilibj:java-test //wpimath:cpp-test //wpimath:java-test //hal:cpp-test -k --combined_report=lcov || true
 
       - name: Build, allow buildbudy failure
-        run: bazel coverage //wpilibc:wpilibc-test //wpilibj:java-test //wpimath:cpp-test //wpimath:java-test //hal:cpp-test -k --combined_report=lcov
+        run: bazel coverage //wpilibc:wpilibc-test //wpilibj:java-test //wpimath:cpp-test //wpimath:java-test //hal:cpp-test -k --combined_report=lcov --coverage_report_generator=@bazel_tools//tools/test/CoverageOutputGenerator/java/com/google/devtools/coverageoutputgenerator:Main
 
       - name: Debug
         run: |
           ls -al
+          echo "---bazel-out"
           ls bazel-out
+          echo "---Coverage folder"
           ls bazel-out/_coverage
           echo "Done"
 
