@@ -1,6 +1,6 @@
 name: Documentation
 
-on: [push, workflow_dispatch]
+on: [pull_request]
 
 env:
   BASE_PATH: allwpilib/docs

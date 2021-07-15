@@ -157,8 +157,13 @@ jobs:
           fetch-depth: 0
       - uses: bazelbuild/setup-bazelisk@v1
 
-      - name: Install LCOV
-        run: apt-get update && apt-get install -y lcov
+
+      - name: DEBUG wpiutil coverage
+        run: |
+          bazel coverage -s \
+            //wpiutil/... \
+            --coverage_report_generator=@bazel_tools//tools/test/CoverageOutputGenerator/java/com/google/devtools/coverageoutputgenerator:Main \
+            -k --cache_test_results=no || true
 
       - name: Build, allow buildbudy failure
         run: |
@@ -171,9 +176,9 @@ jobs:
             --coverage_report_generator=@bazel_tools//tools/test/CoverageOutputGenerator/java/com/google/devtools/coverageoutputgenerator:Main \
             -k --cache_test_results=no --combined_report=lcov || true
 
-      - name: Build, allow buildbudy failure
+      - name: Build
         run: |
-          bazel coverage \
+          bazel coverage -s \
             //wpilibc:wpilibc-test \
             //wpilibj:java-test \
             //wpimath:cpp-test \
@@ -190,6 +195,19 @@ jobs:
           echo "---Coverage folder"
           ls bazel-out/_coverage
           echo "Done"
+
+      - name: Debug
+        run: |
+          mkdir debug_coverage_files
+          find bazel-out/ -name "*coverage.dat" -exec cp --parents {} debug_coverage_files/ \;
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: "Upload Debug Coverage files"
+          path: debug_coverage_files
+
+      - name: Install LCOV
+        run: apt-get update && apt-get install -y lcov
 
       - name: genhtml
         run: |
