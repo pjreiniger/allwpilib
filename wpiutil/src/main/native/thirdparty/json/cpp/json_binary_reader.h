@@ -7,7 +7,8 @@
 #include "fmt/format.h"
 #include "wpi/raw_istream.h"
 
-namespace wpi {
+namespace wpi
+{
 ///////////////////
 // binary reader //
 ///////////////////
@@ -17,6 +18,7 @@ namespace wpi {
 */
 class json::binary_reader
 {
+
   public:
     /*!
     @brief create a binary reader

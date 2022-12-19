@@ -1,12 +1,13 @@
 #define WPI_JSON_IMPLEMENTATION
-#include "json_binary_writer.h"
+#include "./json_binary_writer.h"
 
 #include "wpi/json.h"
 
 #include "fmt/format.h"
 #include "wpi/raw_ostream.h"
 
-namespace wpi {
+namespace wpi
+{
 
 void json::binary_writer::write_cbor(const json& j)
 {

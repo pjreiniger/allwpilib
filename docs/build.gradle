@@ -117,6 +117,9 @@ doxygen {
 
         // json
         exclude 'wpi/json.h'
+        exclude 'wpi/json_fwd.h'
+        exclude 'wpi/json_adl_serializer.h'
+        exclude 'wpi/detail/**/json_*.h'
 
         // memory
         exclude 'wpi/memory/**'

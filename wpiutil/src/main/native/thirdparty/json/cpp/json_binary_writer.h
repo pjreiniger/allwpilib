@@ -5,7 +5,8 @@
 #include "fmt/format.h"
 #include "wpi/raw_ostream.h"
 
-namespace wpi {
+namespace wpi
+{
 ///////////////////
 // binary writer //
 ///////////////////

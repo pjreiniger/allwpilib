@@ -1,5 +1,5 @@
 #define WPI_JSON_IMPLEMENTATION
-#include "json_lexer.h"
+#include "./json_lexer.h"
 
 namespace wpi {
 

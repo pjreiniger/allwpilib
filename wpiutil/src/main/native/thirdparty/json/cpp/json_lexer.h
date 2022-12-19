@@ -12,7 +12,8 @@
 #include "wpi/raw_istream.h"
 #include "wpi/raw_ostream.h"
 
-namespace wpi {
+namespace wpi
+{
 ///////////
 // lexer //
 ///////////
@@ -24,6 +25,7 @@ This class organizes the lexical analysis during JSON deserialization.
 */
 class json::lexer
 {
+
   public:
     /// token types for the parser
     enum class token_type

@@ -6,13 +6,14 @@
 #include <cmath>
 #include <cstdlib>
 
-#include "json_lexer.h"
+#include "./json_lexer.h"
 
 #include "fmt/format.h"
 #include "wpi/SmallString.h"
 #include "wpi/raw_istream.h"
 
-namespace wpi {
+namespace wpi
+{
 
 ////////////
 // parser //
