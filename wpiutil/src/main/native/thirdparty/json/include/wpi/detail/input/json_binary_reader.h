@@ -1,13 +1,22 @@
 #pragma once
 
-#include "wpi/json.h"
-
 #include <cmath>  // ldexp
 
 #include "fmt/format.h"
 #include "wpi/raw_istream.h"
 
+#include "wpi/json.h"
+#include "wpi/detail/json_macro_scope.h"
+#include "wpi/detail/json_value_t.h"
+
 namespace wpi
+{
+class json;
+}
+
+namespace wpi
+{
+namespace detail
 {
 ///////////////////
 // binary reader //
@@ -16,7 +25,7 @@ namespace wpi
 /*!
 @brief deserialization of CBOR and MessagePack values
 */
-class json::binary_reader
+class binary_reader
 {
 
   public:
@@ -374,5 +383,5 @@ class json::binary_reader
     /// whether we can assume little endianess
     const bool is_little_endian = little_endianess();
 };
-
-}  // namespace wpi
+}
+}

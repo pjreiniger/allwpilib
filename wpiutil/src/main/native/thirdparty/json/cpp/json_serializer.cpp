@@ -1,17 +1,19 @@
 #define WPI_JSON_IMPLEMENTATION
-#include "wpi/json.h"
+#include "wpi/detail/output/json_serializer.h"
 
 #include "fmt/format.h"
 #include "wpi/SmallString.h"
 #include "wpi/raw_os_ostream.h"
 
-#include "wpi/detail/output/json_serializer.h"
 #include "wpi/detail/conversions/json_to_chars.h"
+#include "wpi/json.h"
 
 namespace wpi
 {
+namespace detail
+{
 
-void json::serializer::dump(const json& val, const bool pretty_print,
+void serializer::dump(const json& val, const bool pretty_print,
           const bool ensure_ascii,
           const unsigned int indent_step,
           const unsigned int current_indent)
@@ -216,7 +218,7 @@ void json::serializer::dump(const json& val, const bool pretty_print,
     }
 }
 
-void json::serializer::dump_escaped(std::string_view s, const bool ensure_ascii)
+void serializer::dump_escaped(std::string_view s, const bool ensure_ascii)
 {
     uint32_t codepoint;
     uint8_t state = UTF8_ACCEPT;
@@ -325,7 +327,7 @@ void json::serializer::dump_escaped(std::string_view s, const bool ensure_ascii)
     }
 }
 
-void json::serializer::dump_float(double x)
+void serializer::dump_float(double x)
 {
     // NaN / inf
     if (not std::isfinite(x))
@@ -342,7 +344,7 @@ void json::serializer::dump_float(double x)
     o.write(begin, static_cast<size_t>(end - begin));
 }
 
-uint8_t json::serializer::decode(uint8_t& state, uint32_t& codep, const uint8_t byte) noexcept
+uint8_t serializer::decode(uint8_t& state, uint32_t& codep, const uint8_t byte) noexcept
 {
     static const std::array<uint8_t, 400> utf8d =
     {
@@ -374,4 +376,5 @@ uint8_t json::serializer::decode(uint8_t& state, uint32_t& codep, const uint8_t 
     return state;
 }
 
+}  // namespace detail
 }  // namespace wpi

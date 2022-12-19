@@ -5,9 +5,9 @@
 #include "wpi/raw_ostream.h"
 #include "wpi/raw_os_ostream.h"
 
-#include "./json_parser.h"
-#include "./json_binary_reader.h"
-#include "./json_binary_writer.h"
+#include "wpi/detail/input/json_parser.h"
+#include "wpi/detail/input/json_binary_reader.h"
+#include "wpi/detail/output/json_binary_writer.h"
 #include "wpi/detail/output/json_serializer.h"
 
 namespace wpi {

@@ -1,12 +1,10 @@
 #pragma once
 
-#include "wpi/json.h"
-
 #include <clocale>
 #include <cmath>
 #include <cstdlib>
 
-#include "./json_lexer.h"
+#include "wpi/detail/input/json_lexer.h"
 
 #include "fmt/format.h"
 #include "wpi/SmallString.h"
@@ -14,7 +12,13 @@
 
 namespace wpi
 {
+class json;
+}
 
+namespace wpi
+{
+namespace detail
+{
 ////////////
 // parser //
 ////////////
@@ -24,12 +28,31 @@ namespace wpi
 
 This class implements a recursive decent parser.
 */
-class json::parser
+class parser
 {
-    using lexer_t = json::lexer;
+    using lexer_t = lexer;
     using token_type = typename lexer_t::token_type;
 
   public:
+    enum class parse_event_t : uint8_t
+    {
+        /// the parser read `{` and started to process a JSON object
+        object_start,
+        /// the parser read `}` and finished processing a JSON object
+        object_end,
+        /// the parser read `[` and started to process a JSON array
+        array_start,
+        /// the parser read `]` and finished processing a JSON array
+        array_end,
+        /// the parser read a key of a value in an object
+        key,
+        /// the parser finished reading a JSON value
+        value
+    };
+
+    using parser_callback_t =
+        std::function<bool(int depth, parse_event_t event, json& parsed)>;
+
     /// a parser reading from an input adapter
     explicit parser(raw_istream& s,
                     const parser_callback_t cb = nullptr,
@@ -136,5 +159,5 @@ class json::parser
     /// whether to throw exceptions in case of errors
     const bool allow_exceptions = true;
 };
-
-}  // namespace wpi
+}
+}

@@ -9,6 +9,10 @@
 #include "wpi/detail/json_exceptions.h"
 #include "wpi/detail/json_value_t.h"
 
+namespace wpi {
+class json;
+}
+
 namespace wpi
 {
 class json_pointer

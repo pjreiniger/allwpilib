@@ -1,7 +1,5 @@
 #pragma once
 
-#include "wpi/json.h"
-
 #include <clocale>
 #include <cmath>
 #include <cstdlib>
@@ -12,7 +10,11 @@
 #include "wpi/raw_istream.h"
 #include "wpi/raw_ostream.h"
 
+#include "wpi/detail/json_macro_scope.h"
+
 namespace wpi
+{
+namespace detail
 {
 ///////////
 // lexer //
@@ -23,7 +25,7 @@ namespace wpi
 
 This class organizes the lexical analysis during JSON deserialization.
 */
-class json::lexer
+class lexer
 {
 
   public:
@@ -372,5 +374,5 @@ class json::lexer
     /// the decimal point
     const char decimal_point_char = '.';
 };
-
-}  // namespace wpi
+}
+}

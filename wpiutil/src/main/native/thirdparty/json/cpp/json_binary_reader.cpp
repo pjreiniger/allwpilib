@@ -1,9 +1,12 @@
 #define WPI_JSON_IMPLEMENTATION
-#include "json_binary_reader.h"
+#include "wpi/detail/input/json_binary_reader.h"
 
-namespace wpi {
+namespace wpi
+{
+namespace detail
+{
 
-json json::binary_reader::parse_cbor_internal(const bool get_char)
+json binary_reader::parse_cbor_internal(const bool get_char)
 {
     switch (get_char ? get() : current)
     {
@@ -318,7 +321,7 @@ json json::binary_reader::parse_cbor_internal(const bool get_char)
     }
 }
 
-json json::binary_reader::parse_msgpack_internal()
+json binary_reader::parse_msgpack_internal()
 {
     switch (get())
     {
@@ -641,7 +644,7 @@ json json::binary_reader::parse_msgpack_internal()
     }
 }
 
-std::string json::binary_reader::get_cbor_string()
+std::string binary_reader::get_cbor_string()
 {
     unexpect_eof();
 
@@ -714,7 +717,7 @@ std::string json::binary_reader::get_cbor_string()
     }
 }
 
-std::string json::binary_reader::get_msgpack_string()
+std::string binary_reader::get_msgpack_string()
 {
     unexpect_eof();
 
@@ -780,7 +783,7 @@ std::string json::binary_reader::get_msgpack_string()
     }
 }
 
-std::string json::binary_reader::get_ubjson_string(const bool get_char)
+std::string binary_reader::get_ubjson_string(const bool get_char)
 {
     if (get_char)
     {
@@ -807,7 +810,7 @@ std::string json::binary_reader::get_ubjson_string(const bool get_char)
     }
 }
 
-std::pair<std::size_t, int> json::binary_reader::get_ubjson_size_type()
+std::pair<std::size_t, int> binary_reader::get_ubjson_size_type()
 {
     std::size_t sz = std::string::npos;
     int tc = 0;
@@ -835,7 +838,7 @@ std::pair<std::size_t, int> json::binary_reader::get_ubjson_size_type()
     return std::make_pair(sz, tc);
 }
 
-json json::binary_reader::get_ubjson_value(const int prefix)
+json binary_reader::get_ubjson_value(const int prefix)
 {
     switch (prefix)
     {
@@ -892,7 +895,7 @@ json json::binary_reader::get_ubjson_value(const int prefix)
     }
 }
 
-json json::binary_reader::get_ubjson_array()
+json binary_reader::get_ubjson_array()
 {
     json result = value_t::array;
     const auto size_and_type = get_ubjson_size_type();
@@ -937,7 +940,7 @@ json json::binary_reader::get_ubjson_array()
     return result;
 }
 
-json json::binary_reader::get_ubjson_object()
+json binary_reader::get_ubjson_object()
 {
     json result = value_t::object;
     const auto size_and_type = get_ubjson_size_type();
@@ -979,5 +982,6 @@ json json::binary_reader::get_ubjson_object()
 
     return result;
 }
+}  // namespace detail
 }  // namespace wpi
 #undef WPI_JSON_IMPLEMENTATION

@@ -17,7 +17,7 @@ using namespace nt;
 static std::string ConnInfoToJson(bool connected, const ConnectionInfo& info) {
   std::string str;
   wpi::raw_string_ostream os{str};
-  wpi::json::serializer s{os, ' ', 0};
+  wpi::detail::serializer s{os, ' ', 0};
   os << "{\"connected\":" << (connected ? "true" : "false");
   os << ",\"remote_id\":\"";
   s.dump_escaped(info.remote_id, false);

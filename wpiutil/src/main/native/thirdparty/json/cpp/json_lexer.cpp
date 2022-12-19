@@ -1,9 +1,10 @@
 #define WPI_JSON_IMPLEMENTATION
-#include "./json_lexer.h"
+#include "wpi/detail/input/json_lexer.h"
 
 namespace wpi {
+namespace detail {
 
-const char* json::lexer::token_type_name(const token_type t) noexcept
+const char* lexer::token_type_name(const token_type t) noexcept
 {
     switch (t)
     {
@@ -44,7 +45,7 @@ const char* json::lexer::token_type_name(const token_type t) noexcept
     }
 }
 
-json::lexer::lexer(raw_istream& s)
+lexer::lexer(raw_istream& s)
     : is(s), decimal_point_char(get_decimal_point())
 {
     // skip byte order mark
@@ -73,7 +74,7 @@ json::lexer::lexer(raw_istream& s)
     unget(); // no byte order mark; process as usual
 }
 
-int json::lexer::get_codepoint()
+int lexer::get_codepoint()
 {
     // this function only makes sense after reading `\u`
     assert(current == 'u');
@@ -106,7 +107,7 @@ int json::lexer::get_codepoint()
     return codepoint;
 }
 
-json::lexer::token_type json::lexer::scan_string()
+lexer::token_type lexer::scan_string()
 {
     // reset token_buffer (ignore opening quote)
     reset();
@@ -537,7 +538,7 @@ json::lexer::token_type json::lexer::scan_string()
     }
 }
 
-json::lexer::token_type json::lexer::scan_number()
+lexer::token_type lexer::scan_number()
 {
     // reset token_buffer to store the number's bytes
     reset();
@@ -864,7 +865,7 @@ scan_number_done:
     return token_type::value_float;
 }
 
-json::lexer::token_type json::lexer::scan_literal(const char* literal_text, const std::size_t length,
+lexer::token_type lexer::scan_literal(const char* literal_text, const std::size_t length,
                         token_type return_type)
 {
     assert(current == literal_text[0]);
@@ -879,7 +880,7 @@ json::lexer::token_type json::lexer::scan_literal(const char* literal_text, cons
     return return_type;
 }
 
-std::string json::lexer::get_token_string() const
+std::string lexer::get_token_string() const
 {
     // escape control characters
     std::string result;
@@ -902,7 +903,7 @@ std::string json::lexer::get_token_string() const
     return result;
 }
 
-json::lexer::token_type json::lexer::scan()
+lexer::token_type lexer::scan()
 {
     // read next character and ignore whitespace
     do
@@ -966,5 +967,6 @@ json::lexer::token_type json::lexer::scan()
     }
 }
 
+}  // namespace detail
 }  // namespace wpi
 #undef WPI_JSON_IMPLEMENTATION

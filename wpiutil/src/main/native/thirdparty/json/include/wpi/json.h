@@ -63,11 +63,15 @@ SOFTWARE.
 #include "wpi/detail/json_value_t.h"
 #include "wpi/detail/conversions/json_from_json.h"
 #include "wpi/detail/conversions/json_to_json.h"
+#include "wpi/detail/input/json_lexer.h"
+#include "wpi/detail/input/json_parser.h"
 #include "wpi/detail/iterators/json_primitive_iterator.h"
 #include "wpi/detail/iterators/json_internal_iterator.h"
 #include "wpi/detail/iterators/json_iter_impl.h"
 #include "wpi/detail/iterators/json_iteration_proxy.h"
 #include "wpi/detail/iterators/json_reverse_iterator.h"
+#include "wpi/detail/output/json_binary_writer.h"
+#include "wpi/detail/output/json_serializer.h"
 #include "wpi/detail/json_ref.h"
 #include "wpi/detail/json_pointer.h"
 #include "wpi/json_adl_serializer.h"
@@ -79,6 +83,11 @@ class raw_istream;
 class raw_ostream;
 
 class JsonTest;
+
+namespace detail
+{
+class binary_reader;
+}
 }
 
 
@@ -152,14 +161,22 @@ class json
   private:
     template<detail::value_t> friend struct detail::external_constructor;
     friend ::wpi::json_pointer;
+    friend ::wpi::detail::parser;
+    friend ::wpi::detail::serializer;
     template<typename BasicJsonType>
     friend class ::wpi::detail::iter_impl;
+    friend class ::wpi::detail::binary_writer;
+    friend class ::wpi::detail::binary_reader;
+
     friend class JsonTest;
 
     /// workaround type for MSVC
     using json_t = json;
 
     // convenience aliases for types residing in namespace detail;
+    using lexer = ::wpi::detail::lexer;
+    using parser = ::wpi::detail::parser;
+
     using primitive_iterator_t = ::wpi::detail::primitive_iterator_t;
     template<typename BasicJsonType>
     using internal_iterator = ::wpi::detail::internal_iterator<BasicJsonType>;
@@ -169,14 +186,12 @@ class json
     using iteration_proxy = ::wpi::detail::iteration_proxy<Iterator>;
     template<typename Base> using json_reverse_iterator = ::wpi::detail::json_reverse_iterator<Base>;
 
-    class binary_reader;
-    class binary_writer;
-    class lexer;
-    class parser;
+    using binary_reader = ::wpi::detail::binary_reader;
+    using binary_writer = ::wpi::detail::binary_writer;
+
+    using serializer = ::wpi::detail::serializer;
 
   public:
-    class serializer;
-
     using value_t = detail::value_t;
     /// @copydoc wpi::json_pointer
     using json_pointer = ::wpi::json_pointer;
@@ -546,21 +561,7 @@ class json
 
     @sa @ref parser_callback_t for more information and examples
     */
-    enum class parse_event_t : uint8_t
-    {
-        /// the parser read `{` and started to process a JSON object
-        object_start,
-        /// the parser read `}` and finished processing a JSON object
-        object_end,
-        /// the parser read `[` and started to process a JSON array
-        array_start,
-        /// the parser read `]` and finished processing a JSON array
-        array_end,
-        /// the parser read a key of a value in an object
-        key,
-        /// the parser finished reading a JSON value
-        value
-    };
+    using parse_event_t = typename parser::parse_event_t;
 
     /*!
     @brief per-element parser callback type
@@ -611,8 +612,7 @@ class json
 
     @since version 1.0.0
     */
-    using parser_callback_t =
-        std::function<bool(int depth, parse_event_t event, json& parsed)>;
+    using parser_callback_t = typename parser::parser_callback_t;
 
 
     //////////////////

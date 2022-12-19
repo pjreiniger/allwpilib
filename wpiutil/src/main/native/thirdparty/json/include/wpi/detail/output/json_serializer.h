@@ -1,22 +1,30 @@
 #pragma once
 
-#include "wpi/json.h"
-
-#include <clocale> // lconv, localeconv
-#include <cmath>  // labs, isfinite, isnan, signbit, ldexp
-#include <type_traits>
+#include <algorithm> // reverse, remove, fill, find, none_of
+#include <array> // array
+#include <cassert> // assert
+#include <cmath> // labs, isfinite, isnan, signbit
+#include <cstddef> // size_t, ptrdiff_t
+#include <cstdint> // uint8_t
+#include <string> // string
+#include <type_traits> // is_same
 
 #include "fmt/format.h"
 
 #include "wpi/raw_ostream.h"
 
+#include "wpi/detail/json_macro_scope.h"
+#include "wpi/detail/json_meta.h"
+
 namespace wpi
+{
+namespace detail
 {
 ///////////////////
 // serialization //
 ///////////////////
 
-class json::serializer
+class serializer
 {
     static constexpr uint8_t UTF8_ACCEPT = 0;
     static constexpr uint8_t UTF8_REJECT = 1;
@@ -178,5 +186,5 @@ class json::serializer
     /// the indentation string
     std::string indent_string;
 };
-
-}  // namespace wpi
+}
+}

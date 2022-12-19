@@ -1,4 +1,6 @@
 #define WPI_JSON_IMPLEMENTATION
+#include "wpi/detail/json_pointer.h"
+
 #include "wpi/json.h"
 
 #include <numeric> // accumulate

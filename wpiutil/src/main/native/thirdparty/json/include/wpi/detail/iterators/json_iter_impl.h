@@ -14,7 +14,10 @@
 namespace wpi
 {
 class JsonTest;
+}
 
+namespace wpi
+{
 namespace detail
 {
 // forward declare, to be able to friend it later on

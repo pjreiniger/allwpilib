@@ -1,11 +1,16 @@
 #pragma once
 
-#include "wpi/json.h"
-
 #include "fmt/format.h"
 #include "wpi/raw_ostream.h"
 
 namespace wpi
+{
+class json;
+}
+
+namespace wpi
+{
+namespace detail
 {
 ///////////////////
 // binary writer //
@@ -14,7 +19,7 @@ namespace wpi
 /*!
 @brief serialization to CBOR and MessagePack values
 */
-class json::binary_writer
+class binary_writer
 {
     using CharType = unsigned char;
 
@@ -144,5 +149,5 @@ class json::binary_writer
     /// the output
     raw_ostream& o;
 };
-
-}  // namespace wpi
+}
+}

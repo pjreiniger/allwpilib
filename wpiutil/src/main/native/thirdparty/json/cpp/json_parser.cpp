@@ -1,9 +1,14 @@
 #define WPI_JSON_IMPLEMENTATION
-#include "./json_parser.h"
+#include "wpi/detail/input/json_parser.h"
 
-namespace wpi {
+#include "wpi/json.h"
 
-void json::parser::parse(const bool strict, json& result)
+namespace wpi
+{
+namespace detail
+{
+
+void parser::parse(const bool strict, json& result)
 {
     // read first token
     get_token();
@@ -33,7 +38,7 @@ void json::parser::parse(const bool strict, json& result)
     }
 }
 
-void json::parser::parse_internal(bool keep, json& result)
+void parser::parse_internal(bool keep, json& result)
 {
     // never parse after a parse error was detected
     assert(not errored);
@@ -312,7 +317,7 @@ void json::parser::parse_internal(bool keep, json& result)
     }
 }
 
-bool json::parser::accept_internal()
+bool parser::accept_internal()
 {
     switch (last_token)
     {
@@ -415,7 +420,7 @@ bool json::parser::accept_internal()
     }
 }
 
-void json::parser::throw_exception() const
+void parser::throw_exception() const
 {
     std::string error_msg = "syntax error - ";
     if (last_token == token_type::parse_error)
@@ -436,4 +441,5 @@ void json::parser::throw_exception() const
     JSON_THROW(parse_error::create(101, m_lexer.get_position(), error_msg));
 }
 
+}  // namespace detail
 }  // namespace wpi
