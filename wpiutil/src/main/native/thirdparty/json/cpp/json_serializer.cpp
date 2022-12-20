@@ -1,20 +1,19 @@
 #define WPI_JSON_IMPLEMENTATION
-#include "wpi/json.h"
+#include "wpi/detail/output/json_serializer.h"
 
 #include "fmt/format.h"
 #include "wpi/SmallString.h"
 #include "wpi/raw_os_ostream.h"
 
-#include "wpi/detail/output/json_serializer.h"
 #include "wpi/detail/conversions/json_to_chars.h"
 
 namespace wpi
 {
 
 void json::serializer::dump(const json& val, const bool pretty_print,
-          const bool ensure_ascii,
-          const unsigned int indent_step,
-          const unsigned int current_indent)
+              const bool ensure_ascii,
+              const unsigned int indent_step,
+              const unsigned int current_indent)
 {
     switch (val.m_type)
     {
@@ -64,7 +63,7 @@ void json::serializer::dump(const json& val, const bool pretty_print,
 
                 // last element
                 assert(i != sorted.end());
-                //assert(std::next(i) == val.m_value.object->end());
+                //assert(std::next(i) == val.m_value.object->cend());
                 o.write(indent_string.c_str(), new_indent);
                 o << '\"';
                 dump_escaped((*i)->first(), ensure_ascii);
@@ -92,7 +91,7 @@ void json::serializer::dump(const json& val, const bool pretty_print,
 
                 // last element
                 assert(i != sorted.end());
-                //assert(std::next(i) == val.m_value.object->end());
+                //assert(std::next(i) == val.m_value.object->cend());
                 o << '\"';
                 dump_escaped((*i)->first(), ensure_ascii);
                 o << "\":";
@@ -298,6 +297,7 @@ void json::serializer::dump_escaped(std::string_view s, const bool ensure_ascii)
                         break;
                     }
                 }
+
                 break;
             }
 
@@ -373,5 +373,5 @@ uint8_t json::serializer::decode(uint8_t& state, uint32_t& codep, const uint8_t 
     state = utf8d[256u + state * 16u + type];
     return state;
 }
-
 }  // namespace wpi
+#undef WPI_JSON_IMPLEMENTATION

@@ -1,20 +1,19 @@
 #pragma once
 
-#include "wpi/json.h"
+#include <cstdint> // uint8_t
+#include <functional> // function
 
-#include <clocale>
-#include <cmath>
-#include <cstdlib>
-
-#include "./json_lexer.h"
-
-#include "fmt/format.h"
-#include "wpi/SmallString.h"
-#include "wpi/raw_istream.h"
+#include "wpi/detail/json_macro_scope.h"
+#include "wpi/detail/input/json_lexer.h"
 
 namespace wpi
 {
+class json;
+class raw_istream;
+}
 
+namespace wpi
+{
 ////////////
 // parser //
 ////////////
@@ -55,19 +54,7 @@ class json::parser
     @param[in] strict  whether to expect the last token to be EOF
     @return whether the input is a proper JSON text
     */
-    bool accept(const bool strict = true)
-    {
-        // read first token
-        get_token();
-
-        if (not accept_internal())
-        {
-            return false;
-        }
-
-        // strict => last token must be EOF
-        return not strict or (get_token() == token_type::end_of_input);
-    }
+    bool accept(const bool strict = true);
 
   private:
     /*!
@@ -99,24 +86,7 @@ class json::parser
     /*!
     @throw parse_error.101 if expected token did not occur
     */
-    bool expect(token_type t)
-    {
-        if (JSON_UNLIKELY(t != last_token))
-        {
-            errored = true;
-            expected = t;
-            if (allow_exceptions)
-            {
-                throw_exception();
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
+    bool expect(token_type t);
 
     [[noreturn]] void throw_exception() const;
 
@@ -136,5 +106,4 @@ class json::parser
     /// whether to throw exceptions in case of errors
     const bool allow_exceptions = true;
 };
-
-}  // namespace wpi
+}

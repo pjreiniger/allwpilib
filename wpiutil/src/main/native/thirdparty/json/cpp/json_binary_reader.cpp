@@ -1,7 +1,44 @@
 #define WPI_JSON_IMPLEMENTATION
-#include "json_binary_reader.h"
+#include "wpi/detail/input/json_binary_reader.h"
 
-namespace wpi {
+#include "fmt/format.h"
+#include "wpi/raw_istream.h"
+
+namespace wpi
+{
+
+json json::binary_reader::parse_cbor(const bool strict)
+{
+    const auto res = parse_cbor_internal();
+    if (strict)
+    {
+        get();
+        expect_eof();
+    }
+    return res;
+}
+
+json json::binary_reader::parse_msgpack(const bool strict)
+{
+    const auto res = parse_msgpack_internal();
+    if (strict)
+    {
+        get();
+        expect_eof();
+    }
+    return res;
+}
+
+json json::binary_reader::parse_ubjson(const bool strict)
+{
+    const auto res = parse_ubjson_internal();
+    if (strict)
+    {
+        get_ignore_noop();
+        expect_eof();
+    }
+    return res;
+}
 
 json json::binary_reader::parse_cbor_internal(const bool get_char)
 {
@@ -636,9 +673,76 @@ json json::binary_reader::parse_msgpack_internal()
         default: // anything else
         {
             JSON_THROW(parse_error::create(112, chars_read,
-                fmt::format("error reading MessagePack; last byte: {:#02x}", current)));
+                                           fmt::format("error reading MessagePack; last byte: {:#02x}", current)));
         }
     }
+}
+
+int json::binary_reader::get()
+{
+    ++chars_read;
+    unsigned char c;
+    is.read(c);
+    if (is.has_error())
+    {
+        current = std::char_traits<char>::eof();
+    }
+    else
+    {
+        current = c;
+    }
+    return current;
+}
+
+int json::binary_reader::get_ignore_noop()
+{
+    do
+    {
+        get();
+    }
+    while (current == 'N');
+
+    return current;
+}
+
+
+template<typename NumberType> NumberType json::binary_reader::get_number()
+{
+    // step 1: read input into array with system's byte order
+    std::array<uint8_t, sizeof(NumberType)> vec;
+    for (std::size_t i = 0; i < sizeof(NumberType); ++i)
+    {
+        get();
+        unexpect_eof();
+
+        // reverse byte order prior to conversion if necessary
+        if (is_little_endian)
+        {
+            vec[sizeof(NumberType) - i - 1] = static_cast<uint8_t>(current);
+        }
+        else
+        {
+            vec[i] = static_cast<uint8_t>(current); // LCOV_EXCL_LINE
+        }
+    }
+
+    // step 2: convert array into number of type T and return
+    NumberType result;
+    std::memcpy(&result, vec.data(), sizeof(NumberType));
+    return result;
+}
+
+template<typename NumberType>
+std::string json::binary_reader::get_string(const NumberType len)
+{
+    std::string result;
+    std::generate_n(std::back_inserter(result), len, [this]()
+    {
+        get();
+        unexpect_eof();
+        return static_cast<char>(current);
+    });
+    return result;
 }
 
 std::string json::binary_reader::get_cbor_string()
@@ -708,10 +812,33 @@ std::string json::binary_reader::get_cbor_string()
 
         default:
         {
-            JSON_THROW(parse_error::create(113, chars_read,
-                fmt::format("expected a CBOR string; last byte: {:#02x}", current)));
+            JSON_THROW(parse_error::create(113, chars_read, fmt::format("expected a CBOR string; last byte: {:#02x}", current)));
         }
     }
+}
+
+template<typename NumberType>
+json json::binary_reader::get_cbor_array(const NumberType len)
+{
+    json result = value_t::array;
+    std::generate_n(std::back_inserter(*result.m_value.array), len, [this]()
+    {
+        return parse_cbor_internal();
+    });
+    return result;
+}
+
+template<typename NumberType>
+json json::binary_reader::get_cbor_object(const NumberType len)
+{
+    json result = value_t::object;
+    for (NumberType i = 0; i < len; ++i)
+    {
+        get();
+        auto key = get_cbor_string();
+        (*result.m_value.object)[key] = parse_cbor_internal();
+    }
+    return result;
 }
 
 std::string json::binary_reader::get_msgpack_string()
@@ -775,9 +902,33 @@ std::string json::binary_reader::get_msgpack_string()
         default:
         {
             JSON_THROW(parse_error::create(113, chars_read,
-                fmt::format("expected a MessagePack string; last byte: {:#02x}", current)));
+                                           fmt::format("expected a MessagePack string; last byte: {:#02x}", current)));
         }
     }
+}
+
+template<typename NumberType>
+json json::binary_reader::get_msgpack_array(const NumberType len)
+{
+    json result = value_t::array;
+    std::generate_n(std::back_inserter(*result.m_value.array), len, [this]()
+    {
+        return parse_msgpack_internal();
+    });
+    return result;
+}
+
+template<typename NumberType>
+json json::binary_reader::get_msgpack_object(const NumberType len)
+{
+    json result = value_t::object;
+    for (NumberType i = 0; i < len; ++i)
+    {
+        get();
+        auto key = get_msgpack_string();
+        (*result.m_value.object)[key] = parse_msgpack_internal();
+    }
+    return result;
 }
 
 std::string json::binary_reader::get_ubjson_string(const bool get_char)
@@ -803,7 +954,7 @@ std::string json::binary_reader::get_ubjson_string(const bool get_char)
             return get_string(get_number<int64_t>());
         default:
             JSON_THROW(parse_error::create(113, chars_read,
-                fmt::format("expected a UBJSON string; last byte: {:#02x}", current)));
+                                           fmt::format("expected a UBJSON string; last byte: {:#02x}", current)));
     }
 }
 
@@ -823,7 +974,7 @@ std::pair<std::size_t, int> json::binary_reader::get_ubjson_size_type()
         if (current != '#')
         {
             JSON_THROW(parse_error::create(112, chars_read,
-                fmt::format("expected '#' after UBJSON type information; last byte: {:#02x}", current)));
+                                           fmt::format("expected '#' after UBJSON type information; last byte: {:#02x}", current)));
         }
         sz = parse_ubjson_internal();
     }
@@ -872,7 +1023,7 @@ json json::binary_reader::get_ubjson_value(const int prefix)
             if (JSON_UNLIKELY(current > 127))
             {
                 JSON_THROW(parse_error::create(113, chars_read,
-                    fmt::format("byte after 'C' must be in range 0x00..0x7F; last byte: {:#02x}", current)));
+                                               fmt::format("byte after 'C' must be in range 0x00..0x7F; last byte: {:#02x}", current)));
             }
             return std::string(1, static_cast<char>(current));
         }
@@ -888,7 +1039,7 @@ json json::binary_reader::get_ubjson_value(const int prefix)
 
         default: // anything else
             JSON_THROW(parse_error::create(112, chars_read,
-                fmt::format("error reading UBJSON; last byte: {:#02x}", current)));
+                                           fmt::format("error reading UBJSON; last byte: {:#02x}", current)));
     }
 }
 
@@ -902,7 +1053,7 @@ json json::binary_reader::get_ubjson_array()
         if (JSON_UNLIKELY(size_and_type.first > result.max_size()))
         {
             JSON_THROW(out_of_range::create(408,
-                fmt::format("excessive array size: {}", size_and_type.first)));
+                                            fmt::format("excessive array size: {}", size_and_type.first)));
         }
 
         if (size_and_type.second != 0)
@@ -947,7 +1098,7 @@ json json::binary_reader::get_ubjson_object()
         if (JSON_UNLIKELY(size_and_type.first > result.max_size()))
         {
             JSON_THROW(out_of_range::create(408,
-                fmt::format("excessive object size: {}", size_and_type.first)));
+                                            fmt::format("excessive object size: {}", size_and_type.first)));
         }
 
         if (size_and_type.second != 0)
@@ -978,6 +1129,22 @@ json json::binary_reader::get_ubjson_object()
     }
 
     return result;
+}
+
+void json::binary_reader::expect_eof() const
+{
+    if (JSON_UNLIKELY(current != std::char_traits<char>::eof()))
+    {
+        JSON_THROW(parse_error::create(110, chars_read, "expected end of input"));
+    }
+}
+
+void json::binary_reader::unexpect_eof() const
+{
+    if (JSON_UNLIKELY(current == std::char_traits<char>::eof()))
+    {
+        JSON_THROW(parse_error::create(110, chars_read, "unexpected end of input"));
+    }
 }
 }  // namespace wpi
 #undef WPI_JSON_IMPLEMENTATION

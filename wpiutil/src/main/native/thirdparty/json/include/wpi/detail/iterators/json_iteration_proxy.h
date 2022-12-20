@@ -96,4 +96,3 @@ template<typename IteratorType> class iteration_proxy
 };
 }
 }
-

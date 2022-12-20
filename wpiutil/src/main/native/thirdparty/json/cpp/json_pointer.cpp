@@ -1,4 +1,6 @@
 #define WPI_JSON_IMPLEMENTATION
+#include "wpi/detail/json_pointer.h"
+
 #include "wpi/json.h"
 
 #include <numeric> // accumulate
@@ -7,7 +9,8 @@
 #include "wpi/SmallString.h"
 #include "wpi/StringExtras.h"
 
-namespace wpi {
+namespace wpi
+{
 
 std::string json_pointer::to_string() const noexcept
 {
@@ -32,6 +35,30 @@ int json_pointer::array_index(std::string_view s)
     }
 
     return res;
+}
+
+std::string json_pointer::pop_back()
+{
+    if (JSON_UNLIKELY(is_root()))
+    {
+        JSON_THROW(detail::out_of_range::create(405, "JSON pointer has no parent"));
+    }
+
+    auto last = reference_tokens.back();
+    reference_tokens.pop_back();
+    return last;
+}
+
+json_pointer json_pointer::top() const
+{
+    if (JSON_UNLIKELY(is_root()))
+    {
+        JSON_THROW(detail::out_of_range::create(405, "JSON pointer has no parent"));
+    }
+
+    json_pointer result = *this;
+    result.reference_tokens = {reference_tokens[0]};
+    return result;
 }
 
 json& json_pointer::get_and_create(json& j) const
@@ -132,7 +159,7 @@ json& json_pointer::get_unchecked(json* ptr) const
                 if (JSON_UNLIKELY(reference_token.size() > 1 and reference_token[0] == '0'))
                 {
                     JSON_THROW(detail::parse_error::create(106, 0,
-                        fmt::format("array index '{}' must not begin with '0'", reference_token)));
+                                            fmt::format("array index '{}' must not begin with '0'", reference_token)));
                 }
 
                 if (reference_token == "-")
@@ -151,7 +178,7 @@ json& json_pointer::get_unchecked(json* ptr) const
                     JSON_CATCH(std::invalid_argument&)
                     {
                         JSON_THROW(detail::parse_error::create(109, 0,
-                            fmt::format("array index '{}' is not a number", reference_token)));
+                                                    fmt::format("array index '{}' is not a number", reference_token)));
                     }
                 }
                 break;
@@ -159,7 +186,7 @@ json& json_pointer::get_unchecked(json* ptr) const
 
             default:
                 JSON_THROW(detail::out_of_range::create(404,
-                    fmt::format("unresolved reference token '{}'", reference_token)));
+                                    fmt::format("unresolved reference token '{}'", reference_token)));
         }
     }
 
@@ -193,7 +220,7 @@ json& json_pointer::get_checked(json* ptr) const
                 if (JSON_UNLIKELY(reference_token.size() > 1 and reference_token[0] == '0'))
                 {
                     JSON_THROW(detail::parse_error::create(106, 0,
-                        fmt::format("array index '{}' must not begin with '0'", reference_token)));
+                                            fmt::format("array index '{}' must not begin with '0'", reference_token)));
                 }
 
                 // note: at performs range check
@@ -204,14 +231,14 @@ json& json_pointer::get_checked(json* ptr) const
                 JSON_CATCH(std::invalid_argument&)
                 {
                     JSON_THROW(detail::parse_error::create(109, 0,
-                        fmt::format("array index '{}' is not a number", reference_token)));
+                                            fmt::format("array index '{}' is not a number", reference_token)));
                 }
                 break;
             }
 
             default:
                 JSON_THROW(detail::out_of_range::create(404,
-                    fmt::format("unresolved reference token '{}'", reference_token)));
+                                    fmt::format("unresolved reference token '{}'", reference_token)));
         }
     }
 
@@ -264,7 +291,7 @@ const json& json_pointer::get_unchecked(const json* ptr) const
 
             default:
                 JSON_THROW(detail::out_of_range::create(404,
-                    fmt::format("unresolved reference token '{}'", reference_token)));
+                                    fmt::format("unresolved reference token '{}'", reference_token)));
         }
     }
 
@@ -291,14 +318,14 @@ const json& json_pointer::get_checked(const json* ptr) const
                 {
                     // "-" always fails the range check
                     JSON_THROW(detail::out_of_range::create(402,
-                        fmt::format("array index '-' ({}) is out of range", ptr->m_value.array->size())));
+                                            fmt::format("array index '-' ({}) is out of range", ptr->m_value.array->size())));
                 }
 
                 // error condition (cf. RFC 6901, Sect. 4)
                 if (JSON_UNLIKELY(reference_token.size() > 1 and reference_token[0] == '0'))
                 {
                     JSON_THROW(detail::parse_error::create(106, 0,
-                        fmt::format("array index '{}' must not begin with '0'", reference_token)));
+                                            fmt::format("array index '{}' must not begin with '0'", reference_token)));
                 }
 
                 // note: at performs range check
@@ -309,35 +336,35 @@ const json& json_pointer::get_checked(const json* ptr) const
                 JSON_CATCH(std::invalid_argument&)
                 {
                     JSON_THROW(detail::parse_error::create(109, 0,
-                        fmt::format("array index '{}' is not a number", reference_token)));
+                                            fmt::format("array index '{}' is not a number", reference_token)));
                 }
                 break;
             }
 
             default:
                 JSON_THROW(detail::out_of_range::create(404,
-                    fmt::format("unresolved reference token '{}'", reference_token)));
+                                    fmt::format("unresolved reference token '{}'", reference_token)));
         }
     }
 
     return *ptr;
 }
 
-std::vector<std::string> json_pointer::split(std::string_view ref_str)
+std::vector<std::string> json_pointer::split(std::string_view reference_string)
 {
     std::vector<std::string> result;
 
     // special case: empty reference string -> no reference tokens
-    if (ref_str.empty())
+    if (reference_string.empty())
     {
         return result;
     }
 
     // check if nonempty reference string begins with slash
-    if (JSON_UNLIKELY(ref_str[0] != '/'))
+    if (JSON_UNLIKELY(reference_string[0] != '/'))
     {
         JSON_THROW(detail::parse_error::create(107, 1,
-            fmt::format("JSON pointer must be empty or begin with '/' - was: '{}'", ref_str)));
+            fmt::format("JSON pointer must be empty or begin with '/' - was: '{}'", reference_string)));
     }
 
     // extract the reference tokens:
@@ -345,7 +372,7 @@ std::vector<std::string> json_pointer::split(std::string_view ref_str)
     // - start: position after the previous slash
     for (
         // search for the first slash after the first character
-        std::size_t slash = ref_str.find_first_of('/', 1),
+        std::size_t slash = reference_string.find_first_of('/', 1),
         // set the beginning of the first reference token
         start = 1;
         // we can stop if start == string::npos+1 = 0
@@ -354,11 +381,11 @@ std::vector<std::string> json_pointer::split(std::string_view ref_str)
         // (will eventually be 0 if slash == std::string::npos)
         start = slash + 1,
         // find next slash
-        slash = ref_str.find_first_of('/', start))
+        slash = reference_string.find_first_of('/', start))
     {
         // use the text between the beginning of the reference token
         // (start) and the last slash (slash).
-        auto reference_token = slice(ref_str, start, slash);
+        auto reference_token = slice(reference_string, start, slash);
 
         // check reference tokens are properly escaped
         for (std::size_t pos = reference_token.find_first_of('~');
@@ -386,7 +413,7 @@ std::vector<std::string> json_pointer::split(std::string_view ref_str)
 }
 
 void json_pointer::replace_substring(std::string& s, const std::string& f,
-                              const std::string& t)
+                                  const std::string& t)
 {
     assert(not f.empty());
     for (auto pos = s.find(f);                // find first occurrence of f
@@ -403,7 +430,6 @@ std::string json_pointer::escape(std::string s)
     return s;
 }
 
-/// unescape "~1" to tilde and "~0" to slash (order is important!)
 void json_pointer::unescape(std::string& s)
 {
     replace_substring(s, "~1", "/");
@@ -411,8 +437,8 @@ void json_pointer::unescape(std::string& s)
 }
 
 void json_pointer::flatten(std::string_view reference_string,
-                    const json& value,
-                    json& result)
+                        const json& value,
+                        json& result)
 {
     switch (value.m_type)
     {
@@ -462,8 +488,7 @@ void json_pointer::flatten(std::string_view reference_string,
     }
 }
 
-json
-json_pointer::unflatten(const json& value)
+json json_pointer::unflatten(const json& value)
 {
     if (JSON_UNLIKELY(not value.is_object()))
     {
@@ -503,5 +528,5 @@ json_pointer::unflatten(const json& value)
 
     return result;
 }
-
 }  // namespace wpi
+#undef WPI_JSON_IMPLEMENTATION

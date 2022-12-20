@@ -331,4 +331,3 @@ namespace
 constexpr const auto& to_json = detail::static_const<detail::to_json_fn>::value;
 }
 }
-

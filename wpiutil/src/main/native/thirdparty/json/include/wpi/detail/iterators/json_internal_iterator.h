@@ -23,4 +23,3 @@ template<typename BasicJsonType> struct internal_iterator
 };
 }
 }
-

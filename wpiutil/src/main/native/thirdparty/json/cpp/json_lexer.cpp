@@ -1,7 +1,12 @@
 #define WPI_JSON_IMPLEMENTATION
-#include "./json_lexer.h"
+#include "wpi/detail/input/json_lexer.h"
 
-namespace wpi {
+#include "fmt/format.h"
+#include "wpi/raw_istream.h"
+#include "wpi/raw_ostream.h"
+
+namespace wpi
+{
 
 const char* json::lexer::token_type_name(const token_type t) noexcept
 {
@@ -104,6 +109,28 @@ int json::lexer::get_codepoint()
 
     assert(0x0000 <= codepoint and codepoint <= 0xFFFF);
     return codepoint;
+}
+
+bool json::lexer::next_byte_in_range(std::initializer_list<int> ranges)
+{
+    assert(ranges.size() == 2 or ranges.size() == 4 or ranges.size() == 6);
+    add(current);
+
+    for (auto range = ranges.begin(); range != ranges.end(); ++range)
+    {
+        get();
+        if (JSON_LIKELY(*range <= current and current <= *(++range)))
+        {
+            add(current);
+        }
+        else
+        {
+            error_message = "invalid string: ill-formed UTF-8 byte";
+            return false;
+        }
+    }
+
+    return true;
 }
 
 json::lexer::token_type json::lexer::scan_string()
@@ -865,7 +892,7 @@ scan_number_done:
 }
 
 json::lexer::token_type json::lexer::scan_literal(const char* literal_text, const std::size_t length,
-                        token_type return_type)
+                            token_type return_type)
 {
     assert(current == literal_text[0]);
     for (std::size_t i = 1; i < length; ++i)
@@ -877,6 +904,58 @@ json::lexer::token_type json::lexer::scan_literal(const char* literal_text, cons
         }
     }
     return return_type;
+}
+
+void json::lexer::reset() noexcept
+{
+    token_buffer.clear();
+    token_string.clear();
+    token_string.push_back(std::char_traits<char>::to_char_type(current));
+}
+
+std::char_traits<char>::int_type json::lexer::get()
+{
+    ++chars_read;
+    if (JSON_UNLIKELY(!unget_chars.empty()))
+    {
+        current = unget_chars.back();
+        unget_chars.pop_back();
+        token_string.push_back(current);
+        return current;
+    }
+    char c;
+    is.read(c);
+    if (JSON_UNLIKELY(is.has_error()))
+    {
+        current = std::char_traits<char>::eof();
+    }
+    else
+    {
+        current = std::char_traits<char>::to_int_type(c);
+        token_string.push_back(c);
+    }
+    return current;
+}
+
+void json::lexer::unget()
+{
+    --chars_read;
+    if (JSON_LIKELY(current != std::char_traits<char>::eof()))
+    {
+        unget_chars.emplace_back(current);
+        assert(token_string.size() != 0);
+        token_string.pop_back();
+        if (!token_string.empty())
+        {
+            current = token_string.back();
+        }
+    }
+}
+
+void json::lexer::putback(std::char_traits<char>::int_type c)
+{
+    --chars_read;
+    unget_chars.emplace_back(c);
 }
 
 std::string json::lexer::get_token_string() const
@@ -965,6 +1044,5 @@ json::lexer::token_type json::lexer::scan()
             return token_type::parse_error;
     }
 }
-
 }  // namespace wpi
 #undef WPI_JSON_IMPLEMENTATION

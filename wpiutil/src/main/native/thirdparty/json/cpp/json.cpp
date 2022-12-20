@@ -2,15 +2,17 @@
 #include "wpi/json.h"
 
 #include "fmt/format.h"
+#include "wpi/raw_istream.h"
 #include "wpi/raw_ostream.h"
 #include "wpi/raw_os_ostream.h"
 
-#include "./json_parser.h"
-#include "./json_binary_reader.h"
-#include "./json_binary_writer.h"
+#include "wpi/detail/input/json_parser.h"
+#include "wpi/detail/input/json_binary_reader.h"
+#include "wpi/detail/output/json_binary_writer.h"
 #include "wpi/detail/output/json_serializer.h"
 
-namespace wpi {
+namespace wpi
+{
 
 json json::meta()
 {
@@ -91,25 +93,25 @@ json::json_value::json_value(value_t t)
 
         case value_t::boolean:
         {
-            boolean = false;
+            boolean = bool(false);
             break;
         }
 
         case value_t::number_integer:
         {
-            number_integer = 0;
+            number_integer = int64_t(0);
             break;
         }
 
         case value_t::number_unsigned:
         {
-            number_unsigned = 0u;
+            number_unsigned = uint64_t(0);
             break;
         }
 
         case value_t::number_float:
         {
-            number_float = 0.0;
+            number_float = double(0.0);
             break;
         }
 
@@ -167,8 +169,8 @@ void json::json_value::destroy(value_t t) noexcept
 }
 
 json::json(initializer_list_t init,
-           bool type_deduction,
-           value_t manual_type)
+               bool type_deduction,
+               value_t manual_type)
 {
     // check if each element is an array with two elements whose first
     // element is a string
@@ -282,9 +284,40 @@ json::json(const json& other)
     assert_invariant();
 }
 
+json::json(json&& other) noexcept
+    : m_type(std::move(other.m_type)),
+      m_value(std::move(other.m_value))
+{
+    // check that passed value is valid
+    other.assert_invariant();
+
+    // invalidate payload
+    other.m_type = value_t::null;
+    other.m_value = {};
+
+    assert_invariant();
+}
+
+json::reference& json::operator=(json other) noexcept (
+        std::is_nothrow_move_constructible<value_t>::value and
+        std::is_nothrow_move_assignable<value_t>::value and
+        std::is_nothrow_move_constructible<json_value>::value and
+        std::is_nothrow_move_assignable<json_value>::value
+    )
+{
+    // check that passed value is valid
+    other.assert_invariant();
+
+    using std::swap;
+    swap(m_type, other.m_type);
+    swap(m_value, other.m_value);
+
+    assert_invariant();
+    return *this;
+}
 
 std::string json::dump(const int indent, const char indent_char,
-                 const bool ensure_ascii) const
+                  const bool ensure_ascii) const
 {
     std::string result;
     raw_string_ostream os(result);
@@ -293,7 +326,7 @@ std::string json::dump(const int indent, const char indent_char,
 }
 
 void json::dump(raw_ostream& os, int indent, const char indent_char,
-          const bool ensure_ascii) const
+              const bool ensure_ascii) const
 {
     serializer s(os, indent_char);
 
@@ -307,6 +340,16 @@ void json::dump(raw_ostream& os, int indent, const char indent_char,
     }
 
     os.flush();
+}
+
+bool json::get_impl(bool* /*unused*/) const
+{
+    if (JSON_LIKELY(is_boolean()))
+    {
+        return m_value.boolean;
+    }
+
+    JSON_THROW(type_error::create(302, "type must be boolean, but is", type_name()));
 }
 
 json::reference json::at(size_type idx)
@@ -886,8 +929,49 @@ void json::update(const_iterator first, const_iterator last)
     }
 }
 
+void json::swap(array_t& other)
+{
+    // swap only works for arrays
+    if (JSON_LIKELY(is_array()))
+    {
+        std::swap(*(m_value.array), other);
+    }
+    else
+    {
+        JSON_THROW(type_error::create(310, "cannot use swap() with", type_name()));
+    }
+}
+
+void json::swap(json::object_t& other)
+{
+    // swap only works for objects
+    if (JSON_LIKELY(is_object()))
+    {
+        std::swap(*(m_value.object), other);
+    }
+    else
+    {
+        JSON_THROW(type_error::create(310, "cannot use swap() with", type_name()));
+    }
+}
+
+void json::swap(std::string& other)
+{
+    // swap only works for strings
+    if (JSON_LIKELY(is_string()))
+    {
+        std::swap(*(m_value.string), other);
+    }
+    else
+    {
+        JSON_THROW(type_error::create(310, "cannot use swap() with", type_name()));
+    }
+}
+
 bool operator==(json::const_reference lhs, json::const_reference rhs) noexcept
 {
+    using value_t = json::value_t;
+
     const auto lhs_type = lhs.type();
     const auto rhs_type = rhs.type();
 
@@ -895,55 +979,55 @@ bool operator==(json::const_reference lhs, json::const_reference rhs) noexcept
     {
         switch (lhs_type)
         {
-            case json::value_t::array:
+            case value_t::array:
                 return (*lhs.m_value.array == *rhs.m_value.array);
 
-            case json::value_t::object:
+            case value_t::object:
                 return (*lhs.m_value.object == *rhs.m_value.object);
 
-            case json::value_t::null:
+            case value_t::null:
                 return true;
 
-            case json::value_t::string:
+            case value_t::string:
                 return (*lhs.m_value.string == *rhs.m_value.string);
 
-            case json::value_t::boolean:
+            case value_t::boolean:
                 return (lhs.m_value.boolean == rhs.m_value.boolean);
 
-            case json::value_t::number_integer:
+            case value_t::number_integer:
                 return (lhs.m_value.number_integer == rhs.m_value.number_integer);
 
-            case json::value_t::number_unsigned:
+            case value_t::number_unsigned:
                 return (lhs.m_value.number_unsigned == rhs.m_value.number_unsigned);
 
-            case json::value_t::number_float:
+            case value_t::number_float:
                 return (lhs.m_value.number_float == rhs.m_value.number_float);
 
             default:
                 return false;
         }
     }
-    else if (lhs_type == json::value_t::number_integer and rhs_type == json::value_t::number_float)
+    else if (lhs_type == value_t::number_integer and rhs_type == value_t::number_float)
     {
         return (static_cast<double>(lhs.m_value.number_integer) == rhs.m_value.number_float);
     }
-    else if (lhs_type == json::value_t::number_float and rhs_type == json::value_t::number_integer)
+    else if (lhs_type == value_t::number_float and rhs_type == value_t::number_integer)
     {
         return (lhs.m_value.number_float == static_cast<double>(rhs.m_value.number_integer));
     }
-    else if (lhs_type == json::value_t::number_unsigned and rhs_type == json::value_t::number_float)
+    else if (lhs_type == value_t::number_unsigned and rhs_type == value_t::number_float)
     {
         return (static_cast<double>(lhs.m_value.number_unsigned) == rhs.m_value.number_float);
     }
-    else if (lhs_type == json::value_t::number_float and rhs_type == json::value_t::number_unsigned)
+    else if (lhs_type == value_t::number_float and rhs_type == value_t::number_unsigned)
     {
         return (lhs.m_value.number_float == static_cast<double>(rhs.m_value.number_unsigned));
     }
-    else if (lhs_type == json::value_t::number_unsigned and rhs_type == json::value_t::number_integer)
+    else if (lhs_type == value_t::number_unsigned and rhs_type == value_t::number_integer)
     {
         return (static_cast<int64_t>(lhs.m_value.number_unsigned) == rhs.m_value.number_integer);
     }
-    else if (lhs_type == json::value_t::number_integer and rhs_type == json::value_t::number_unsigned)
+    else if (lhs_type == value_t::number_integer and rhs_type == value_t::number_unsigned)
     {
         return (lhs.m_value.number_integer == static_cast<int64_t>(rhs.m_value.number_unsigned));
     }
@@ -953,6 +1037,7 @@ bool operator==(json::const_reference lhs, json::const_reference rhs) noexcept
 
 bool operator<(json::const_reference lhs, json::const_reference rhs) noexcept
 {
+    using value_t = json::value_t;
     const auto lhs_type = lhs.type();
     const auto rhs_type = rhs.type();
 
@@ -960,55 +1045,55 @@ bool operator<(json::const_reference lhs, json::const_reference rhs) noexcept
     {
         switch (lhs_type)
         {
-            case json::value_t::array:
+            case value_t::array:
                 return (*lhs.m_value.array) < (*rhs.m_value.array);
 
-            case json::value_t::object:
+            case value_t::object:
                 return *lhs.m_value.object < *rhs.m_value.object;
 
-            case json::value_t::null:
+            case value_t::null:
                 return false;
 
-            case json::value_t::string:
+            case value_t::string:
                 return *lhs.m_value.string < *rhs.m_value.string;
 
-            case json::value_t::boolean:
+            case value_t::boolean:
                 return lhs.m_value.boolean < rhs.m_value.boolean;
 
-            case json::value_t::number_integer:
+            case value_t::number_integer:
                 return lhs.m_value.number_integer < rhs.m_value.number_integer;
 
-            case json::value_t::number_unsigned:
+            case value_t::number_unsigned:
                 return lhs.m_value.number_unsigned < rhs.m_value.number_unsigned;
 
-            case json::value_t::number_float:
+            case value_t::number_float:
                 return lhs.m_value.number_float < rhs.m_value.number_float;
 
             default:
                 return false;
         }
     }
-    else if (lhs_type == json::value_t::number_integer and rhs_type == json::value_t::number_float)
+    else if (lhs_type == value_t::number_integer and rhs_type == value_t::number_float)
     {
         return static_cast<double>(lhs.m_value.number_integer) < rhs.m_value.number_float;
     }
-    else if (lhs_type == json::value_t::number_float and rhs_type == json::value_t::number_integer)
+    else if (lhs_type == value_t::number_float and rhs_type == value_t::number_integer)
     {
         return lhs.m_value.number_float < static_cast<double>(rhs.m_value.number_integer);
     }
-    else if (lhs_type == json::value_t::number_unsigned and rhs_type == json::value_t::number_float)
+    else if (lhs_type == value_t::number_unsigned and rhs_type == value_t::number_float)
     {
         return static_cast<double>(lhs.m_value.number_unsigned) < rhs.m_value.number_float;
     }
-    else if (lhs_type == json::value_t::number_float and rhs_type == json::value_t::number_unsigned)
+    else if (lhs_type == value_t::number_float and rhs_type == value_t::number_unsigned)
     {
         return lhs.m_value.number_float < static_cast<double>(rhs.m_value.number_unsigned);
     }
-    else if (lhs_type == json::value_t::number_integer and rhs_type == json::value_t::number_unsigned)
+    else if (lhs_type == value_t::number_integer and rhs_type == value_t::number_unsigned)
     {
         return lhs.m_value.number_integer < static_cast<int64_t>(rhs.m_value.number_unsigned);
     }
-    else if (lhs_type == json::value_t::number_unsigned and rhs_type == json::value_t::number_integer)
+    else if (lhs_type == value_t::number_unsigned and rhs_type == value_t::number_integer)
     {
         return static_cast<int64_t>(lhs.m_value.number_unsigned) < rhs.m_value.number_integer;
     }
@@ -1033,24 +1118,24 @@ std::ostream& operator<<(std::ostream& o, const json& j)
 }
 
 json json::parse(std::string_view s,
-                        const parser_callback_t cb,
-                        const bool allow_exceptions)
+                            const parser_callback_t cb,
+                            const bool allow_exceptions)
 {
     raw_mem_istream is(std::span<const char>(s.data(), s.size()));
     return parse(is, cb, allow_exceptions);
 }
 
 json json::parse(std::span<const uint8_t> arr,
-                        const parser_callback_t cb,
-                        const bool allow_exceptions)
+                            const parser_callback_t cb,
+                            const bool allow_exceptions)
 {
     raw_mem_istream is(arr);
     return parse(is, cb, allow_exceptions);
 }
 
 json json::parse(raw_istream& i,
-                        const parser_callback_t cb,
-                        const bool allow_exceptions)
+                            const parser_callback_t cb,
+                            const bool allow_exceptions)
 {
     json result;
     parser(i, cb, allow_exceptions).parse(true, result);
@@ -1162,8 +1247,8 @@ void json::to_msgpack(raw_ostream& os, const json& j)
 }
 
 std::vector<uint8_t> json::to_ubjson(const json& j,
-                                     const bool use_size,
-                                     const bool use_type)
+                                          const bool use_size,
+                                          const bool use_type)
 {
     std::vector<uint8_t> result;
     raw_uvector_ostream os(result);
@@ -1172,7 +1257,7 @@ std::vector<uint8_t> json::to_ubjson(const json& j,
 }
 
 std::span<uint8_t> json::to_ubjson(const json& j, std::vector<uint8_t>& buf,
-                              const bool use_size, const bool use_type)
+                          const bool use_size, const bool use_type)
 {
     buf.clear();
     raw_uvector_ostream os(buf);
@@ -1181,7 +1266,7 @@ std::span<uint8_t> json::to_ubjson(const json& j, std::vector<uint8_t>& buf,
 }
 
 std::span<uint8_t> json::to_ubjson(const json& j, SmallVectorImpl<uint8_t>& buf,
-                              const bool use_size, const bool use_type)
+                          const bool use_size, const bool use_type)
 {
     buf.clear();
     raw_usvector_ostream os(buf);
@@ -1190,12 +1275,13 @@ std::span<uint8_t> json::to_ubjson(const json& j, SmallVectorImpl<uint8_t>& buf,
 }
 
 void json::to_ubjson(raw_ostream& os, const json& j,
-                     const bool use_size, const bool use_type)
+                        const bool use_size, const bool use_type)
 {
     binary_writer(os).write_ubjson(j, use_size, use_type);
 }
 
-json json::from_cbor(raw_istream& is, const bool strict)
+json json::from_cbor(raw_istream& is,
+                                const bool strict)
 {
     return binary_reader(is).parse_cbor(strict);
 }
@@ -1206,7 +1292,8 @@ json json::from_cbor(std::span<const uint8_t> arr, const bool strict)
     return from_cbor(is, strict);
 }
 
-json json::from_msgpack(raw_istream& is, const bool strict)
+json json::from_msgpack(raw_istream& is,
+                                   const bool strict)
 {
     return binary_reader(is).parse_msgpack(strict);
 }
@@ -1217,7 +1304,8 @@ json json::from_msgpack(std::span<const uint8_t> arr, const bool strict)
     return from_msgpack(is, strict);
 }
 
-json json::from_ubjson(raw_istream& is, const bool strict)
+json json::from_ubjson(raw_istream& is,
+                                  const bool strict)
 {
     return binary_reader(is).parse_ubjson(strict);
 }
@@ -1494,7 +1582,7 @@ json json::patch(const json& json_patch) const
 }
 
 json json::diff(const json& source, const json& target,
-                       const std::string& path)
+                           const std::string& path)
 {
     // the patch
     json result(value_t::array);
@@ -1643,5 +1731,5 @@ void json::merge_patch(const json& patch)
         *this = patch;
     }
 }
-
 }  // namespace wpi
+#undef WPI_JSON_IMPLEMENTATION

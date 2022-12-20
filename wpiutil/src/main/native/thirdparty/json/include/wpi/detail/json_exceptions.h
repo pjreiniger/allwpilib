@@ -303,4 +303,3 @@ class other_error : public exception
 };
 }
 }
-

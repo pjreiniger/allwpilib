@@ -33,26 +33,14 @@ SOFTWARE.
 #define NLOHMANN_JSON_VERSION_MINOR 1
 #define NLOHMANN_JSON_VERSION_PATCH 2
 
-
-#include <algorithm> // all_of, copy, find, for_each, generate_n, min, reverse, remove, fill, none_of, transform
-#include <array> // array
+#include <algorithm> // all_of, find, for_each
 #include <cassert> // assert
 #include <cstddef> // nullptr_t, ptrdiff_t, size_t
-#include <cstdint> // uint8_t, uint16_t, uint32_t, uint64_t
-#include <exception> // exception
-#include <functional> // function, hash, less
+#include <functional> // hash, less
 #include <initializer_list> // initializer_list
-#include <iterator>
-#include <limits> // numeric_limits
-#include <memory> // allocator, shared_ptr, make_shared, addressof
 #include <span>
-#include <stdexcept> // runtime_error
-#include <string> // string, char_traits, stoi, to_string
-#include <string_view>
-#include <tuple> // tuple, get, make_tuple
-#include <type_traits>
-#include <utility>
-#include <vector> // vector
+#include <string> // string, stoi, to_string
+#include <utility> // declval, forward, move, pair, swap
 
 #include "wpi/StringMap.h"
 
@@ -81,7 +69,11 @@ class raw_ostream;
 class JsonTest;
 }
 
-
+/*!
+@brief namespace for Niels Lohmann
+@see https://github.com/nlohmann
+@since version 1.0.0
+*/
 namespace wpi
 {
 
@@ -154,12 +146,18 @@ class json
     friend ::wpi::json_pointer;
     template<typename BasicJsonType>
     friend class ::wpi::detail::iter_impl;
+    class binary_writer;
+    class binary_reader;
+
     friend class JsonTest;
 
     /// workaround type for MSVC
     using json_t = json;
 
     // convenience aliases for types residing in namespace detail;
+    class lexer;
+    class parser;
+
     using primitive_iterator_t = ::wpi::detail::primitive_iterator_t;
     template<typename BasicJsonType>
     using internal_iterator = ::wpi::detail::internal_iterator<BasicJsonType>;
@@ -169,10 +167,6 @@ class json
     using iteration_proxy = ::wpi::detail::iteration_proxy<Iterator>;
     template<typename Base> using json_reverse_iterator = ::wpi::detail::json_reverse_iterator<Base>;
 
-    class binary_reader;
-    class binary_writer;
-    class lexer;
-    class parser;
 
   public:
     class serializer;
@@ -297,9 +291,13 @@ class json
     /// the template arguments passed to class @ref json.
     /// @{
 
+#if defined(JSON_HAS_CPP_14)
     // Use transparent comparator if possible, combined with perfect forwarding
     // on find() and count() calls prevents unnecessary string construction.
     using object_comparator_t = std::less<>;
+#else
+    using object_comparator_t = std::less<StringType>;
+#endif
 
     /*!
     @brief a type for an object
@@ -308,6 +306,32 @@ class json
     > An object is an unordered collection of zero or more name/value pairs,
     > where a name is a string and a value is a string, number, boolean, null,
     > object, or array.
+
+    To store objects in C++, a type is defined by the template parameters
+    described below.
+
+    @tparam ObjectType  the container to store objects (e.g., `std::map` or
+    `std::unordered_map`)
+    @tparam StringType the type of the keys or names (e.g., `std::string`).
+    The comparison function `std::less<StringType>` is used to order elements
+    inside the container.
+    @tparam AllocatorType the allocator to use for objects (e.g.,
+    `std::allocator`)
+
+    #### Default type
+
+    With the default values for @a ObjectType (`std::map`), @a StringType
+    (`std::string`), and @a AllocatorType (`std::allocator`), the default
+    value for @a object_t is:
+
+    @code {.cpp}
+    std::map<
+      std::string, // key_type
+      json, // value_type
+      std::less<std::string>, // key_compare
+      std::allocator<std::pair<const std::string, json>> // allocator_type
+    >
+    @endcode
 
     #### Behavior
 
@@ -346,6 +370,8 @@ class json
     access to object values, a pointer of type `object_t*` must be
     dereferenced.
 
+    @sa @ref array_t -- type for an array value
+
     @since version 1.0.0
 
     @note The order name/value pairs are added to the object is *not*
@@ -363,6 +389,25 @@ class json
 
     [RFC 7159](http://rfc7159.net/rfc7159) describes JSON arrays as follows:
     > An array is an ordered sequence of zero or more values.
+
+    To store objects in C++, a type is defined by the template parameters
+    explained below.
+
+    @tparam ArrayType  container type to store arrays (e.g., `std::vector` or
+    `std::list`)
+    @tparam AllocatorType allocator to use for arrays (e.g., `std::allocator`)
+
+    #### Default type
+
+    With the default values for @a ArrayType (`std::vector`) and @a
+    AllocatorType (`std::allocator`), the default value for @a array_t is:
+
+    @code {.cpp}
+    std::vector<
+      json, // value_type
+      std::allocator<json> // allocator_type
+    >
+    @endcode
 
     #### Limits
 
@@ -394,7 +439,6 @@ class json
     static T* create(Args&& ... args)
     {
         std::allocator<T> alloc;
-
         using AllocatorTraits = std::allocator_traits<std::allocator<T>>;
 
         auto deleter = [&](T * object)
@@ -422,7 +466,7 @@ class json
     --------- | --------------- | ------------------------
     object    | object          | pointer to @ref object_t
     array     | array           | pointer to @ref array_t
-    string    | string          | pointer to std::string
+    string    | string          | pointer to `std::string`
     boolean   | boolean         | bool
     number    | number_integer  | int64_t
     number    | number_unsigned | uint64_t
@@ -694,8 +738,8 @@ class json
     Template type @a CompatibleType includes, but is not limited to, the
     following types:
     - **arrays**: @ref array_t and all kinds of compatible containers such as
-      `std::vector`, `std::deque`, `std::list`,
-      `std::array`, `std::set`, `std::unordered_set`,
+      `std::vector`, `std::deque`, `std::list`, `std::forward_list`,
+      `std::array`, `std::valarray`, `std::set`, `std::unordered_set`,
       `std::multiset`, and `std::unordered_multiset` with a `value_type` from
       which a @ref json value can be constructed.
     - **objects**: @ref object_t and all kinds of compatible associative
@@ -708,7 +752,7 @@ class json
     - **numbers**: int64_t, uint64_t,
       double, and all convertible number types such as `int`,
       `size_t`, `int64_t`, `float` or `double` can be used.
-    - **boolean**: `bool` can be used.
+    - **boolean**: bool / `bool` can be used.
 
     See the examples below.
 
@@ -1141,19 +1185,7 @@ class json
 
     @since version 1.0.0
     */
-    json(json&& other) noexcept
-        : m_type(std::move(other.m_type)),
-          m_value(std::move(other.m_value))
-    {
-        // check that passed value is valid
-        other.assert_invariant();
-
-        // invalidate payload
-        other.m_type = value_t::null;
-        other.m_value = {};
-
-        assert_invariant();
-    }
+    json(json&& other) noexcept;
 
     /*!
     @brief copy assignment
@@ -1183,18 +1215,7 @@ class json
         std::is_nothrow_move_assignable<value_t>::value and
         std::is_nothrow_move_constructible<json_value>::value and
         std::is_nothrow_move_assignable<json_value>::value
-    )
-    {
-        // check that passed value is valid
-        other.assert_invariant();
-
-        using std::swap;
-        swap(m_type, other.m_type);
-        swap(m_value, other.m_value);
-
-        assert_invariant();
-        return *this;
-    }
+    );
 
     /*!
     @brief destructor
@@ -1265,7 +1286,7 @@ class json
            @a ensure_ascii and exceptions added in version 3.0.0
     */
     std::string dump(const int indent = -1, const char indent_char = ' ',
-                     const bool ensure_ascii = false) const;
+                  const bool ensure_ascii = false) const;
 
     void dump(raw_ostream& os, int indent = -1, const char indent_char = ' ',
               const bool ensure_ascii = false) const;
@@ -1302,7 +1323,7 @@ class json
 
     @since version 1.0.0
     */
-    value_t type() const noexcept
+    constexpr value_t type() const noexcept
     {
         return m_type;
     }
@@ -1332,7 +1353,7 @@ class json
 
     @since version 1.0.0
     */
-    bool is_primitive() const noexcept
+    constexpr bool is_primitive() const noexcept
     {
         return is_null() or is_string() or is_boolean() or is_number();
     }
@@ -1359,7 +1380,7 @@ class json
 
     @since version 1.0.0
     */
-    bool is_structured() const noexcept
+    constexpr bool is_structured() const noexcept
     {
         return is_array() or is_object();
     }
@@ -1381,7 +1402,7 @@ class json
 
     @since version 1.0.0
     */
-    bool is_null() const noexcept
+    constexpr bool is_null() const noexcept
     {
         return (m_type == value_t::null);
     }
@@ -1403,7 +1424,7 @@ class json
 
     @since version 1.0.0
     */
-    bool is_boolean() const noexcept
+    constexpr bool is_boolean() const noexcept
     {
         return (m_type == value_t::boolean);
     }
@@ -1433,7 +1454,7 @@ class json
 
     @since version 1.0.0
     */
-    bool is_number() const noexcept
+    constexpr bool is_number() const noexcept
     {
         return is_number_integer() or is_number_float();
     }
@@ -1462,7 +1483,7 @@ class json
 
     @since version 1.0.0
     */
-    bool is_number_integer() const noexcept
+    constexpr bool is_number_integer() const noexcept
     {
         return (m_type == value_t::number_integer or m_type == value_t::number_unsigned);
     }
@@ -1490,7 +1511,7 @@ class json
 
     @since version 2.0.0
     */
-    bool is_number_unsigned() const noexcept
+    constexpr bool is_number_unsigned() const noexcept
     {
         return (m_type == value_t::number_unsigned);
     }
@@ -1518,7 +1539,7 @@ class json
 
     @since version 1.0.0
     */
-    bool is_number_float() const noexcept
+    constexpr bool is_number_float() const noexcept
     {
         return (m_type == value_t::number_float);
     }
@@ -1540,7 +1561,7 @@ class json
 
     @since version 1.0.0
     */
-    bool is_object() const noexcept
+    constexpr bool is_object() const noexcept
     {
         return (m_type == value_t::object);
     }
@@ -1562,7 +1583,7 @@ class json
 
     @since version 1.0.0
     */
-    bool is_array() const noexcept
+    constexpr bool is_array() const noexcept
     {
         return (m_type == value_t::array);
     }
@@ -1584,7 +1605,7 @@ class json
 
     @since version 1.0.0
     */
-    bool is_string() const noexcept
+    constexpr bool is_string() const noexcept
     {
         return (m_type == value_t::string);
     }
@@ -1611,7 +1632,7 @@ class json
 
     @since version 1.0.0
     */
-    bool is_discarded() const noexcept
+    constexpr bool is_discarded() const noexcept
     {
         return (m_type == value_t::discarded);
     }
@@ -1637,7 +1658,7 @@ class json
 
     @since version 1.0.0
     */
-    operator value_t() const noexcept
+    constexpr operator value_t() const noexcept
     {
         return m_type;
     }
@@ -1650,15 +1671,7 @@ class json
     //////////////////
 
     /// get a boolean (explicit)
-    bool get_impl(bool* /*unused*/) const
-    {
-        if (JSON_LIKELY(is_boolean()))
-        {
-            return m_value.boolean;
-        }
-
-        JSON_THROW(type_error::create(302, "type must be boolean, but is", type_name()));
-    }
+    bool get_impl(bool* /*unused*/) const;
 
     /// get a pointer to the value (object)
     object_t* get_impl_ptr(object_t* /*unused*/) noexcept
@@ -1667,7 +1680,7 @@ class json
     }
 
     /// get a pointer to the value (object)
-    const object_t* get_impl_ptr(const object_t* /*unused*/) const noexcept
+    constexpr const object_t* get_impl_ptr(const object_t* /*unused*/) const noexcept
     {
         return is_object() ? m_value.object : nullptr;
     }
@@ -1679,7 +1692,7 @@ class json
     }
 
     /// get a pointer to the value (array)
-    const array_t* get_impl_ptr(const array_t* /*unused*/) const noexcept
+    constexpr const array_t* get_impl_ptr(const array_t* /*unused*/) const noexcept
     {
         return is_array() ? m_value.array : nullptr;
     }
@@ -1691,7 +1704,7 @@ class json
     }
 
     /// get a pointer to the value (string)
-    const std::string* get_impl_ptr(const std::string* /*unused*/) const noexcept
+    constexpr const std::string* get_impl_ptr(const std::string* /*unused*/) const noexcept
     {
         return is_string() ? m_value.string : nullptr;
     }
@@ -1703,7 +1716,7 @@ class json
     }
 
     /// get a pointer to the value (boolean)
-    const bool* get_impl_ptr(const bool* /*unused*/) const noexcept
+    constexpr const bool* get_impl_ptr(const bool* /*unused*/) const noexcept
     {
         return is_boolean() ? &m_value.boolean : nullptr;
     }
@@ -1715,7 +1728,7 @@ class json
     }
 
     /// get a pointer to the value (integer number)
-    const int64_t* get_impl_ptr(const int64_t* /*unused*/) const noexcept
+    constexpr const int64_t* get_impl_ptr(const int64_t* /*unused*/) const noexcept
     {
         return is_number_integer() ? &m_value.number_integer : nullptr;
     }
@@ -1727,7 +1740,7 @@ class json
     }
 
     /// get a pointer to the value (unsigned number)
-    const uint64_t* get_impl_ptr(const uint64_t* /*unused*/) const noexcept
+    constexpr const uint64_t* get_impl_ptr(const uint64_t* /*unused*/) const noexcept
     {
         return is_number_unsigned() ? &m_value.number_unsigned : nullptr;
     }
@@ -1739,7 +1752,7 @@ class json
     }
 
     /// get a pointer to the value (floating-point number)
-    const double* get_impl_ptr(const double* /*unused*/) const noexcept
+    constexpr const double* get_impl_ptr(const double* /*unused*/) const noexcept
     {
         return is_number_float() ? &m_value.number_float : nullptr;
     }
@@ -1910,7 +1923,8 @@ class json
     changes.
 
     @tparam PointerType pointer type; must be a pointer to @ref array_t, @ref
-    object_t, `std::string`, bool, int64_t, uint64_t, or double.
+    object_t, `std::string`, bool, int64_t,
+    uint64_t, or double.
 
     @return pointer to the internally stored JSON value if the requested
     pointer type @a PointerType fits to the JSON value; `nullptr` otherwise
@@ -1940,7 +1954,7 @@ class json
     */
     template<typename PointerType, typename std::enable_if<
                  std::is_pointer<PointerType>::value, int>::type = 0>
-    const PointerType get() const noexcept
+    constexpr const PointerType get() const noexcept
     {
         // delegate the call to get_ptr
         return get_ptr<PointerType>();
@@ -1957,7 +1971,8 @@ class json
 
     @tparam PointerType pointer type; must be a pointer to @ref array_t, @ref
     object_t, `std::string`, bool, int64_t,
-    uint64_t, or double. Enforced by a static assertion.
+    uint64_t, or double. Enforced by a static
+    assertion.
 
     @return pointer to the internally stored JSON value if the requested
     pointer type @a PointerType fits to the JSON value; `nullptr` otherwise
@@ -2001,7 +2016,7 @@ class json
     template<typename PointerType, typename std::enable_if<
                  std::is_pointer<PointerType>::value and
                  std::is_const<typename std::remove_pointer<PointerType>::type>::value, int>::type = 0>
-    const PointerType get_ptr() const noexcept
+    constexpr const PointerType get_ptr() const noexcept
     {
         // get the type of the PointerType (remove pointer and const)
         using pointee_t = typename std::remove_const<typename
@@ -2032,7 +2047,7 @@ class json
     state.
 
     @tparam ReferenceType reference type; must be a reference to @ref array_t,
-    @ref object_t, std::string, bool, int64_t, or
+    @ref object_t, `std::string`, bool, int64_t, or
     double. Enforced by static assertion.
 
     @return reference to the internally stored JSON value if the requested
@@ -2106,7 +2121,9 @@ class json
 #ifndef _MSC_VER  // fix for issue #167 operator<< ambiguity under VS2015
                    and not std::is_same<ValueType, std::initializer_list<std::string::value_type>>::value
 #endif
+#if defined(JSON_HAS_CPP_17)
                    and not std::is_same<ValueType, typename std::string_view>::value
+#endif
                    , int >::type = 0 >
     operator ValueType() const
     {
@@ -2462,7 +2479,7 @@ class json
     @note Unlike @ref at(const typename object_t::key_type&), this function
     does not throw if the given key @a key was not found.
 
-    @note Unlike @ref operator[](const typename object_t::key_type& key), this
+    @note Unlike @ref operator[](std::string_view key), this
     function does not implicitly add an element to the position defined by @a
     key. This function is furthermore also applicable to const objects.
 
@@ -2689,6 +2706,8 @@ class json
     will be `null`.
 
     @param[in] pos iterator to the element to remove
+    @return Iterator following the last removed element. If the iterator @a
+    pos refers to the last element, the `end()` iterator is returned.
 
     @tparam IteratorType an @ref iterator or @ref const_iterator
 
@@ -2715,7 +2734,7 @@ class json
 
     @sa @ref erase(IteratorType, IteratorType) -- removes the elements in
     the given range
-    @sa @ref erase(std::string_view) -- removes the element
+    @sa @ref erase(const typename object_t::key_type&) -- removes the element
     from an object at the given key
     @sa @ref erase(const size_type) -- removes the element from an array at
     the given index
@@ -4008,18 +4027,7 @@ class json
 
     @since version 1.0.0
     */
-    void swap(array_t& other)
-    {
-        // swap only works for arrays
-        if (JSON_LIKELY(is_array()))
-        {
-            std::swap(*(m_value.array), other);
-        }
-        else
-        {
-            JSON_THROW(type_error::create(310, "cannot use swap() with", type_name()));
-        }
-    }
+    void swap(array_t& other);
 
     /*!
     @brief exchanges the values
@@ -4041,18 +4049,7 @@ class json
 
     @since version 1.0.0
     */
-    void swap(object_t& other)
-    {
-        // swap only works for objects
-        if (JSON_LIKELY(is_object()))
-        {
-            std::swap(*(m_value.object), other);
-        }
-        else
-        {
-            JSON_THROW(type_error::create(310, "cannot use swap() with", type_name()));
-        }
-    }
+    void swap(object_t& other);
 
     /*!
     @brief exchanges the values
@@ -4074,18 +4071,7 @@ class json
 
     @since version 1.0.0
     */
-    void swap(std::string& other)
-    {
-        // swap only works for strings
-        if (JSON_LIKELY(is_string()))
-        {
-            std::swap(*(m_value.string), other);
-        }
-        else
-        {
-            JSON_THROW(type_error::create(310, "cannot use swap() with", type_name()));
-        }
-    }
+    void swap(std::string& other);
 
     /// @}
 
@@ -4109,8 +4095,8 @@ class json
     - Two JSON null values are equal.
 
     @note Floating-point inside JSON values numbers are compared with
-    `double::operator==`.
-    To compare floating-point while respecting an epsilon, an alternative
+    `json::double::operator==` which is `double::operator==` by
+    default. To compare floating-point while respecting an epsilon, an alternative
     [comparison function](https://github.com/mariokonrad/marnav/blob/master/src/marnav/math/floatingpoint.hpp#L34-#L39)
     could be used, for instance
     @code {.cpp}
@@ -4454,7 +4440,7 @@ class json
     - input streams
     - container with contiguous storage of 1-byte values. Compatible container
       types include `std::vector`, `std::string`, `std::array`,
-      and `std::initializer_list`. Furthermore, C-style
+      `std::valarray`, and `std::initializer_list`. Furthermore, C-style
       arrays can be used with `std::begin()`/`std::end()`. User-defined
       containers can be used as long as they implement random-access iterators
       and a contiguous storage.
@@ -4704,6 +4690,7 @@ class json
     static std::vector<uint8_t> to_cbor(const json& j);
     static std::span<uint8_t> to_cbor(const json& j, std::vector<uint8_t>& buf);
     static std::span<uint8_t> to_cbor(const json& j, SmallVectorImpl<uint8_t>& buf);
+
     static void to_cbor(raw_ostream& os, const json& j);
 
     /*!
@@ -4788,6 +4775,7 @@ class json
     */
     static std::vector<uint8_t> to_msgpack(const json& j);
     static std::span<uint8_t> to_msgpack(const json& j, std::vector<uint8_t>& buf);
+
     static std::span<uint8_t> to_msgpack(const json& j, SmallVectorImpl<uint8_t>& buf);
     static void to_msgpack(raw_ostream& os, const json& j);
 
@@ -4875,11 +4863,12 @@ class json
                                           const bool use_size = false,
                                           const bool use_type = false);
     static std::span<uint8_t> to_ubjson(const json& j, std::vector<uint8_t>& buf,
-                                   const bool use_size = false, const bool use_type = false);
-    static std::span<uint8_t> to_ubjson(const json& j, SmallVectorImpl<uint8_t>& buf,
-                                   const bool use_size = false, const bool use_type = false);
-    static void to_ubjson(raw_ostream& os, const json& j,
                           const bool use_size = false, const bool use_type = false);
+    static std::span<uint8_t> to_ubjson(const json& j, SmallVectorImpl<uint8_t>& buf,
+                          const bool use_size = false, const bool use_type = false);
+
+    static void to_ubjson(raw_ostream& os, const json& j,
+                        const bool use_size = false, const bool use_type = false);
 
     /*!
     @brief create a JSON value from an input in CBOR format

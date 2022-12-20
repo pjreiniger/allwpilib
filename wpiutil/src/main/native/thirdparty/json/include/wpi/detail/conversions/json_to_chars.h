@@ -1090,5 +1090,6 @@ char* to_chars(char* first, char* last, FloatType value)
 
     return dtoa_impl::format_buffer(first, len, decimal_exponent, kMinExp, kMaxExp);
 }
+
 } // namespace detail
 } // namespace wpi

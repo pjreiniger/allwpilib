@@ -6,8 +6,10 @@
 #include <vector> // vector
 
 #include "wpi/detail/json_macro_scope.h"
-#include "wpi/detail/json_exceptions.h"
-#include "wpi/detail/json_value_t.h"
+
+namespace wpi {
+class json;
+}
 
 namespace wpi
 {
@@ -80,17 +82,7 @@ class json_pointer
     @brief remove and return last reference pointer
     @throw out_of_range.405 if JSON pointer has no parent
     */
-    std::string pop_back()
-    {
-        if (JSON_UNLIKELY(is_root()))
-        {
-            JSON_THROW(detail::out_of_range::create(405, "JSON pointer has no parent"));
-        }
-
-        auto last = reference_tokens.back();
-        reference_tokens.pop_back();
-        return last;
-    }
+    std::string pop_back();
 
     /// return whether pointer points to the root document
     bool is_root() const
@@ -98,17 +90,7 @@ class json_pointer
         return reference_tokens.empty();
     }
 
-    json_pointer top() const
-    {
-        if (JSON_UNLIKELY(is_root()))
-        {
-            JSON_THROW(detail::out_of_range::create(405, "JSON pointer has no parent"));
-        }
-
-        json_pointer result = *this;
-        result.reference_tokens = {reference_tokens[0]};
-        return result;
-    }
+    json_pointer top() const;
 
     /*!
     @brief create and return a reference to the pointed to value
@@ -226,8 +208,7 @@ class json_pointer
     @throw type_error.315  if object values are not primitive
     @throw type_error.313  if value cannot be unflattened
     */
-    static json
-    unflatten(const json& value);
+    static json unflatten(const json& value);
 
     friend bool operator==(json_pointer const& lhs,
                            json_pointer const& rhs) noexcept
@@ -245,4 +226,3 @@ class json_pointer
     std::vector<std::string> reference_tokens;
 };
 }
-

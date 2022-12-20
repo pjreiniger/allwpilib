@@ -43,4 +43,3 @@ struct adl_serializer
     }
 };
 }
-

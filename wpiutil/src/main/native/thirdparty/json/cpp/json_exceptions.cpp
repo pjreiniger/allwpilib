@@ -3,11 +3,13 @@
 
 #include "fmt/format.h"
 
-namespace wpi {
-namespace detail {
+namespace wpi
+{
+namespace detail
+{
 
 exception::exception(int id_, std::string_view what_arg)
-    : id(id_), m(std::string{what_arg}) {}
+: id(id_), m(std::string{what_arg}) {}
 
 parse_error parse_error::create(int id_, std::size_t byte_, std::string_view what_arg)
 {
@@ -46,6 +48,6 @@ other_error other_error::create(int id_, std::string_view what_arg)
 {
     return other_error(id_, fmt::format("[json.exception.other_error.{}] {}", id_, what_arg));
 }
-
 }  // namespace detail
-} // namespace wpi
+}  // namespace wpi
+#undef WPI_JSON_IMPLEMENTATION

@@ -14,7 +14,10 @@
 namespace wpi
 {
 class JsonTest;
+}
 
+namespace wpi
+{
 namespace detail
 {
 // forward declare, to be able to friend it later on
@@ -306,7 +309,7 @@ class iter_impl
         {
             case value_t::object:
             {
-                ++m_it.object_iterator;
+                std::advance(m_it.object_iterator, 1);
                 break;
             }
 
@@ -349,7 +352,7 @@ class iter_impl
         {
             case value_t::object:
             {
-                --m_it.object_iterator;
+                std::advance(m_it.object_iterator, -1);
                 break;
             }
 
@@ -615,4 +618,3 @@ class iter_impl
 };
 }
 }
-

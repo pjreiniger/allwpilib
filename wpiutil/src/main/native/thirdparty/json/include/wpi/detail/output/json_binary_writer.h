@@ -1,9 +1,14 @@
 #pragma once
 
+#include <string_view>
+
 #include "wpi/json.h"
 
-#include "fmt/format.h"
-#include "wpi/raw_ostream.h"
+namespace wpi
+{
+class json;
+class raw_ostream;
+}
 
 namespace wpi
 {
@@ -69,14 +74,7 @@ class json::binary_writer
     template<typename NumberType, typename std::enable_if<
                  std::is_floating_point<NumberType>::value, int>::type = 0>
     void write_number_with_ubjson_prefix(const NumberType n,
-                                         const bool add_prefix)
-    {
-        if (add_prefix)
-        {
-            o << get_ubjson_float_prefix(n);
-        }
-        write_number(n);
-    }
+                                         const bool add_prefix);
 
     // UBJSON: write number (unsigned integer)
     template<typename NumberType, typename std::enable_if<
@@ -144,5 +142,4 @@ class json::binary_writer
     /// the output
     raw_ostream& o;
 };
-
-}  // namespace wpi
+}

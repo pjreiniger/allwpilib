@@ -1,7 +1,5 @@
 #define WPI_JSON_IMPLEMENTATION
-#include "./json_binary_writer.h"
-
-#include "wpi/json.h"
+#include "wpi/detail/output/json_binary_writer.h"
 
 #include "fmt/format.h"
 #include "wpi/raw_ostream.h"
@@ -119,7 +117,7 @@ void json::binary_writer::write_cbor(const json& j)
             break;
         }
 
-        case value_t::number_float:
+        case value_t::number_float: // Double-Precision Float
         {
             o << get_cbor_float_prefix(j.m_value.number_float);
             write_number(j.m_value.number_float);
@@ -342,7 +340,7 @@ void json::binary_writer::write_msgpack(const json& j)
             break;
         }
 
-        case value_t::number_float:
+        case value_t::number_float: // float 64
         {
             o << get_msgpack_float_prefix(j.m_value.number_float);
             write_number(j.m_value.number_float);
@@ -422,7 +420,7 @@ void json::binary_writer::write_msgpack(const json& j)
 }
 
 void json::binary_writer::write_ubjson(const json& j, const bool use_count,
-                  const bool use_type, const bool add_prefix)
+                      const bool use_type, const bool add_prefix)
 {
     switch (j.type())
     {
@@ -653,9 +651,21 @@ void json::binary_writer::write_number(const NumberType n)
 }
 
 template<typename NumberType, typename std::enable_if<
-             std::is_unsigned<NumberType>::value, int>::type>
+                 std::is_floating_point<NumberType>::value, int>::type>
 void json::binary_writer::write_number_with_ubjson_prefix(const NumberType n,
-                                     const bool add_prefix)
+                                         const bool add_prefix)
+{
+    if (add_prefix)
+    {
+        o << get_ubjson_float_prefix(n);
+    }
+    write_number(n);
+}
+
+template<typename NumberType, typename std::enable_if<
+                 std::is_unsigned<NumberType>::value, int>::type>
+void json::binary_writer::write_number_with_ubjson_prefix(const NumberType n,
+                                         const bool add_prefix)
 {
     if (n <= static_cast<uint64_t>((std::numeric_limits<int8_t>::max)()))
     {
@@ -704,10 +714,10 @@ void json::binary_writer::write_number_with_ubjson_prefix(const NumberType n,
 }
 
 template<typename NumberType, typename std::enable_if<
-             std::is_signed<NumberType>::value and
-             not std::is_floating_point<NumberType>::value, int>::type>
+                 std::is_signed<NumberType>::value and
+                 not std::is_floating_point<NumberType>::value, int>::type>
 void json::binary_writer::write_number_with_ubjson_prefix(const NumberType n,
-                                     const bool add_prefix)
+                                         const bool add_prefix)
 {
     if ((std::numeric_limits<int8_t>::min)() <= n and n <= (std::numeric_limits<int8_t>::max)())
     {

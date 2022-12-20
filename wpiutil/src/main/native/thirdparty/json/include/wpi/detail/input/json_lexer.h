@@ -1,16 +1,21 @@
 #pragma once
 
+#include <clocale> // localeconv
+#include <cstddef> // size_t
+#include <cstdlib> // strtof, strtod, strtold, strtoll, strtoull
+#include <initializer_list> // initializer_list
+#include <string> // char_traits, string
+
+#include "wpi/detail/json_macro_scope.h"
 #include "wpi/json.h"
 
-#include <clocale>
-#include <cmath>
-#include <cstdlib>
-
-#include "fmt/format.h"
 #include "wpi/SmallString.h"
 #include "wpi/SmallVector.h"
-#include "wpi/raw_istream.h"
-#include "wpi/raw_ostream.h"
+
+namespace wpi
+{
+class raw_istream;
+}
 
 namespace wpi
 {
@@ -107,27 +112,7 @@ class json::lexer
 
     @return true if and only if no range violation was detected
     */
-    bool next_byte_in_range(std::initializer_list<int> ranges)
-    {
-        assert(ranges.size() == 2 or ranges.size() == 4 or ranges.size() == 6);
-        add(current);
-
-        for (auto range = ranges.begin(); range != ranges.end(); ++range)
-        {
-            get();
-            if (JSON_LIKELY(*range <= current and current <= *(++range)))
-            {
-                add(current);
-            }
-            else
-            {
-                error_message = "invalid string: ill-formed UTF-8 byte";
-                return false;
-            }
-        }
-
-        return true;
-    }
+    bool next_byte_in_range(std::initializer_list<int> ranges);
 
     /*!
     @brief scan a string literal
@@ -216,12 +201,7 @@ class json::lexer
     /////////////////////
 
     /// reset token_buffer; current character is beginning of token
-    void reset() noexcept
-    {
-        token_buffer.clear();
-        token_string.clear();
-        token_string.push_back(std::char_traits<char>::to_char_type(current));
-    }
+    void reset() noexcept;
 
     /*
     @brief get next character from the input
@@ -233,52 +213,13 @@ class json::lexer
 
     @return character read from the input
     */
-    std::char_traits<char>::int_type get()
-    {
-        ++chars_read;
-        if (JSON_UNLIKELY(!unget_chars.empty()))
-        {
-            current = unget_chars.back();
-            unget_chars.pop_back();
-            token_string.push_back(current);
-            return current;
-        }
-        char c;
-        is.read(c);
-        if (JSON_UNLIKELY(is.has_error()))
-        {
-            current = std::char_traits<char>::eof();
-        }
-        else
-        {
-            current = std::char_traits<char>::to_int_type(c);
-            token_string.push_back(c);
-        }
-        return current;
-    }
+    std::char_traits<char>::int_type get();
 
     /// unget current character (return it again on next get)
-    void unget()
-    {
-        --chars_read;
-        if (JSON_LIKELY(current != std::char_traits<char>::eof()))
-        {
-            unget_chars.emplace_back(current);
-            assert(token_string.size() != 0);
-            token_string.pop_back();
-            if (!token_string.empty())
-            {
-                current = token_string.back();
-            }
-        }
-    }
+    void unget();
 
     /// put back character (returned on next get)
-    void putback(std::char_traits<char>::int_type c)
-    {
-        --chars_read;
-        unget_chars.emplace_back(c);
-    }
+    void putback(std::char_traits<char>::int_type c);
 
     /// add a character to token_buffer
     void add(int c)
@@ -292,19 +233,19 @@ class json::lexer
     /////////////////////
 
     /// return integer value
-    int64_t get_number_integer() const noexcept
+    constexpr int64_t get_number_integer() const noexcept
     {
         return value_integer;
     }
 
     /// return unsigned integer value
-    uint64_t get_number_unsigned() const noexcept
+    constexpr uint64_t get_number_unsigned() const noexcept
     {
         return value_unsigned;
     }
 
     /// return floating-point value
-    double get_number_float() const noexcept
+    constexpr double get_number_float() const noexcept
     {
         return value_float;
     }
@@ -320,7 +261,7 @@ class json::lexer
     /////////////////////
 
     /// return position of last read token
-    std::size_t get_position() const noexcept
+    constexpr std::size_t get_position() const noexcept
     {
         return chars_read;
     }
@@ -331,7 +272,7 @@ class json::lexer
     std::string get_token_string() const;
 
     /// return syntax error message
-    const char* get_error_message() const noexcept
+    constexpr const char* get_error_message() const noexcept
     {
         return error_message;
     }
@@ -372,5 +313,4 @@ class json::lexer
     /// the decimal point
     const char decimal_point_char = '.';
 };
-
-}  // namespace wpi
+}

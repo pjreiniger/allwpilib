@@ -204,4 +204,3 @@ template<typename T>
 constexpr T static_const<T>::value;
 }
 }
-
