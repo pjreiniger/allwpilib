@@ -183,7 +183,7 @@ TEST(JsonElementNonArrayOperatorAccessTest, NullStandard)
     const json j_nonarray_const(j_nonarray);
     EXPECT_NO_THROW(j_nonarray[0]);
     EXPECT_THROW_MSG(j_nonarray_const[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with null");
+                     "[json.exception.type_error.305] cannot use operator[] with a numeric argument with null");
 }
 
 // implicit transformation to properly filled array
@@ -199,9 +199,9 @@ TEST(JsonElementNonArrayOperatorAccessTest, Boolean)
     json j_nonarray(json::value_t::boolean);
     const json j_nonarray_const(j_nonarray);
     EXPECT_THROW_MSG(j_nonarray[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with boolean");
+                     "[json.exception.type_error.305] cannot use operator[] with a numeric argument with boolean");
     EXPECT_THROW_MSG(j_nonarray_const[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with boolean");
+                     "[json.exception.type_error.305] cannot use operator[] with a numeric argument with boolean");
 }
 
 TEST(JsonElementNonArrayOperatorAccessTest, String)
@@ -209,9 +209,9 @@ TEST(JsonElementNonArrayOperatorAccessTest, String)
     json j_nonarray(json::value_t::string);
     const json j_nonarray_const(j_nonarray);
     EXPECT_THROW_MSG(j_nonarray[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with string");
+                     "[json.exception.type_error.305] cannot use operator[] with a numeric argument with string");
     EXPECT_THROW_MSG(j_nonarray_const[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with string");
+                     "[json.exception.type_error.305] cannot use operator[] with a numeric argument with string");
 }
 
 TEST(JsonElementNonArrayOperatorAccessTest, Object)
@@ -219,9 +219,9 @@ TEST(JsonElementNonArrayOperatorAccessTest, Object)
     json j_nonarray(json::value_t::object);
     const json j_nonarray_const(j_nonarray);
     EXPECT_THROW_MSG(j_nonarray[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with object");
+                     "[json.exception.type_error.305] cannot use operator[] with a numeric argument with object");
     EXPECT_THROW_MSG(j_nonarray_const[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with object");
+                     "[json.exception.type_error.305] cannot use operator[] with a numeric argument with object");
 }
 
 TEST(JsonElementNonArrayOperatorAccessTest, Integer)
@@ -229,9 +229,9 @@ TEST(JsonElementNonArrayOperatorAccessTest, Integer)
     json j_nonarray(json::value_t::number_integer);
     const json j_nonarray_const(j_nonarray);
     EXPECT_THROW_MSG(j_nonarray[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+                     "[json.exception.type_error.305] cannot use operator[] with a numeric argument with number");
     EXPECT_THROW_MSG(j_nonarray_const[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+                     "[json.exception.type_error.305] cannot use operator[] with a numeric argument with number");
 }
 
 TEST(JsonElementNonArrayOperatorAccessTest, Unsigned)
@@ -239,9 +239,9 @@ TEST(JsonElementNonArrayOperatorAccessTest, Unsigned)
     json j_nonarray(json::value_t::number_unsigned);
     const json j_nonarray_const(j_nonarray);
     EXPECT_THROW_MSG(j_nonarray[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+                     "[json.exception.type_error.305] cannot use operator[] with a numeric argument with number");
     EXPECT_THROW_MSG(j_nonarray_const[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+                     "[json.exception.type_error.305] cannot use operator[] with a numeric argument with number");
 }
 
 TEST(JsonElementNonArrayOperatorAccessTest, Float)
@@ -249,9 +249,9 @@ TEST(JsonElementNonArrayOperatorAccessTest, Float)
     json j_nonarray(json::value_t::number_float);
     const json j_nonarray_const(j_nonarray);
     EXPECT_THROW_MSG(j_nonarray[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+                     "[json.exception.type_error.305] cannot use operator[] with a numeric argument with number");
     EXPECT_THROW_MSG(j_nonarray_const[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+                     "[json.exception.type_error.305] cannot use operator[] with a numeric argument with number");
 }
 
 class JsonElementArrayRemoveTest : public ::testing::Test,
