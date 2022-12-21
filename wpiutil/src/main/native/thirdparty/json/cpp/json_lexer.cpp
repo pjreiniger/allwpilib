@@ -44,8 +44,10 @@ const char* json::lexer::token_type_name(const token_type t) noexcept
             return "end of input";
         case token_type::literal_or_value:
             return "'[', '{', or a literal";
+        // LCOV_EXCL_START
         default: // catch non-enum values
-            return "unknown token"; // LCOV_EXCL_LINE
+            return "unknown token";
+            // LCOV_EXCL_STOP
     }
 }
 
@@ -602,11 +604,13 @@ json::lexer::token_type json::lexer::scan_number()
             goto scan_number_any1;
         }
 
+        // LCOV_EXCL_START
         default:
         {
             // all other characters are rejected outside scan_number()
-            assert(false); // LCOV_EXCL_LINE
+            assert(false);
         }
+            // LCOV_EXCL_STOP
     }
 
 scan_number_minus:
@@ -981,8 +985,39 @@ std::string json::lexer::get_token_string() const
     return result;
 }
 
+bool json::lexer::skip_bom()
+{
+    if (get() == 0xEF)
+    {
+        if (get() == 0xBB and get() == 0xBF)
+        {
+            // we completely parsed the BOM
+            return true;
+        }
+        else
+        {
+            // after reading 0xEF, an unexpected character followed
+            return false;
+        }
+    }
+    else
+    {
+        // the first character is not the beginning of the BOM; unget it to
+        // process is later
+        unget();
+        return true;
+    }
+}
+
 json::lexer::token_type json::lexer::scan()
 {
+    // initially, skip the BOM
+    if (chars_read == 0 and not skip_bom())
+    {
+        error_message = "invalid BOM; must be 0xEF 0xBB 0xBF if given";
+        return token_type::parse_error;
+    }
+
     // read next character and ignore whitespace
     do
     {

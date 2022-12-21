@@ -1,10 +1,11 @@
 /*
     __ _____ _____ _____
  __|  |   __|     |   | |  JSON for Modern C++
-|  |  |__   |  |  | | | |  version 3.1.2
+|  |  |__   |  |  | | | |  version 3.2.0
 |_____|_____|_____|_|___|  https://github.com/nlohmann/json
 
 Licensed under the MIT License <http://opensource.org/licenses/MIT>.
+SPDX-License-Identifier: MIT
 Copyright (c) 2013-2018 Niels Lohmann <http://nlohmann.me>.
 
 Permission is hereby  granted, free of charge, to any  person obtaining a copy
@@ -26,12 +27,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef WPIUTIL_JSON_H
-#define WPIUTIL_JSON_H
+#ifndef NLOHMANN_JSON_HPP
+#define NLOHMANN_JSON_HPP
 
 #define NLOHMANN_JSON_VERSION_MAJOR 3
-#define NLOHMANN_JSON_VERSION_MINOR 1
-#define NLOHMANN_JSON_VERSION_PATCH 2
+#define NLOHMANN_JSON_VERSION_MINOR 2
+#define NLOHMANN_JSON_VERSION_PATCH 0
 
 #include <algorithm> // all_of, find, for_each
 #include <cassert> // assert
@@ -46,7 +47,8 @@ SOFTWARE.
 
 #include "wpi/json_fwd.h"
 #include "wpi/detail/json_macro_scope.h"
-#include "wpi/detail/json_meta.h"
+#include "wpi/detail/meta/json_cpp_future.h"
+#include "wpi/detail/meta/json_type_traits.h"
 #include "wpi/detail/json_exceptions.h"
 #include "wpi/detail/json_value_t.h"
 #include "wpi/detail/conversions/json_from_json.h"
@@ -66,7 +68,17 @@ namespace wpi
 class raw_istream;
 class raw_ostream;
 
+struct json_sax;
 class JsonTest;
+
+namespace detail
+{
+class json_sax_dom_parser;
+class json_sax_dom_callback_parser;
+
+/// the supported input formats
+enum class input_format_t { json, cbor, msgpack, ubjson };
+}
 }
 
 /*!
@@ -82,42 +94,42 @@ namespace wpi
 
 @requirement The class satisfies the following concept requirements:
 - Basic
- - [DefaultConstructible](http://en.cppreference.com/w/cpp/concept/DefaultConstructible):
+ - [DefaultConstructible](https://en.cppreference.com/w/cpp/named_req/DefaultConstructible):
    JSON values can be default constructed. The result will be a JSON null
    value.
- - [MoveConstructible](http://en.cppreference.com/w/cpp/concept/MoveConstructible):
+ - [MoveConstructible](https://en.cppreference.com/w/cpp/named_req/MoveConstructible):
    A JSON value can be constructed from an rvalue argument.
- - [CopyConstructible](http://en.cppreference.com/w/cpp/concept/CopyConstructible):
+ - [CopyConstructible](https://en.cppreference.com/w/cpp/named_req/CopyConstructible):
    A JSON value can be copy-constructed from an lvalue expression.
- - [MoveAssignable](http://en.cppreference.com/w/cpp/concept/MoveAssignable):
+ - [MoveAssignable](https://en.cppreference.com/w/cpp/named_req/MoveAssignable):
    A JSON value van be assigned from an rvalue argument.
- - [CopyAssignable](http://en.cppreference.com/w/cpp/concept/CopyAssignable):
+ - [CopyAssignable](https://en.cppreference.com/w/cpp/named_req/CopyAssignable):
    A JSON value can be copy-assigned from an lvalue expression.
- - [Destructible](http://en.cppreference.com/w/cpp/concept/Destructible):
+ - [Destructible](https://en.cppreference.com/w/cpp/named_req/Destructible):
    JSON values can be destructed.
 - Layout
- - [StandardLayoutType](http://en.cppreference.com/w/cpp/concept/StandardLayoutType):
+ - [StandardLayoutType](https://en.cppreference.com/w/cpp/named_req/StandardLayoutType):
    JSON values have
-   [standard layout](http://en.cppreference.com/w/cpp/language/data_members#Standard_layout):
+   [standard layout](https://en.cppreference.com/w/cpp/language/data_members#Standard_layout):
    All non-static data members are private and standard layout types, the
    class has no virtual functions or (virtual) base classes.
 - Library-wide
- - [EqualityComparable](http://en.cppreference.com/w/cpp/concept/EqualityComparable):
+ - [EqualityComparable](https://en.cppreference.com/w/cpp/named_req/EqualityComparable):
    JSON values can be compared with `==`, see @ref
    operator==(const_reference,const_reference).
- - [LessThanComparable](http://en.cppreference.com/w/cpp/concept/LessThanComparable):
+ - [LessThanComparable](https://en.cppreference.com/w/cpp/named_req/LessThanComparable):
    JSON values can be compared with `<`, see @ref
    operator<(const_reference,const_reference).
- - [Swappable](http://en.cppreference.com/w/cpp/concept/Swappable):
+ - [Swappable](https://en.cppreference.com/w/cpp/named_req/Swappable):
    Any JSON lvalue or rvalue of can be swapped with any lvalue or rvalue of
    other compatible types, using unqualified function call @ref swap().
- - [NullablePointer](http://en.cppreference.com/w/cpp/concept/NullablePointer):
+ - [NullablePointer](https://en.cppreference.com/w/cpp/named_req/NullablePointer):
    JSON values can be compared against `std::nullptr_t` objects which are used
    to model the `null` value.
 - Container
- - [Container](http://en.cppreference.com/w/cpp/concept/Container):
+ - [Container](https://en.cppreference.com/w/cpp/named_req/Container):
    JSON values can be used like STL containers and provide iterator access.
- - [ReversibleContainer](http://en.cppreference.com/w/cpp/concept/ReversibleContainer);
+ - [ReversibleContainer](https://en.cppreference.com/w/cpp/named_req/ReversibleContainer);
    JSON values can be used like STL containers and provide reverse iterator
    access.
 
@@ -148,6 +160,8 @@ class json
     friend class ::wpi::detail::iter_impl;
     class binary_writer;
     class binary_reader;
+    friend class ::wpi::detail::json_sax_dom_parser;
+    friend class ::wpi::detail::json_sax_dom_callback_parser;
 
     friend class JsonTest;
 
@@ -167,17 +181,20 @@ class json
     using iteration_proxy = ::wpi::detail::iteration_proxy<Iterator>;
     template<typename Base> using json_reverse_iterator = ::wpi::detail::json_reverse_iterator<Base>;
 
-
   public:
     class serializer;
 
     using value_t = detail::value_t;
-    /// @copydoc wpi::json_pointer
+    /// JSON Pointer, see @ref wpi::json_pointer
     using json_pointer = ::wpi::json_pointer;
     template<typename T, typename SFINAE>
     using json_serializer = adl_serializer<T, SFINAE>;
     /// helper type for initializer lists of json values
     using initializer_list_t = std::initializer_list<detail::json_ref<json>>;
+
+    using input_format_t = detail::input_format_t;
+    /// SAX interface type, see @ref wpi::json_sax
+    using json_sax_t = json_sax;
 
     ////////////////
     // exceptions //
@@ -1015,7 +1032,7 @@ class json
     @warning A precondition is enforced with a runtime assertion that will
              result in calling `std::abort` if this precondition is not met.
              Assertions can be disabled by defining `NDEBUG` at compile time.
-             See http://en.cppreference.com/w/cpp/error/assert for more
+             See https://en.cppreference.com/w/cpp/error/assert for more
              information.
 
     @throw invalid_iterator.201 if iterators @a first and @a last are not
@@ -1147,7 +1164,7 @@ class json
     changes to any JSON value.
 
     @requirement This function helps `json` satisfying the
-    [Container](http://en.cppreference.com/w/cpp/concept/Container)
+    [Container](https://en.cppreference.com/w/cpp/named_req/Container)
     requirements:
     - The complexity is linear.
     - As postcondition, it holds: `other == json(other)`.
@@ -1177,7 +1194,7 @@ class json
     exceptions.
 
     @requirement This function helps `json` satisfying the
-    [MoveConstructible](http://en.cppreference.com/w/cpp/concept/MoveConstructible)
+    [MoveConstructible](https://en.cppreference.com/w/cpp/named_req/MoveConstructible)
     requirements.
 
     @liveexample{The code below shows the move constructor explicitly called
@@ -1199,7 +1216,7 @@ class json
     @complexity Linear.
 
     @requirement This function helps `json` satisfying the
-    [Container](http://en.cppreference.com/w/cpp/concept/Container)
+    [Container](https://en.cppreference.com/w/cpp/named_req/Container)
     requirements:
     - The complexity is linear.
 
@@ -1225,7 +1242,7 @@ class json
     @complexity Linear.
 
     @requirement This function helps `json` satisfying the
-    [Container](http://en.cppreference.com/w/cpp/concept/Container)
+    [Container](https://en.cppreference.com/w/cpp/named_req/Container)
     requirements:
     - The complexity is linear.
     - All stored elements are destroyed and all memory is freed.
@@ -1813,8 +1830,8 @@ class json
     @brief get a value (explicit)
 
     Explicit type conversion between the JSON value and a compatible value
-    which is [CopyConstructible](http://en.cppreference.com/w/cpp/concept/CopyConstructible)
-    and [DefaultConstructible](http://en.cppreference.com/w/cpp/concept/DefaultConstructible).
+    which is [CopyConstructible](https://en.cppreference.com/w/cpp/named_req/CopyConstructible)
+    and [DefaultConstructible](https://en.cppreference.com/w/cpp/named_req/DefaultConstructible).
     The value is converted by calling the @ref json_serializer<ValueType>
     `from_json()` method.
 
@@ -1874,8 +1891,8 @@ class json
     @brief get a value (explicit); special case
 
     Explicit type conversion between the JSON value and a compatible value
-    which is **not** [CopyConstructible](http://en.cppreference.com/w/cpp/concept/CopyConstructible)
-    and **not** [DefaultConstructible](http://en.cppreference.com/w/cpp/concept/DefaultConstructible).
+    which is **not** [CopyConstructible](https://en.cppreference.com/w/cpp/named_req/CopyConstructible)
+    and **not** [DefaultConstructible](https://en.cppreference.com/w/cpp/named_req/DefaultConstructible).
     The value is converted by calling the @ref json_serializer<ValueType>
     `from_json()` method.
 
@@ -2120,9 +2137,9 @@ class json
                    not detail::is_json<ValueType>::value
 #ifndef _MSC_VER  // fix for issue #167 operator<< ambiguity under VS2015
                    and not std::is_same<ValueType, std::initializer_list<std::string::value_type>>::value
-#endif
-#if defined(JSON_HAS_CPP_17)
+#if defined(JSON_HAS_CPP_17) && defined(_MSC_VER) and _MSC_VER <= 1914
                    and not std::is_same<ValueType, typename std::string_view>::value
+#endif
 #endif
                    , int >::type = 0 >
     operator ValueType() const
@@ -2591,7 +2608,7 @@ class json
             {
                 return ptr.get_checked(this);
             }
-            JSON_CATCH (out_of_range&)
+            JSON_INTERNAL_CATCH (out_of_range&)
             {
                 return default_value;
             }
@@ -3039,7 +3056,7 @@ class json
     @complexity Constant.
 
     @requirement This function helps `json` satisfying the
-    [Container](http://en.cppreference.com/w/cpp/concept/Container)
+    [Container](https://en.cppreference.com/w/cpp/named_req/Container)
     requirements:
     - The complexity is constant.
 
@@ -3078,7 +3095,7 @@ class json
     @complexity Constant.
 
     @requirement This function helps `json` satisfying the
-    [Container](http://en.cppreference.com/w/cpp/concept/Container)
+    [Container](https://en.cppreference.com/w/cpp/named_req/Container)
     requirements:
     - The complexity is constant.
     - Has the semantics of `const_cast<const json&>(*this).begin()`.
@@ -3110,7 +3127,7 @@ class json
     @complexity Constant.
 
     @requirement This function helps `json` satisfying the
-    [Container](http://en.cppreference.com/w/cpp/concept/Container)
+    [Container](https://en.cppreference.com/w/cpp/named_req/Container)
     requirements:
     - The complexity is constant.
 
@@ -3149,7 +3166,7 @@ class json
     @complexity Constant.
 
     @requirement This function helps `json` satisfying the
-    [Container](http://en.cppreference.com/w/cpp/concept/Container)
+    [Container](https://en.cppreference.com/w/cpp/named_req/Container)
     requirements:
     - The complexity is constant.
     - Has the semantics of `const_cast<const json&>(*this).end()`.
@@ -3179,7 +3196,7 @@ class json
     @complexity Constant.
 
     @requirement This function helps `json` satisfying the
-    [ReversibleContainer](http://en.cppreference.com/w/cpp/concept/ReversibleContainer)
+    [ReversibleContainer](https://en.cppreference.com/w/cpp/named_req/ReversibleContainer)
     requirements:
     - The complexity is constant.
     - Has the semantics of `reverse_iterator(end())`.
@@ -3216,7 +3233,7 @@ class json
     @complexity Constant.
 
     @requirement This function helps `json` satisfying the
-    [ReversibleContainer](http://en.cppreference.com/w/cpp/concept/ReversibleContainer)
+    [ReversibleContainer](https://en.cppreference.com/w/cpp/named_req/ReversibleContainer)
     requirements:
     - The complexity is constant.
     - Has the semantics of `reverse_iterator(begin())`.
@@ -3253,7 +3270,7 @@ class json
     @complexity Constant.
 
     @requirement This function helps `json` satisfying the
-    [ReversibleContainer](http://en.cppreference.com/w/cpp/concept/ReversibleContainer)
+    [ReversibleContainer](https://en.cppreference.com/w/cpp/named_req/ReversibleContainer)
     requirements:
     - The complexity is constant.
     - Has the semantics of `const_cast<const json&>(*this).rbegin()`.
@@ -3282,7 +3299,7 @@ class json
     @complexity Constant.
 
     @requirement This function helps `json` satisfying the
-    [ReversibleContainer](http://en.cppreference.com/w/cpp/concept/ReversibleContainer)
+    [ReversibleContainer](https://en.cppreference.com/w/cpp/named_req/ReversibleContainer)
     requirements:
     - The complexity is constant.
     - Has the semantics of `const_cast<const json&>(*this).rend()`.
@@ -3352,7 +3369,7 @@ class json
 
     @complexity Constant.
 
-    @since version 3.x.x.
+    @since version 3.1.0.
     */
     iteration_proxy<iterator> items() noexcept
     {
@@ -3409,7 +3426,7 @@ class json
     false in the case of a string.
 
     @requirement This function helps `json` satisfying the
-    [Container](http://en.cppreference.com/w/cpp/concept/Container)
+    [Container](https://en.cppreference.com/w/cpp/named_req/Container)
     requirements:
     - The complexity is constant.
     - Has the semantics of `begin() == end()`.
@@ -3452,7 +3469,7 @@ class json
     the case of a string.
 
     @requirement This function helps `json` satisfying the
-    [Container](http://en.cppreference.com/w/cpp/concept/Container)
+    [Container](https://en.cppreference.com/w/cpp/named_req/Container)
     requirements:
     - The complexity is constant.
     - Has the semantics of `std::distance(begin(), end())`.
@@ -3494,7 +3511,7 @@ class json
     @exceptionsafety No-throw guarantee: this function never throws exceptions.
 
     @requirement This function helps `json` satisfying the
-    [Container](http://en.cppreference.com/w/cpp/concept/Container)
+    [Container](https://en.cppreference.com/w/cpp/named_req/Container)
     requirements:
     - The complexity is constant.
     - Has the semantics of returning `b.size()` where `b` is the largest
@@ -4512,7 +4529,66 @@ class json
 
     static bool accept(std::span<const uint8_t> arr);
 
-    static bool accept(raw_istream& i);
+    /*!
+    @brief generate SAX events
+
+    The SAX event lister must follow the interface of @ref json_sax.
+
+    This function reads from a compatible input. Examples are:
+    - an array of 1-byte values
+    - strings with character/literal type with size of 1 byte
+    - input streams
+    - container with contiguous storage of 1-byte values. Compatible container
+      types include `std::vector`, `std::string`, `std::array`,
+      `std::valarray`, and `std::initializer_list`. Furthermore, C-style
+      arrays can be used with `std::begin()`/`std::end()`. User-defined
+      containers can be used as long as they implement random-access iterators
+      and a contiguous storage.
+
+    @pre Each element of the container has a size of 1 byte. Violating this
+    precondition yields undefined behavior. **This precondition is enforced
+    with a static assertion.**
+
+    @pre The container storage is contiguous. Violating this precondition
+    yields undefined behavior. **This precondition is enforced with an
+    assertion.**
+    @pre Each element of the container has a size of 1 byte. Violating this
+    precondition yields undefined behavior. **This precondition is enforced
+    with a static assertion.**
+
+    @warning There is no way to enforce all preconditions at compile-time. If
+             the function is called with a noncompliant container and with
+             assertions switched off, the behavior is undefined and will most
+             likely yield segmentation violation.
+
+    @param[in] i  input to read from
+    @param[in,out] sax  SAX event listener
+    @param[in] format  the format to parse (JSON, CBOR, MessagePack, or UBJSON)
+    @param[in] strict  whether the input has to be consumed completely
+
+    @return return value of the last processed SAX event
+
+    @throw parse_error.101 if a parse error occurs; example: `""unexpected end
+    of input; expected string literal""`
+    @throw parse_error.102 if to_unicode fails or surrogate error
+    @throw parse_error.103 if to_unicode fails
+
+    @complexity Linear in the length of the input. The parser is a predictive
+    LL(1) parser. The complexity can be higher if the SAX consumer @a sax has
+    a super-linear complexity.
+
+    @note A UTF-8 byte order mark is silently ignored.
+
+    @liveexample{The example below demonstrates the `sax_parse()` function
+    reading from string and processing the events with a user-defined SAX
+    event consumer.,sax_parse}
+
+    @since version 3.2.0
+    */
+    template <typename SAX>
+    static bool sax_parse(raw_istream& is, SAX* sax,
+                          input_format_t format = input_format_t::json,
+                          const bool strict = true);
 
     /*!
     @brief deserialize from stream
@@ -4939,6 +5015,9 @@ class json
     @param[in] i  an input in CBOR format convertible to an input adapter
     @param[in] strict  whether to expect the input to be consumed until EOF
                        (true by default)
+    @param[in] allow_exceptions  whether to throw exceptions in case of a
+    parse error (optional, true by default)
+
     @return deserialized JSON value
 
     @throw parse_error.110 if the given input ends prematurely or the end of
@@ -4954,22 +5033,26 @@ class json
 
     @sa http://cbor.io
     @sa @ref to_cbor(const json&) for the analogous serialization
-    @sa @ref from_msgpack(raw_istream&, const bool) for the
+    @sa @ref from_msgpack(raw_istream&, const bool, const bool) for the
         related MessagePack format
-    @sa @ref from_ubjson(raw_istream&, const bool) for the related
-        UBJSON format
+    @sa @ref from_ubjson(raw_istream&, const bool, const bool) for the
+        related UBJSON format
 
     @since version 2.0.9; parameter @a start_index since 2.1.1; changed to
            consume input adapters, removed start_index parameter, and added
-           @a strict parameter since 3.0.0
+           @a strict parameter since 3.0.0; added @allow_exceptions parameter
+           since 3.2.0
     */
     static json from_cbor(raw_istream& is,
-                                const bool strict = true);
+                                const bool strict = true,
+                                const bool allow_exceptions = true);
 
     /*!
-    @copydoc from_cbor(raw_istream&, const bool)
+    @copydoc from_cbor(raw_istream, const bool, const bool)
     */
-    static json from_cbor(std::span<const uint8_t> arr, const bool strict = true);
+    static json from_cbor(std::span<const uint8_t> arr,
+                            const bool strict = true,
+                            const bool allow_exceptions = true);
 
     /*!
     @brief create a JSON value from an input in MessagePack format
@@ -5021,6 +5104,10 @@ class json
                   adapter
     @param[in] strict  whether to expect the input to be consumed until EOF
                        (true by default)
+    @param[in] allow_exceptions  whether to throw exceptions in case of a
+    parse error (optional, true by default)
+
+    @return deserialized JSON value
 
     @throw parse_error.110 if the given input ends prematurely or the end of
     file was not reached when @a strict was set to true
@@ -5035,22 +5122,26 @@ class json
 
     @sa http://msgpack.org
     @sa @ref to_msgpack(const json&) for the analogous serialization
-    @sa @ref from_cbor(raw_istream&, const bool) for the related CBOR
-        format
-    @sa @ref from_ubjson(raw_istream&, const bool) for the related
-        UBJSON format
+    @sa @ref from_cbor(raw_istream&, const bool, const bool) for the
+        related CBOR format
+    @sa @ref from_ubjson(raw_istream&, const bool, const bool) for
+        the related UBJSON format
 
     @since version 2.0.9; parameter @a start_index since 2.1.1; changed to
            consume input adapters, removed start_index parameter, and added
-           @a strict parameter since 3.0.0
+           @a strict parameter since 3.0.0; added @allow_exceptions parameter
+           since 3.2.0
     */
     static json from_msgpack(raw_istream& is,
-                                   const bool strict = true);
+                                   const bool strict = true,
+                                   const bool allow_exceptions = true);
 
     /*!
     @copydoc from_msgpack(raw_istream&, const bool)
     */
-    static json from_msgpack(std::span<const uint8_t> arr, const bool strict = true);
+    static json from_msgpack(std::span<const uint8_t> arr,
+                                   const bool strict = true,
+                                   const bool allow_exceptions = true);
 
     /*!
     @brief create a JSON value from an input in UBJSON format
@@ -5084,6 +5175,10 @@ class json
     @param[in] i  an input in UBJSON format convertible to an input adapter
     @param[in] strict  whether to expect the input to be consumed until EOF
                        (true by default)
+    @param[in] allow_exceptions  whether to throw exceptions in case of a
+    parse error (optional, true by default)
+
+    @return deserialized JSON value
 
     @throw parse_error.110 if the given input ends prematurely or the end of
     file was not reached when @a strict was set to true
@@ -5098,17 +5193,23 @@ class json
     @sa http://ubjson.org
     @sa @ref to_ubjson(const json&, const bool, const bool) for the
              analogous serialization
-    @sa @ref from_cbor(raw_istream&, const bool) for the related CBOR
-        format
-    @sa @ref from_msgpack(raw_istream&, const bool) for the related
-        MessagePack format
+    @sa @ref from_cbor(raw_istream&, const bool, const bool) for the
+        related CBOR format
+    @sa @ref from_msgpack(raw_istream&, const bool, const bool) for
+        the related MessagePack format
 
-    @since version 3.1.0
+    @since version 3.1.0; added @allow_exceptions parameter since 3.2.0
     */
     static json from_ubjson(raw_istream& is,
-                                  const bool strict = true);
+                                  const bool strict = true,
+                                  const bool allow_exceptions = true);
 
-    static json from_ubjson(std::span<const uint8_t> arr, const bool strict = true);
+    /*!
+    @copydoc from_ubjson(detail::input_adapter, const bool, const bool)
+    */
+    static json from_ubjson(std::span<const uint8_t> arr,
+                                  const bool strict = true,
+                                  const bool allow_exceptions = true);
 
     /// @}
 
@@ -5499,11 +5600,10 @@ namespace std
 @since version 1.0.0
 */
 template<>
-inline void swap<wpi::json>(wpi::json& j1,
-                 wpi::json& j2) noexcept(
-                     is_nothrow_move_constructible<wpi::json>::value and
-                     is_nothrow_move_assignable<wpi::json>::value
-                 )
+inline void swap<wpi::json>(wpi::json& j1, wpi::json& j2) noexcept(
+    is_nothrow_move_constructible<wpi::json>::value and
+    is_nothrow_move_assignable<wpi::json>::value
+)
 {
     j1.swap(j2);
 }

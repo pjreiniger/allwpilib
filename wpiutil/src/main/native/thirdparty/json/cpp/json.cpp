@@ -126,7 +126,7 @@ json::json_value::json_value(value_t t)
             object = nullptr;  // silence warning, see #821
             if (JSON_UNLIKELY(t == value_t::null))
             {
-                JSON_THROW(other_error::create(500, "961c151d2e87f2686a955a9be24d316f1362bf21 3.1.2")); // LCOV_EXCL_LINE
+                JSON_THROW(other_error::create(500, "961c151d2e87f2686a955a9be24d316f1362bf21 3.2.0")); // LCOV_EXCL_LINE
             }
             break;
         }
@@ -942,7 +942,7 @@ void json::swap(array_t& other)
     }
 }
 
-void json::swap(json::object_t& other)
+void json::swap(object_t& other)
 {
     // swap only works for objects
     if (JSON_LIKELY(is_object()))
@@ -1154,9 +1154,19 @@ bool json::accept(std::span<const uint8_t> arr)
     return parser(is).accept(true);
 }
 
-bool json::accept(raw_istream& i)
+template <typename SAX>
+bool json::sax_parse(raw_istream& is, SAX* sax,
+                      input_format_t format,
+                      const bool strict)
 {
-    return parser(i).accept(true);
+    assert(sax);
+    switch (format)
+    {
+        case input_format_t::json:
+            return parser(is).sax_parse(sax, strict);
+        default:
+            return binary_reader(is).sax_parse(format, sax, strict);
+    }
 }
 
 raw_istream& operator>>(raw_istream& i, json& j)
@@ -1281,39 +1291,57 @@ void json::to_ubjson(raw_ostream& os, const json& j,
 }
 
 json json::from_cbor(raw_istream& is,
-                                const bool strict)
+                                const bool strict,
+                                const bool allow_exceptions)
 {
-    return binary_reader(is).parse_cbor(strict);
+    json result;
+    detail::json_sax_dom_parser sdp(result, allow_exceptions);
+    const bool res = binary_reader(is).sax_parse(input_format_t::cbor, &sdp, strict);
+    return res ? result : json(value_t::discarded);
 }
 
-json json::from_cbor(std::span<const uint8_t> arr, const bool strict)
+json json::from_cbor(std::span<const uint8_t> arr,
+                            const bool strict,
+                            const bool allow_exceptions)
 {
     raw_mem_istream is(arr);
-    return from_cbor(is, strict);
+    return from_cbor(is, strict, allow_exceptions);
 }
 
 json json::from_msgpack(raw_istream& is,
-                                   const bool strict)
+                                   const bool strict,
+                                   const bool allow_exceptions)
 {
-    return binary_reader(is).parse_msgpack(strict);
+    json result;
+    detail::json_sax_dom_parser sdp(result, allow_exceptions);
+    const bool res = binary_reader(is).sax_parse(input_format_t::msgpack, &sdp, strict);
+    return res ? result : json(value_t::discarded);
 }
 
-json json::from_msgpack(std::span<const uint8_t> arr, const bool strict)
+json json::from_msgpack(std::span<const uint8_t> arr,
+                                   const bool strict,
+                                   const bool allow_exceptions)
 {
     raw_mem_istream is(arr);
-    return from_msgpack(is, strict);
+    return from_msgpack(is, strict, allow_exceptions);
 }
 
 json json::from_ubjson(raw_istream& is,
-                                  const bool strict)
+                                  const bool strict,
+                                  const bool allow_exceptions)
 {
-    return binary_reader(is).parse_ubjson(strict);
+    json result;
+    detail::json_sax_dom_parser sdp(result, allow_exceptions);
+    const bool res = binary_reader(is).sax_parse(input_format_t::ubjson, &sdp, strict);
+    return res ? result : json(value_t::discarded);
 }
 
-json json::from_ubjson(std::span<const uint8_t> arr, const bool strict)
+json json::from_ubjson(std::span<const uint8_t> arr,
+                                  const bool strict,
+                                  const bool allow_exceptions)
 {
     raw_mem_istream is(arr);
-    return from_ubjson(is, strict);
+    return from_ubjson(is, strict, allow_exceptions);
 }
 
 json json::patch(const json& json_patch) const
@@ -1409,11 +1437,13 @@ json json::patch(const json& json_patch) const
                     break;
                 }
 
+                // LCOV_EXCL_START
                 default:
                 {
                     // if there exists a parent it cannot be primitive
-                    assert(false);  // LCOV_EXCL_LINE
+                    assert(false);
                 }
+                    // LCOV_EXCL_STOP
             }
         }
     };
@@ -1555,7 +1585,7 @@ json json::patch(const json& json_patch) const
                     // the "path" location must exist - use at()
                     success = (result.at(ptr) == get_value("test", "value", false));
                 }
-                JSON_CATCH (out_of_range&)
+                JSON_INTERNAL_CATCH (out_of_range&)
                 {
                     // ignore out of range errors: success remains false
                 }

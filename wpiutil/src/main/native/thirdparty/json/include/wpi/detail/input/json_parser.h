@@ -4,6 +4,8 @@
 #include <functional> // function
 
 #include "wpi/detail/json_macro_scope.h"
+#include "wpi/detail/meta/json_is_sax.h"
+#include "wpi/detail/input/json_sax.h"
 #include "wpi/detail/input/json_lexer.h"
 
 namespace wpi
@@ -34,7 +36,10 @@ class json::parser
                     const parser_callback_t cb = nullptr,
                     const bool allow_exceptions_ = true)
         : callback(cb), m_lexer(s), allow_exceptions(allow_exceptions_)
-    {}
+    {
+        // read first token
+        get_token();
+    }
 
     /*!
     @brief public parser interface
@@ -56,26 +61,26 @@ class json::parser
     */
     bool accept(const bool strict = true);
 
+    template <typename SAX>
+    bool sax_parse(SAX* sax, const bool strict = true)
+    {
+        (void)detail::is_sax_static_asserts<SAX, json> {};
+        const bool result = sax_parse_internal(sax);
+
+        // strict mode: next byte must be EOF
+        if (result and strict and (get_token() != token_type::end_of_input))
+        {
+            return sax->parse_error(m_lexer.get_position(),
+                                    m_lexer.get_token_string(),
+                                    parse_error::create(101, m_lexer.get_position(), exception_message(token_type::end_of_input)));
+        }
+
+        return result;
+    }
+
   private:
-    /*!
-    @brief the actual parser
-    @throw parse_error.101 in case of an unexpected token
-    @throw parse_error.102 if to_unicode fails or surrogate error
-    @throw parse_error.103 if to_unicode fails
-    */
-    void parse_internal(bool keep, json& result);
-
-    /*!
-    @brief the actual acceptor
-
-    @invariant 1. The last token is not yet processed. Therefore, the caller
-                  of this function must make sure a token has been read.
-               2. When this function returns, the last token is processed.
-                  That is, the last read character was already considered.
-
-    This invariant makes sure that no token needs to be "unput".
-    */
-    bool accept_internal();
+    template <typename SAX>
+    bool sax_parse_internal(SAX* sax);
 
     /// get next token from lexer
     token_type get_token()
@@ -83,26 +88,15 @@ class json::parser
         return (last_token = m_lexer.scan());
     }
 
-    /*!
-    @throw parse_error.101 if expected token did not occur
-    */
-    bool expect(token_type t);
-
-    [[noreturn]] void throw_exception() const;
+    std::string exception_message(const token_type expected);
 
   private:
-    /// current level of recursion
-    int depth = 0;
     /// callback function
     const parser_callback_t callback = nullptr;
     /// the type of the last read token
     token_type last_token = token_type::uninitialized;
     /// the lexer
     lexer_t m_lexer;
-    /// whether a syntax error occurred
-    bool errored = false;
-    /// possible reason for the syntax error
-    token_type expected = token_type::uninitialized;
     /// whether to throw exceptions in case of errors
     const bool allow_exceptions = true;
 };

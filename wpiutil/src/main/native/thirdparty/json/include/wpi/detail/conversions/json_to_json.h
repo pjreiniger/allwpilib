@@ -8,8 +8,10 @@
 #include <valarray> // valarray
 #include <vector> // vector
 
-#include "wpi/detail/json_meta.h"
+#include "wpi/detail/meta/json_cpp_future.h"
+#include "wpi/detail/meta/json_type_traits.h"
 #include "wpi/detail/json_value_t.h"
+#include "wpi/detail/iterators/json_iteration_proxy.h"
 
 namespace wpi
 {
@@ -50,6 +52,16 @@ struct external_constructor<value_t::string>
     {
         j.m_type = value_t::string;
         j.m_value = std::move(s);
+        j.assert_invariant();
+    }
+
+    template<typename BasicJsonType, typename CompatibleStringType,
+             enable_if_t<not std::is_same<CompatibleStringType, std::string>::value,
+                         int> = 0>
+    static void construct(BasicJsonType& j, const CompatibleStringType& str)
+    {
+        j.m_type = value_t::string;
+        j.m_value.string = j.template create<std::string>(str);
         j.assert_invariant();
     }
 };
@@ -277,6 +289,14 @@ template<typename BasicJsonType, typename... Args>
 void to_json(BasicJsonType& j, const std::pair<Args...>& p)
 {
     j = {p.first, p.second};
+}
+
+// for https://github.com/nlohmann/json/pull/1134
+template<typename BasicJsonType, typename T,
+         enable_if_t<std::is_same<T, typename iteration_proxy<typename BasicJsonType::iterator>::iteration_proxy_internal>::value, int> = 0>
+void to_json(BasicJsonType& j, T b) noexcept
+{
+    j = {{b.key(), b.value()}};
 }
 
 template<typename BasicJsonType, typename Tuple, std::size_t... Idx>

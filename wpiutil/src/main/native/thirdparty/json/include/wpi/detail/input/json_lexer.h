@@ -215,7 +215,14 @@ class json::lexer
     */
     std::char_traits<char>::int_type get();
 
-    /// unget current character (return it again on next get)
+    /*!
+    @brief unget current character (read it again on next get)
+
+    We implement unget by setting variable next_unget to true. The input is not
+    changed - we just simulate ungetting by modifying chars_read and
+    token_string. The next call to get() will behave as if the unget character
+    is read again.
+    */
     void unget();
 
     /// put back character (returned on next get)
@@ -280,6 +287,12 @@ class json::lexer
     /////////////////////
     // actual scanner
     /////////////////////
+
+    /*!
+    @brief skip the UTF-8 byte order mark
+    @return true iff there is no BOM or the correct BOM has been skipped
+    */
+    bool skip_bom();
 
     token_type scan();
 

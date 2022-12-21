@@ -10,7 +10,7 @@
 #include <type_traits> // is_same
 
 #include "wpi/detail/json_macro_scope.h"
-#include "wpi/detail/json_meta.h"
+#include "wpi/detail/meta/json_cpp_future.h"
 #include "wpi/json.h"
 
 #include "wpi/raw_ostream.h"
