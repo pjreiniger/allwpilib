@@ -1,0 +1,26 @@
+load("//shared/bazel/rules:cc_rules.bzl", "wpilib_cc_static_and_shared_library")
+
+wpilib_cc_static_and_shared_library(
+    name = "json",
+    srcs = [
+        "cpp/json.cpp",
+        "cpp/json_binary_reader.cpp",
+        "cpp/json_binary_writer.cpp",
+        "cpp/json_exceptions.cpp",
+        "cpp/json_lexer.cpp",
+        "cpp/json_parser.cpp",
+        "cpp/json_pointer.cpp",
+        "cpp/json_sax.cpp",
+        "cpp/json_serializer.cpp",
+    ],
+    hdrs = glob(["include/**/*.h"]),
+    includes = ["include"],
+    standard_deps = [
+    ],
+    strip_include_prefix = "include",
+    visibility = ["//visibility:public"],
+    wpi_maybe_shared_deps = [
+        "//wpiutil/src/main/native/thirdparty/llvm:llvm",
+        "//wpiutil/src/main/native:raw_istream",
+    ],
+)

@@ -1,0 +1,1096 @@
+From 9b7f7df133e3c052642b0d6b113e2adecabd618e Mon Sep 17 00:00:00 2001
+From: PJ Reiniger <pj.reiniger@gmail.com>
+Date: Mon, 12 Dec 2022 23:56:06 -0500
+Subject: [PATCH 10/11] Various fixes
+
+---
+ .../nlohmann/detail/conversions/from_json.hpp |  32 +-
+ .../nlohmann/detail/conversions/to_json.hpp   |   5 +-
+ include/nlohmann/detail/exceptions.hpp        |   2 +-
+ include/nlohmann/detail/input/parser.hpp      |   4 +-
+ include/nlohmann/detail/json_pointer.hpp      |  66 +--
+ include/nlohmann/detail/macro_unscope.hpp     |   4 +
+ .../nlohmann/detail/output/binary_writer.hpp  |  31 +-
+ include/nlohmann/detail/output/serializer.hpp | 120 +-----
+ include/nlohmann/json.hpp                     | 383 +-----------------
+ 9 files changed, 84 insertions(+), 563 deletions(-)
+
+diff --git a/include/nlohmann/detail/conversions/from_json.hpp b/include/nlohmann/detail/conversions/from_json.hpp
+index 631adfef..38967576 100644
+--- a/include/nlohmann/detail/conversions/from_json.hpp
++++ b/include/nlohmann/detail/conversions/from_json.hpp
+@@ -107,35 +107,6 @@ void from_json(const BasicJsonType& j, typename BasicJsonType::array_t& arr)
+     arr = *j.template get_ptr<const typename BasicJsonType::array_t*>();
+ }
+ 
+-// forward_list doesn't have an insert method
+-template<typename BasicJsonType, typename T, typename Allocator,
+-         enable_if_t<std::is_convertible<BasicJsonType, T>::value, int> = 0>
+-void from_json(const BasicJsonType& j, std::forward_list<T, Allocator>& l)
+-{
+-    if (JSON_UNLIKELY(not j.is_array()))
+-    {
+-        JSON_THROW(type_error::create(302, "type must be array, but is " + std::string(j.type_name())));
+-    }
+-    std::transform(j.rbegin(), j.rend(),
+-                   std::front_inserter(l), [](const BasicJsonType & i)
+-    {
+-        return i.template get<T>();
+-    });
+-}
+-
+-// valarray doesn't have an insert method
+-template<typename BasicJsonType, typename T,
+-         enable_if_t<std::is_convertible<BasicJsonType, T>::value, int> = 0>
+-void from_json(const BasicJsonType& j, std::valarray<T>& l)
+-{
+-    if (JSON_UNLIKELY(not j.is_array()))
+-    {
+-        JSON_THROW(type_error::create(302, "type must be array, but is " + std::string(j.type_name())));
+-    }
+-    l.resize(j.size());
+-    std::copy(j.m_value.array->begin(), j.m_value.array->end(), std::begin(l));
+-}
+-
+ template<typename BasicJsonType, typename CompatibleArrayType>
+ void from_json_array_impl(const BasicJsonType& j, CompatibleArrayType& arr, priority_tag<0> /*unused*/)
+ {
+@@ -190,8 +161,7 @@ void from_json(const BasicJsonType& j, CompatibleArrayType& arr)
+ {
+     if (JSON_UNLIKELY(not j.is_array()))
+     {
+-        JSON_THROW(type_error::create(302, "type must be array, but is " +
+-                                      std::string(j.type_name())));
++        JSON_THROW(type_error::create(302, "type must be array, but is", j.type_name()));
+     }
+ 
+     from_json_array_impl(j, arr, priority_tag<2> {});
+diff --git a/include/nlohmann/detail/conversions/to_json.hpp b/include/nlohmann/detail/conversions/to_json.hpp
+index aa0bb538..5c97dc67 100644
+--- a/include/nlohmann/detail/conversions/to_json.hpp
++++ b/include/nlohmann/detail/conversions/to_json.hpp
+@@ -196,8 +196,9 @@ void to_json(BasicJsonType& j, const CompatibleString& s)
+     external_constructor<value_t::string>::construct(j, s);
+ }
+ 
+-template<typename BasicJsonType>
+-void to_json(BasicJsonType& j, typename BasicJsonType::string_t&& s)
++template<typename BasicJsonType, typename T,
++         enable_if_t<std::is_same<std::string, T>::value, int> = 0>
++void to_json(BasicJsonType& j, T&& s)
+ {
+     external_constructor<value_t::string>::construct(j, std::move(s));
+ }
+diff --git a/include/nlohmann/detail/exceptions.hpp b/include/nlohmann/detail/exceptions.hpp
+index b15324e7..9da44b05 100644
+--- a/include/nlohmann/detail/exceptions.hpp
++++ b/include/nlohmann/detail/exceptions.hpp
+@@ -60,7 +60,7 @@ class exception : public std::exception
+     exception(int id_, std::string_view what_arg)
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+- : id(id_), m(what_arg) {}
++    : id(id_), m(std::string{what_arg}) {}
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
+   private:
+diff --git a/include/nlohmann/detail/input/parser.hpp b/include/nlohmann/detail/input/parser.hpp
+index 28f6c000..7d60c66a 100644
+--- a/include/nlohmann/detail/input/parser.hpp
++++ b/include/nlohmann/detail/input/parser.hpp
+@@ -386,8 +386,8 @@ class parser
+                 {
+                     if (allow_exceptions)
+                     {
+-                        JSON_THROW(out_of_range::create(406, "number overflow parsing '" +
+-                                                        m_lexer.get_token_string() + "'"));
++                        JSON_THROW(out_of_range::create(406,
++                            fmt::format("number overflow parsing '{}'", m_lexer.get_token_string())));
+                     }
+                     expect(token_type::uninitialized);
+                 }
+diff --git a/include/nlohmann/detail/json_pointer.hpp b/include/nlohmann/detail/json_pointer.hpp
+index 9dee4ec0..ac3d0ab8 100644
+--- a/include/nlohmann/detail/json_pointer.hpp
++++ b/include/nlohmann/detail/json_pointer.hpp
+@@ -211,7 +211,7 @@ class json_pointer
+                     }
+                     JSON_CATCH(std::invalid_argument&)
+                     {
+-                        JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token + "' is not a number"));
++                        JSON_THROW(detail::parse_error::create(109, 0, fmt::format("array index '{}' is not a number", reference_token)));
+                     }
+                     break;
+                 }
+@@ -290,8 +290,7 @@ class json_pointer
+                     if (JSON_UNLIKELY(reference_token.size() > 1 and reference_token[0] == '0'))
+                     {
+                         JSON_THROW(detail::parse_error::create(106, 0,
+-                                                               "array index '" + reference_token +
+-                                                               "' must not begin with '0'"));
++                                                fmt::format("array index '{}' must not begin with '0'", reference_token)));
+                     }
+ 
+                     if (reference_token == "-")
+@@ -309,14 +308,16 @@ class json_pointer
+                         }
+                         JSON_CATCH(std::invalid_argument&)
+                         {
+-                            JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token + "' is not a number"));
++                            JSON_THROW(detail::parse_error::create(109, 0,
++                                                        fmt::format("array index '{}' is not a number", reference_token)));
+                         }
+                     }
+                     break;
+                 }
+ 
+                 default:
+-                    JSON_THROW(detail::out_of_range::create(404, "unresolved reference token '" + reference_token + "'"));
++                    JSON_THROW(detail::out_of_range::create(404,
++                                        fmt::format("unresolved reference token '{}'", reference_token)));
+             }
+         }
+ 
+@@ -353,16 +354,14 @@ class json_pointer
+                     {
+                         // "-" always fails the range check
+                         JSON_THROW(detail::out_of_range::create(402,
+-                                                                "array index '-' (" + std::to_string(ptr->m_value.array->size()) +
+-                                                                ") is out of range"));
++                            fmt::format("array index '-' ({}) is out of range", ptr->m_value.array->size())));
+                     }
+ 
+                     // error condition (cf. RFC 6901, Sect. 4)
+                     if (JSON_UNLIKELY(reference_token.size() > 1 and reference_token[0] == '0'))
+                     {
+                         JSON_THROW(detail::parse_error::create(106, 0,
+-                                                               "array index '" + reference_token +
+-                                                               "' must not begin with '0'"));
++                                                fmt::format("array index '{}' must not begin with '0'", reference_token)));
+                     }
+ 
+                     // note: at performs range check
+@@ -372,13 +371,15 @@ class json_pointer
+                     }
+                     JSON_CATCH(std::invalid_argument&)
+                     {
+-                        JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token + "' is not a number"));
++                        JSON_THROW(detail::parse_error::create(109, 0,
++                                                fmt::format("array index '{}' is not a number", reference_token)));
+                     }
+                     break;
+                 }
+ 
+                 default:
+-                    JSON_THROW(detail::out_of_range::create(404, "unresolved reference token '" + reference_token + "'"));
++                    JSON_THROW(detail::out_of_range::create(404,
++                                        fmt::format("unresolved reference token '{}'", reference_token)));
+             }
+         }
+ 
+@@ -422,16 +423,14 @@ class json_pointer
+                     {
+                         // "-" cannot be used for const access
+                         JSON_THROW(detail::out_of_range::create(402,
+-                                                                "array index '-' (" + std::to_string(ptr->m_value.array->size()) +
+-                                                                ") is out of range"));
++                            fmt::format("array index '-' ({}) is out of range", ptr->m_value.array->size())));
+                     }
+ 
+                     // error condition (cf. RFC 6901, Sect. 4)
+                     if (JSON_UNLIKELY(reference_token.size() > 1 and reference_token[0] == '0'))
+                     {
+                         JSON_THROW(detail::parse_error::create(106, 0,
+-                                                               "array index '" + reference_token +
+-                                                               "' must not begin with '0'"));
++                            fmt::format("array index '{}' must not begin with '0'", reference_token)));
+                     }
+ 
+                     // use unchecked array access
+@@ -442,13 +441,15 @@ class json_pointer
+                     }
+                     JSON_CATCH(std::invalid_argument&)
+                     {
+-                        JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token + "' is not a number"));
++                        JSON_THROW(detail::parse_error::create(109, 0,
++                            fmt::format("array index '{}' is not a number", reference_token)));
+                     }
+                     break;
+                 }
+ 
+                 default:
+-                    JSON_THROW(detail::out_of_range::create(404, "unresolved reference token '" + reference_token + "'"));
++                    JSON_THROW(detail::out_of_range::create(404,
++                                        fmt::format("unresolved reference token '{}'", reference_token)));
+             }
+         }
+ 
+@@ -485,16 +486,14 @@ class json_pointer
+                     {
+                         // "-" always fails the range check
+                         JSON_THROW(detail::out_of_range::create(402,
+-                                                                "array index '-' (" + std::to_string(ptr->m_value.array->size()) +
+-                                                                ") is out of range"));
++                                                fmt::format("array index '-' ({}) is out of range", ptr->m_value.array->size())));
+                     }
+ 
+                     // error condition (cf. RFC 6901, Sect. 4)
+                     if (JSON_UNLIKELY(reference_token.size() > 1 and reference_token[0] == '0'))
+                     {
+                         JSON_THROW(detail::parse_error::create(106, 0,
+-                                                               "array index '" + reference_token +
+-                                                               "' must not begin with '0'"));
++                                                fmt::format("array index '{}' must not begin with '0'", reference_token)));
+                     }
+ 
+                     // note: at performs range check
+@@ -504,13 +503,15 @@ class json_pointer
+                     }
+                     JSON_CATCH(std::invalid_argument&)
+                     {
+-                        JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token + "' is not a number"));
++                        JSON_THROW(detail::parse_error::create(109, 0,
++                                                fmt::format("array index '{}' is not a number", reference_token)));
+                     }
+                     break;
+                 }
+ 
+                 default:
+-                    JSON_THROW(detail::out_of_range::create(404, "unresolved reference token '" + reference_token + "'"));
++                    JSON_THROW(detail::out_of_range::create(404,
++                                        fmt::format("unresolved reference token '{}'", reference_token)));
+             }
+         }
+ 
+@@ -544,8 +545,7 @@ class json_pointer
+         if (JSON_UNLIKELY(reference_string[0] != '/'))
+         {
+             JSON_THROW(detail::parse_error::create(107, 1,
+-                                                   "JSON pointer must be empty or begin with '/' - was: '" +
+-                                                   reference_string + "'"));
++                fmt::format("JSON pointer must be empty or begin with '/' - was: '{}'", reference_string)));
+         }
+ 
+         // extract the reference tokens:
+@@ -566,11 +566,11 @@ class json_pointer
+         {
+             // use the text between the beginning of the reference token
+             // (start) and the last slash (slash).
+-            auto reference_token = reference_string.substr(start, slash - start);
++            auto reference_token = slice(reference_string, start, slash);
+ 
+             // check reference tokens are properly escaped
+             for (std::size_t pos = reference_token.find_first_of('~');
+-                    pos != std::string::npos;
++                    pos != std::string_view::npos;
+                     pos = reference_token.find_first_of('~', pos + 1))
+             {
+                 assert(reference_token[pos] == '~');
+@@ -585,8 +585,9 @@ class json_pointer
+             }
+ 
+             // finally, store the reference token
+-            unescape(reference_token);
+-            result.push_back(reference_token);
++            std::string ref_tok{reference_token};
++            unescape(ref_tok);
++            result.emplace_back(std::move(ref_tok));
+         }
+ 
+         return result;
+@@ -672,7 +673,7 @@ class json_pointer
+                     // iterate array and use index as reference string
+                     for (std::size_t i = 0; i < value.m_value.array->size(); ++i)
+                     {
+-                        flatten(reference_string + "/" + std::to_string(i),
++                        flatten(fmt::format("{}/{}", reference_string, i),
+                                 value.m_value.array->operator[](i), result);
+                     }
+                 }
+@@ -691,7 +692,7 @@ class json_pointer
+                     // iterate object and use keys as reference string
+                     for (const auto& element : *value.m_value.object)
+                     {
+-                        flatten(reference_string + "/" + escape(element.first), element.second, result);
++                        flatten(fmt::format("{}/{}", reference_string, escape(std::string{element.first()})), element.second, result);
+                     }
+                 }
+                 break;
+@@ -718,8 +719,7 @@ class json_pointer
+     @throw type_error.313  if value cannot be unflattened
+     */
+ //-------EXPORTED_FUNC_DEF_START json_pointer
+-    static BasicJsonType
+-    unflatten(const BasicJsonType& value)
++    static BasicJsonType unflatten(const BasicJsonType& value)
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+     {
+diff --git a/include/nlohmann/detail/macro_unscope.hpp b/include/nlohmann/detail/macro_unscope.hpp
+index 509a7d9f..a66d417f 100644
+--- a/include/nlohmann/detail/macro_unscope.hpp
++++ b/include/nlohmann/detail/macro_unscope.hpp
+@@ -1,5 +1,7 @@
+ #pragma once
+ 
++#ifndef WPI_JSON_IMPLEMENTATION
++
+ // restore GCC/clang diagnostic settings
+ #if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+     #pragma GCC diagnostic pop
+@@ -19,3 +21,5 @@
+ #undef NLOHMANN_BASIC_JSON_TPL_DECLARATION
+ #undef NLOHMANN_BASIC_JSON_TPL
+ #undef NLOHMANN_JSON_HAS_HELPER
++
++#endif  // WPI_JSON_IMPLEMENTATION
+diff --git a/include/nlohmann/detail/output/binary_writer.hpp b/include/nlohmann/detail/output/binary_writer.hpp
+index 3f36f4c3..6063baa4 100644
+--- a/include/nlohmann/detail/output/binary_writer.hpp
++++ b/include/nlohmann/detail/output/binary_writer.hpp
+@@ -57,9 +57,7 @@ class binary_writer
+ 
+             case value_t::boolean:
+             {
+-                oa->write_character(j.m_value.boolean
+-                                    ? static_cast<CharType>(0xF5)
+-                                    : static_cast<CharType>(0xF4));
++                o << static_cast<CharType>(j.m_value.boolean ? 0xF5 : 0xF4);
+                 break;
+             }
+ 
+@@ -273,9 +271,7 @@ class binary_writer
+ 
+             case value_t::boolean: // true and false
+             {
+-                oa->write_character(j.m_value.boolean
+-                                    ? static_cast<CharType>(0xC3)
+-                                    : static_cast<CharType>(0xC2));
++                o << static_cast<CharType>(j.m_value.boolean ? 0xC3 : 0xC2);
+                 break;
+             }
+ 
+@@ -391,7 +387,7 @@ class binary_writer
+ 
+             case value_t::number_float: // float 64
+             {
+-                oa->write_character(static_cast<CharType>(0xCB));
++                o << get_msgpack_float_prefix(j.m_value.number_float);
+                 write_number(j.m_value.number_float);
+                 break;
+             }
+@@ -495,9 +491,7 @@ class binary_writer
+             case value_t::boolean:
+             {
+                 if (add_prefix)
+-                    oa->write_character(j.m_value.boolean
+-                                        ? static_cast<CharType>('T')
+-                                        : static_cast<CharType>('F'));
++                    o << static_cast<CharType>(j.m_value.boolean ? 'T' : 'F');
+                 break;
+             }
+ 
+@@ -526,9 +520,7 @@ class binary_writer
+                     oa->write_character(static_cast<CharType>('S'));
+                 }
+                 write_number_with_ubjson_prefix(j.m_value.string->size(), true);
+-                oa->write_characters(
+-                    reinterpret_cast<const CharType*>(j.m_value.string->c_str()),
+-                    j.m_value.string->size());
++                o << *j.m_value.string;
+                 break;
+             }
+ 
+@@ -611,10 +603,8 @@ class binary_writer
+ 
+                 for (const auto& el : *j.m_value.object)
+                 {
+-                    write_number_with_ubjson_prefix(el.first.size(), true);
+-                    oa->write_characters(
+-                        reinterpret_cast<const CharType*>(el.first.c_str()),
+-                        el.first.size());
++                    write_number_with_ubjson_prefix(el.first().size(), true);
++                    o << el.first();
+                     write_ubjson(el.second, use_count, use_type, prefix_required);
+                 }
+ 
+@@ -990,8 +980,13 @@ class binary_writer
+     }
+ 
+   private:
++    static bool little_endianess(int num = 1) noexcept
++    {
++        return (*reinterpret_cast<char*>(&num) == 1);
++    }
++
+     /// whether we can assume little endianess
+-    const bool is_little_endian = json::binary_reader::little_endianess();
++    const bool is_little_endian = little_endianess();
+ 
+     /// the output
+     raw_ostream& o;
+diff --git a/include/nlohmann/detail/output/serializer.hpp b/include/nlohmann/detail/output/serializer.hpp
+index 9d962216..a8df2801 100644
+--- a/include/nlohmann/detail/output/serializer.hpp
++++ b/include/nlohmann/detail/output/serializer.hpp
+@@ -111,12 +111,12 @@ class serializer
+                     const auto new_indent = current_indent + indent_step;
+                     if (JSON_UNLIKELY(indent_string.size() < new_indent))
+                     {
+-                        indent_string.resize(indent_string.size() * 2, ' ');
++                        indent_string.resize(indent_string.size() * 2, indent_char);
+                     }
+ 
+                     // first n-1 elements
+                     auto i = sorted.begin();
+-                    for (std::size_t cnt = 0; cnt < val.m_value.object->size() - 1; ++cnt, ++i)
++                    for (std::size_t cnt = 0; cnt < sorted.size() - 1; ++cnt, ++i)
+                     {
+                         o->write_characters(indent_string.c_str(), new_indent);
+                         o->write_character('\"');
+@@ -128,7 +128,7 @@ class serializer
+ 
+                     // last element
+                     assert(i != sorted.end());
+-                    assert(std::next(i) == val.m_value.object->cend());
++                    //assert(std::next(i) == val.m_value.object->cend());
+                     o->write_characters(indent_string.c_str(), new_indent);
+                     o->write_character('\"');
+                     dump_escaped(i->first, ensure_ascii);
+@@ -144,8 +144,8 @@ class serializer
+                     o->write_character('{');
+ 
+                     // first n-1 elements
+-                    auto i = val.m_value.object->cbegin();
+-                    for (std::size_t cnt = 0; cnt < val.m_value.object->size() - 1; ++cnt, ++i)
++                    auto i = sorted.begin();
++                    for (std::size_t cnt = 0; cnt < sorted.size() - 1; ++cnt, ++i)
+                     {
+                         o->write_character('\"');
+                         dump_escaped(i->first, ensure_ascii);
+@@ -155,8 +155,8 @@ class serializer
+                     }
+ 
+                     // last element
+-                    assert(i != val.m_value.object->cend());
+-                    assert(std::next(i) == val.m_value.object->cend());
++                    assert(i != sorted.end());
++                    //assert(std::next(i) == val.m_value.object->cend());
+                     o->write_character('\"');
+                     dump_escaped(i->first, ensure_ascii);
+                     o->write_characters("\":", 2);
+@@ -184,7 +184,7 @@ class serializer
+                     const auto new_indent = current_indent + indent_step;
+                     if (JSON_UNLIKELY(indent_string.size() < new_indent))
+                     {
+-                        indent_string.resize(indent_string.size() * 2, ' ');
++                        indent_string.resize(indent_string.size() * 2, indent_char);
+                     }
+ 
+                     // first n-1 elements
+@@ -303,7 +303,6 @@ class serializer
+     {
+         uint32_t codepoint;
+         uint8_t state = UTF8_ACCEPT;
+-        std::size_t bytes = 0;  // number of bytes written to string_buffer
+ 
+         for (std::size_t i = 0; i < s.size(); ++i)
+         {
+@@ -372,44 +371,30 @@ class serializer
+                             {
+                                 if (codepoint <= 0xFFFF)
+                                 {
+-                                    std::snprintf(string_buffer.data() + bytes, 7, "\\u%04x",
+-                                                  static_cast<uint16_t>(codepoint));
+-                                    bytes += 6;
++                                    o << fmt::format("\\u{:04x}", codepoint);
+                                 }
+                                 else
+                                 {
+-                                    std::snprintf(string_buffer.data() + bytes, 13, "\\u%04x\\u%04x",
+-                                                  static_cast<uint16_t>(0xD7C0 + (codepoint >> 10)),
+-                                                  static_cast<uint16_t>(0xDC00 + (codepoint & 0x3FF)));
+-                                    bytes += 12;
++                                    o << fmt::format("\\u{:04x}", 0xD7C0 + (codepoint >> 10));
++                                    o << fmt::format("\\u{:04x}", 0xDC00 + (codepoint & 0x3FF));
+                                 }
+                             }
+                             else
+                             {
+                                 // copy byte to buffer (all previous bytes
+                                 // been copied have in default case above)
+-                                string_buffer[bytes++] = s[i];
++                                o << s[i];
+                             }
+                             break;
+                         }
+                     }
+ 
+-                    // write buffer and reset index; there must be 13 bytes
+-                    // left, as this is the maximal number of bytes to be
+-                    // written ("\uxxxx\uxxxx\0") for one code point
+-                    if (string_buffer.size() - bytes < 13)
+-                    {
+-                        o->write_characters(string_buffer.data(), bytes);
+-                        bytes = 0;
+-                    }
+                     break;
+                 }
+ 
+                 case UTF8_REJECT:  // decode found invalid UTF-8 byte
+                 {
+-                    std::stringstream ss;
+-                    ss << std::setw(2) << std::uppercase << std::setfill('0') << std::hex << static_cast<int>(byte);
+-                    JSON_THROW(type_error::create(316, "invalid UTF-8 byte at index " + std::to_string(i) + ": 0x" + ss.str()));
++                    JSON_THROW(type_error::create(316, fmt::format("invalid UTF-8 byte at index {}: {:#02x}", i, byte)));
+                 }
+ 
+                 default:  // decode found yet incomplete multi-byte code point
+@@ -417,27 +402,17 @@ class serializer
+                     if (not ensure_ascii)
+                     {
+                         // code point will not be escaped - copy byte to buffer
+-                        string_buffer[bytes++] = s[i];
++                        o << s[i];
+                     }
+                     break;
+                 }
+             }
+         }
+ 
+-        if (JSON_LIKELY(state == UTF8_ACCEPT))
+-        {
+-            // write buffer
+-            if (bytes > 0)
+-            {
+-                o->write_characters(string_buffer.data(), bytes);
+-            }
+-        }
+-        else
++        if (JSON_UNLIKELY(state != UTF8_ACCEPT))
+         {
+             // we finish reading, but do not accept: string was incomplete
+-            std::stringstream ss;
+-            ss << std::setw(2) << std::uppercase << std::setfill('0') << std::hex << static_cast<int>(static_cast<uint8_t>(s.back()));
+-            JSON_THROW(type_error::create(316, "incomplete UTF-8 string; last byte: 0x" + ss.str()));
++            JSON_THROW(type_error::create(316, fmt::format("incomplete UTF-8 string; last byte: {:#02x}", s.back())));
+         }
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+@@ -520,74 +495,13 @@ class serializer
+             return;
+         }
+ 
+-        // If number_float_t is an IEEE-754 single or double precision number,
+         // use the Grisu2 algorithm to produce short numbers which are
+         // guaranteed to round-trip, using strtof and strtod, resp.
+-        //
+-        // NB: The test below works if <long double> == <double>.
+-        static constexpr bool is_ieee_single_or_double
+-            = (std::numeric_limits<number_float_t>::is_iec559 and std::numeric_limits<number_float_t>::digits == 24 and std::numeric_limits<number_float_t>::max_exponent == 128) or
+-              (std::numeric_limits<number_float_t>::is_iec559 and std::numeric_limits<number_float_t>::digits == 53 and std::numeric_limits<number_float_t>::max_exponent == 1024);
+-
+-        dump_float(x, std::integral_constant<bool, is_ieee_single_or_double>());
+-    }
+-
+-    void dump_float(number_float_t x, std::true_type /*is_ieee_single_or_double*/)
+-    {
+         char* begin = number_buffer.data();
+-        char* end = ::nlohmann::detail::to_chars(begin, begin + number_buffer.size(), x);
++        char* end = to_chars(begin, begin + number_buffer.size(), x);
+ 
+         o->write_characters(begin, static_cast<size_t>(end - begin));
+     }
+-
+-    void dump_float(number_float_t x, std::false_type /*is_ieee_single_or_double*/)
+-    {
+-        // get number of digits for a float -> text -> float round-trip
+-        static constexpr auto d = std::numeric_limits<number_float_t>::max_digits10;
+-
+-        // the actual conversion
+-        std::ptrdiff_t len = snprintf(number_buffer.data(), number_buffer.size(), "%.*g", d, x);
+-
+-        // negative value indicates an error
+-        assert(len > 0);
+-        // check if buffer was large enough
+-        assert(static_cast<std::size_t>(len) < number_buffer.size());
+-
+-        // erase thousands separator
+-        if (thousands_sep != '\0')
+-        {
+-            const auto end = std::remove(number_buffer.begin(),
+-                                         number_buffer.begin() + len, thousands_sep);
+-            std::fill(end, number_buffer.end(), '\0');
+-            assert((end - number_buffer.begin()) <= len);
+-            len = (end - number_buffer.begin());
+-        }
+-
+-        // convert decimal point to '.'
+-        if (decimal_point != '\0' and decimal_point != '.')
+-        {
+-            const auto dec_pos = std::find(number_buffer.begin(), number_buffer.end(), decimal_point);
+-            if (dec_pos != number_buffer.end())
+-            {
+-                *dec_pos = '.';
+-            }
+-        }
+-
+-        o->write_characters(number_buffer.data(), static_cast<std::size_t>(len));
+-
+-        // determine if need to append ".0"
+-        const bool value_is_int_like =
+-            std::none_of(number_buffer.begin(), number_buffer.begin() + len + 1,
+-                         [](char c)
+-        {
+-            return (c == '.' or c == 'e');
+-        });
+-
+-        if (value_is_int_like)
+-        {
+-            o->write_characters(".0", 2);
+-        }
+-    }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
+     /*!
+diff --git a/include/nlohmann/json.hpp b/include/nlohmann/json.hpp
+index 082bc4e0..81010567 100644
+--- a/include/nlohmann/json.hpp
++++ b/include/nlohmann/json.hpp
+@@ -301,9 +301,9 @@ class basic_json
+     {
+         basic_json result;
+ 
+-        result["copyright"] = "(C) 2013-2017 Niels Lohmann";
+-        result["name"] = "JSON for Modern C++";
+-        result["url"] = "https://github.com/nlohmann/json";
++        result["copyright"] = "(C) 2013-2017 Niels Lohmann, (C) 2017-2018 FIRST";
++        result["name"] = "WPI version of JSON for Modern C++";
++        result["url"] = "https://github.com/wpilibsuite/allwpilib";
+         result["version"]["string"] =
+             std::to_string(NLOHMANN_JSON_VERSION_MAJOR) + "." +
+             std::to_string(NLOHMANN_JSON_VERSION_MINOR) + "." +
+@@ -500,297 +500,7 @@ class basic_json
+ 
+     @since version 1.0.0
+     */
+-    using array_t = ArrayType<basic_json, AllocatorType<basic_json>>;
+-
+-    /*!
+-    @brief a type for a string
+-
+-    [RFC 7159](http://rfc7159.net/rfc7159) describes JSON strings as follows:
+-    > A string is a sequence of zero or more Unicode characters.
+-
+-    To store objects in C++, a type is defined by the template parameter
+-    described below. Unicode values are split by the JSON class into
+-    byte-sized characters during deserialization.
+-
+-    @tparam StringType  the container to store strings (e.g., `std::string`).
+-    Note this container is used for keys/names in objects, see @ref object_t.
+-
+-    #### Default type
+-
+-    With the default values for @a StringType (`std::string`), the default
+-    value for @a string_t is:
+-
+-    @code {.cpp}
+-    std::string
+-    @endcode
+-
+-    #### Encoding
+-
+-    Strings are stored in UTF-8 encoding. Therefore, functions like
+-    `std::string::size()` or `std::string::length()` return the number of
+-    bytes in the string rather than the number of characters or glyphs.
+-
+-    #### String comparison
+-
+-    [RFC 7159](http://rfc7159.net/rfc7159) states:
+-    > Software implementations are typically required to test names of object
+-    > members for equality. Implementations that transform the textual
+-    > representation into sequences of Unicode code units and then perform the
+-    > comparison numerically, code unit by code unit, are interoperable in the
+-    > sense that implementations will agree in all cases on equality or
+-    > inequality of two strings. For example, implementations that compare
+-    > strings with escaped characters unconverted may incorrectly find that
+-    > `"a\\b"` and `"a\u005Cb"` are not equal.
+-
+-    This implementation is interoperable as it does compare strings code unit
+-    by code unit.
+-
+-    #### Storage
+-
+-    String values are stored as pointers in a @ref basic_json type. That is,
+-    for any access to string values, a pointer of type `string_t*` must be
+-    dereferenced.
+-
+-    @since version 1.0.0
+-    */
+-    using string_t = StringType;
+-
+-    /*!
+-    @brief a type for a boolean
+-
+-    [RFC 7159](http://rfc7159.net/rfc7159) implicitly describes a boolean as a
+-    type which differentiates the two literals `true` and `false`.
+-
+-    To store objects in C++, a type is defined by the template parameter @a
+-    BooleanType which chooses the type to use.
+-
+-    #### Default type
+-
+-    With the default values for @a BooleanType (`bool`), the default value for
+-    @a boolean_t is:
+-
+-    @code {.cpp}
+-    bool
+-    @endcode
+-
+-    #### Storage
+-
+-    Boolean values are stored directly inside a @ref basic_json type.
+-
+-    @since version 1.0.0
+-    */
+-    using boolean_t = BooleanType;
+-
+-    /*!
+-    @brief a type for a number (integer)
+-
+-    [RFC 7159](http://rfc7159.net/rfc7159) describes numbers as follows:
+-    > The representation of numbers is similar to that used in most
+-    > programming languages. A number is represented in base 10 using decimal
+-    > digits. It contains an integer component that may be prefixed with an
+-    > optional minus sign, which may be followed by a fraction part and/or an
+-    > exponent part. Leading zeros are not allowed. (...) Numeric values that
+-    > cannot be represented in the grammar below (such as Infinity and NaN)
+-    > are not permitted.
+-
+-    This description includes both integer and floating-point numbers.
+-    However, C++ allows more precise storage if it is known whether the number
+-    is a signed integer, an unsigned integer or a floating-point number.
+-    Therefore, three different types, @ref number_integer_t, @ref
+-    number_unsigned_t and @ref number_float_t are used.
+-
+-    To store integer numbers in C++, a type is defined by the template
+-    parameter @a NumberIntegerType which chooses the type to use.
+-
+-    #### Default type
+-
+-    With the default values for @a NumberIntegerType (`int64_t`), the default
+-    value for @a number_integer_t is:
+-
+-    @code {.cpp}
+-    int64_t
+-    @endcode
+-
+-    #### Default behavior
+-
+-    - The restrictions about leading zeros is not enforced in C++. Instead,
+-      leading zeros in integer literals lead to an interpretation as octal
+-      number. Internally, the value will be stored as decimal number. For
+-      instance, the C++ integer literal `010` will be serialized to `8`.
+-      During deserialization, leading zeros yield an error.
+-    - Not-a-number (NaN) values will be serialized to `null`.
+-
+-    #### Limits
+-
+-    [RFC 7159](http://rfc7159.net/rfc7159) specifies:
+-    > An implementation may set limits on the range and precision of numbers.
+-
+-    When the default type is used, the maximal integer number that can be
+-    stored is `9223372036854775807` (INT64_MAX) and the minimal integer number
+-    that can be stored is `-9223372036854775808` (INT64_MIN). Integer numbers
+-    that are out of range will yield over/underflow when used in a
+-    constructor. During deserialization, too large or small integer numbers
+-    will be automatically be stored as @ref number_unsigned_t or @ref
+-    number_float_t.
+-
+-    [RFC 7159](http://rfc7159.net/rfc7159) further states:
+-    > Note that when such software is used, numbers that are integers and are
+-    > in the range \f$[-2^{53}+1, 2^{53}-1]\f$ are interoperable in the sense
+-    > that implementations will agree exactly on their numeric values.
+-
+-    As this range is a subrange of the exactly supported range [INT64_MIN,
+-    INT64_MAX], this class's integer type is interoperable.
+-
+-    #### Storage
+-
+-    Integer number values are stored directly inside a @ref basic_json type.
+-
+-    @sa @ref number_float_t -- type for number values (floating-point)
+-
+-    @sa @ref number_unsigned_t -- type for number values (unsigned integer)
+-
+-    @since version 1.0.0
+-    */
+-    using number_integer_t = NumberIntegerType;
+-
+-    /*!
+-    @brief a type for a number (unsigned)
+-
+-    [RFC 7159](http://rfc7159.net/rfc7159) describes numbers as follows:
+-    > The representation of numbers is similar to that used in most
+-    > programming languages. A number is represented in base 10 using decimal
+-    > digits. It contains an integer component that may be prefixed with an
+-    > optional minus sign, which may be followed by a fraction part and/or an
+-    > exponent part. Leading zeros are not allowed. (...) Numeric values that
+-    > cannot be represented in the grammar below (such as Infinity and NaN)
+-    > are not permitted.
+-
+-    This description includes both integer and floating-point numbers.
+-    However, C++ allows more precise storage if it is known whether the number
+-    is a signed integer, an unsigned integer or a floating-point number.
+-    Therefore, three different types, @ref number_integer_t, @ref
+-    number_unsigned_t and @ref number_float_t are used.
+-
+-    To store unsigned integer numbers in C++, a type is defined by the
+-    template parameter @a NumberUnsignedType which chooses the type to use.
+-
+-    #### Default type
+-
+-    With the default values for @a NumberUnsignedType (`uint64_t`), the
+-    default value for @a number_unsigned_t is:
+-
+-    @code {.cpp}
+-    uint64_t
+-    @endcode
+-
+-    #### Default behavior
+-
+-    - The restrictions about leading zeros is not enforced in C++. Instead,
+-      leading zeros in integer literals lead to an interpretation as octal
+-      number. Internally, the value will be stored as decimal number. For
+-      instance, the C++ integer literal `010` will be serialized to `8`.
+-      During deserialization, leading zeros yield an error.
+-    - Not-a-number (NaN) values will be serialized to `null`.
+-
+-    #### Limits
+-
+-    [RFC 7159](http://rfc7159.net/rfc7159) specifies:
+-    > An implementation may set limits on the range and precision of numbers.
+-
+-    When the default type is used, the maximal integer number that can be
+-    stored is `18446744073709551615` (UINT64_MAX) and the minimal integer
+-    number that can be stored is `0`. Integer numbers that are out of range
+-    will yield over/underflow when used in a constructor. During
+-    deserialization, too large or small integer numbers will be automatically
+-    be stored as @ref number_integer_t or @ref number_float_t.
+-
+-    [RFC 7159](http://rfc7159.net/rfc7159) further states:
+-    > Note that when such software is used, numbers that are integers and are
+-    > in the range \f$[-2^{53}+1, 2^{53}-1]\f$ are interoperable in the sense
+-    > that implementations will agree exactly on their numeric values.
+-
+-    As this range is a subrange (when considered in conjunction with the
+-    number_integer_t type) of the exactly supported range [0, UINT64_MAX],
+-    this class's integer type is interoperable.
+-
+-    #### Storage
+-
+-    Integer number values are stored directly inside a @ref basic_json type.
+-
+-    @sa @ref number_float_t -- type for number values (floating-point)
+-    @sa @ref number_integer_t -- type for number values (integer)
+-
+-    @since version 2.0.0
+-    */
+-    using number_unsigned_t = NumberUnsignedType;
+-
+-    /*!
+-    @brief a type for a number (floating-point)
+-
+-    [RFC 7159](http://rfc7159.net/rfc7159) describes numbers as follows:
+-    > The representation of numbers is similar to that used in most
+-    > programming languages. A number is represented in base 10 using decimal
+-    > digits. It contains an integer component that may be prefixed with an
+-    > optional minus sign, which may be followed by a fraction part and/or an
+-    > exponent part. Leading zeros are not allowed. (...) Numeric values that
+-    > cannot be represented in the grammar below (such as Infinity and NaN)
+-    > are not permitted.
+-
+-    This description includes both integer and floating-point numbers.
+-    However, C++ allows more precise storage if it is known whether the number
+-    is a signed integer, an unsigned integer or a floating-point number.
+-    Therefore, three different types, @ref number_integer_t, @ref
+-    number_unsigned_t and @ref number_float_t are used.
+-
+-    To store floating-point numbers in C++, a type is defined by the template
+-    parameter @a NumberFloatType which chooses the type to use.
+-
+-    #### Default type
+-
+-    With the default values for @a NumberFloatType (`double`), the default
+-    value for @a number_float_t is:
+-
+-    @code {.cpp}
+-    double
+-    @endcode
+-
+-    #### Default behavior
+-
+-    - The restrictions about leading zeros is not enforced in C++. Instead,
+-      leading zeros in floating-point literals will be ignored. Internally,
+-      the value will be stored as decimal number. For instance, the C++
+-      floating-point literal `01.2` will be serialized to `1.2`. During
+-      deserialization, leading zeros yield an error.
+-    - Not-a-number (NaN) values will be serialized to `null`.
+-
+-    #### Limits
+-
+-    [RFC 7159](http://rfc7159.net/rfc7159) states:
+-    > This specification allows implementations to set limits on the range and
+-    > precision of numbers accepted. Since software that implements IEEE
+-    > 754-2008 binary64 (double precision) numbers is generally available and
+-    > widely used, good interoperability can be achieved by implementations
+-    > that expect no more precision or range than these provide, in the sense
+-    > that implementations will approximate JSON numbers within the expected
+-    > precision.
+-
+-    This implementation does exactly follow this approach, as it uses double
+-    precision floating-point numbers. Note values smaller than
+-    `-1.79769313486232e+308` and values greater than `1.79769313486232e+308`
+-    will be stored as NaN internally and be serialized to `null`.
+-
+-    #### Storage
+-
+-    Floating-point number values are stored directly inside a @ref basic_json
+-    type.
+-
+-    @sa @ref number_integer_t -- type for number values (integer)
+-
+-    @sa @ref number_unsigned_t -- type for number values (unsigned integer)
+-
+-    @since version 1.0.0
+-    */
+-    using number_float_t = NumberFloatType;
++    using array_t = std::vector<basic_json>;
+ 
+     /// @}
+ 
+@@ -1246,78 +956,6 @@ class basic_json
+         assert_invariant();
+     }
+ 
+-    /*!
+-    @brief create a JSON value from an existing one
+-
+-    This is a constructor for existing @ref basic_json types.
+-    It does not hijack copy/move constructors, since the parameter has different
+-    template arguments than the current ones.
+-
+-    The constructor tries to convert the internal @ref m_value of the parameter.
+-
+-    @tparam BasicJsonType a type such that:
+-    - @a BasicJsonType is a @ref basic_json type.
+-    - @a BasicJsonType has different template arguments than @ref basic_json_t.
+-
+-    @param[in] val the @ref basic_json value to be converted.
+-
+-    @complexity Usually linear in the size of the passed @a val, also
+-                depending on the implementation of the called `to_json()`
+-                method.
+-
+-    @exceptionsafety Depends on the called constructor. For types directly
+-    supported by the library (i.e., all types for which no `to_json()` function
+-    was provided), strong guarantee holds: if an exception is thrown, there are
+-    no changes to any JSON value.
+-
+-    @since version 3.1.2
+-    */
+-    template <typename BasicJsonType,
+-              detail::enable_if_t<
+-                  detail::is_basic_json<BasicJsonType>::value and not std::is_same<basic_json, BasicJsonType>::value, int> = 0>
+-    basic_json(const BasicJsonType& val)
+-    {
+-        using other_boolean_t = typename BasicJsonType::boolean_t;
+-        using other_number_float_t = typename BasicJsonType::number_float_t;
+-        using other_number_integer_t = typename BasicJsonType::number_integer_t;
+-        using other_number_unsigned_t = typename BasicJsonType::number_unsigned_t;
+-        using other_string_t = typename BasicJsonType::string_t;
+-        using other_object_t = typename BasicJsonType::object_t;
+-        using other_array_t = typename BasicJsonType::array_t;
+-
+-        switch (val.type())
+-        {
+-            case value_t::boolean:
+-                JSONSerializer<other_boolean_t>::to_json(*this, val.template get<other_boolean_t>());
+-                break;
+-            case value_t::number_float:
+-                JSONSerializer<other_number_float_t>::to_json(*this, val.template get<other_number_float_t>());
+-                break;
+-            case value_t::number_integer:
+-                JSONSerializer<other_number_integer_t>::to_json(*this, val.template get<other_number_integer_t>());
+-                break;
+-            case value_t::number_unsigned:
+-                JSONSerializer<other_number_unsigned_t>::to_json(*this, val.template get<other_number_unsigned_t>());
+-                break;
+-            case value_t::string:
+-                JSONSerializer<other_string_t>::to_json(*this, val.template get_ref<const other_string_t&>());
+-                break;
+-            case value_t::object:
+-                JSONSerializer<other_object_t>::to_json(*this, val.template get_ref<const other_object_t&>());
+-                break;
+-            case value_t::array:
+-                JSONSerializer<other_array_t>::to_json(*this, val.template get_ref<const other_array_t&>());
+-                break;
+-            case value_t::null:
+-                *this = nullptr;
+-                break;
+-            case value_t::discarded:
+-                m_type = value_t::discarded;
+-                break;
+-        }
+-        assert_invariant();
+-    }
+-
+     /*!
+     @brief create a container (array or object) from an initializer list
+ 
+@@ -1432,8 +1070,8 @@ class basic_json
+             std::for_each(init.begin(), init.end(), [this](const detail::json_ref<basic_json>& element_ref)
+             {
+                 auto element = element_ref.moved_or_copied();
+-                m_value.object->emplace(
+-                    std::move(*((*element.m_value.array)[0].m_value.string)),
++                m_value.object->try_emplace(
++                    *((*element.m_value.array)[0].m_value.string),
+                     std::move((*element.m_value.array)[1]));
+             });
+         }
+@@ -1699,8 +1337,7 @@ class basic_json
+             }
+ 
+             default:
+-                JSON_THROW(invalid_iterator::create(206, "cannot construct with iterators from " +
+-                                                    std::string(first.m_object->type_name())));
++                JSON_THROW(invalid_iterator::create(206, "cannot construct with iterators from", first.m_object->type_name()));
+         }
+ 
+         assert_invariant();
+@@ -7322,13 +6959,13 @@ class basic_json
+                 // check if desired value is present
+                 if (JSON_UNLIKELY(it == val.m_value.object->end()))
+                 {
+-                    JSON_THROW(parse_error::create(105, 0, error_msg + " must have member '" + member + "'"));
++                    JSON_THROW(parse_error::create(105, 0, fmt::format("{} must have member '{}'", error_msg, member)));
+                 }
+ 
+                 // check if result is of type string
+                 if (JSON_UNLIKELY(string_type and not it->second.is_string()))
+                 {
+-                    JSON_THROW(parse_error::create(105, 0, error_msg + " must have string member '" + member + "'"));
++                    JSON_THROW(parse_error::create(105, 0, fmt::format("{} must have string member '{}'", error_msg, member)));
+                 }
+ 
+                 // no error: return value
+@@ -7426,7 +7063,7 @@ class basic_json
+                 {
+                     // op must be "add", "remove", "replace", "move", "copy", or
+                     // "test"
+-                    JSON_THROW(parse_error::create(105, 0, "operation value '" + op + "' is invalid"));
++                    JSON_THROW(parse_error::create(105, 0, fmt::format("operation value '{}' is invalid", op)));
+                 }
+             }
+         }

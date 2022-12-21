@@ -1,0 +1,17 @@
+load("//shared/bazel/rules:cc_rules.bzl", "wpilib_cc_library")
+
+wpilib_cc_library(
+    name = "sigslot",
+    #    srcs = glob(["cpp/*"]),
+    hdrs = glob(["include/wpi/*.h"]),
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    #    strip_include_prefix = "include",
+    deps = [
+        "//wpiutil/src/main/native:mutex",
+        #        "//wpiutil/src/main/native/thirdparty/llvm",
+        #        "//wpiutil/src/main/native:raw_mem_istream",
+        #        "//wpiutil:mutex",
+        #        "//wpiutil:MappedFileRegion",
+    ],
+)

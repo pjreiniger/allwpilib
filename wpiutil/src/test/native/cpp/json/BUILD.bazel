@@ -1,0 +1,23 @@
+load("//shared/bazel/rules:cc_rules.bzl", "wpilib_cc_test")
+
+HDRS = glob(["*.h"])
+
+wpilib_cc_test(
+    name = "json-test",
+     srcs = glob(["*.cpp", "*.h"]),
+#    srcs = HDRS + ["unit-algorithms.cpp"],
+#    srcs = HDRS + ["unit-msgpack.cpp"],
+    deps = [
+        "//wpiutil/src/main/native/thirdparty/json:json.static",
+        "@gtest//:gtest_main"
+    ]
+)
+
+#wpilib_cc_test(
+#    name = "json-test2",
+#    srcs = glob(["*.cpp", "*.h"]),
+#    deps = [
+#        "//wpiutil/src/main/native/thirdparty/json:json.shared",
+#        "@gtest//:gtest_main"
+#    ]
+#)

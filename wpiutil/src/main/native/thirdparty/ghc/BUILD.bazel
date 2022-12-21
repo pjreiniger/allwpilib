@@ -1,0 +1,11 @@
+load("//shared/bazel/rules:cc_rules.bzl", "wpilib_cc_library")
+
+wpilib_cc_library(
+    name = "ghc",
+    hdrs = glob(["include/wpi/ghc/filesystem.hpp"]),
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    #    strip_include_prefix = "include",
+    deps = [
+    ],
+)

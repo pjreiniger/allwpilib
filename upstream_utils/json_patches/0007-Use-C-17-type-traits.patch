@@ -1,0 +1,152 @@
+From 56445c1895ce6ea6057ed724b110878fd22b9b45 Mon Sep 17 00:00:00 2001
+From: PJ Reiniger <pj.reiniger@gmail.com>
+Date: Mon, 12 Dec 2022 21:47:46 -0500
+Subject: [PATCH 07/11] Use C++17 type traits
+
+---
+ .../nlohmann/detail/conversions/from_json.hpp |  4 +-
+ .../nlohmann/detail/conversions/to_json.hpp   |  4 +-
+ include/nlohmann/detail/meta.hpp              | 63 ++-----------------
+ 3 files changed, 10 insertions(+), 61 deletions(-)
+
+diff --git a/include/nlohmann/detail/conversions/from_json.hpp b/include/nlohmann/detail/conversions/from_json.hpp
+index 406c5e67..631adfef 100644
+--- a/include/nlohmann/detail/conversions/from_json.hpp
++++ b/include/nlohmann/detail/conversions/from_json.hpp
+@@ -291,7 +291,7 @@ void from_json(const BasicJsonType& j, std::pair<A1, A2>& p)
+ }
+ 
+ template<typename BasicJsonType, typename Tuple, std::size_t... Idx>
+-void from_json_tuple_impl(const BasicJsonType& j, Tuple& t, index_sequence<Idx...>)
++void from_json_tuple_impl(const BasicJsonType& j, Tuple& t, std::index_sequence<Idx...>)
+ {
+     t = std::make_tuple(j.at(Idx).template get<typename std::tuple_element<Idx, Tuple>::type>()...);
+ }
+@@ -299,7 +299,7 @@ void from_json_tuple_impl(const BasicJsonType& j, Tuple& t, index_sequence<Idx..
+ template<typename BasicJsonType, typename... Args>
+ void from_json(const BasicJsonType& j, std::tuple<Args...>& t)
+ {
+-    from_json_tuple_impl(j, t, index_sequence_for<Args...> {});
++    from_json_tuple_impl(j, t, std::index_sequence_for<Args...> {});
+ }
+ 
+ struct from_json_fn
+diff --git a/include/nlohmann/detail/conversions/to_json.hpp b/include/nlohmann/detail/conversions/to_json.hpp
+index 3897ff72..aa0bb538 100644
+--- a/include/nlohmann/detail/conversions/to_json.hpp
++++ b/include/nlohmann/detail/conversions/to_json.hpp
+@@ -279,7 +279,7 @@ void to_json(BasicJsonType& j, const std::pair<Args...>& p)
+ }
+ 
+ template<typename BasicJsonType, typename Tuple, std::size_t... Idx>
+-void to_json_tuple_impl(BasicJsonType& j, const Tuple& t, index_sequence<Idx...>)
++void to_json_tuple_impl(BasicJsonType& j, const Tuple& t, std::index_sequence<Idx...>)
+ {
+     j = {std::get<Idx>(t)...};
+ }
+@@ -287,7 +287,7 @@ void to_json_tuple_impl(BasicJsonType& j, const Tuple& t, index_sequence<Idx...>
+ template<typename BasicJsonType, typename... Args>
+ void to_json(BasicJsonType& j, const std::tuple<Args...>& t)
+ {
+-    to_json_tuple_impl(j, t, index_sequence_for<Args...> {});
++    to_json_tuple_impl(j, t, std::index_sequence_for<Args...> {});
+ }
+ 
+ struct to_json_fn
+diff --git a/include/nlohmann/detail/meta.hpp b/include/nlohmann/detail/meta.hpp
+index 9cc6b420..be909a73 100644
+--- a/include/nlohmann/detail/meta.hpp
++++ b/include/nlohmann/detail/meta.hpp
+@@ -36,57 +36,6 @@ using enable_if_t = typename std::enable_if<B, T>::type;
+ template<typename T>
+ using uncvref_t = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+ 
+-// implementation of C++14 index_sequence and affiliates
+-// source: https://stackoverflow.com/a/32223343
+-template<std::size_t... Ints>
+-struct index_sequence
+-{
+-    using type = index_sequence;
+-    using value_type = std::size_t;
+-    static constexpr std::size_t size() noexcept
+-    {
+-        return sizeof...(Ints);
+-    }
+-};
+-
+-template<class Sequence1, class Sequence2>
+-struct merge_and_renumber;
+-
+-template<std::size_t... I1, std::size_t... I2>
+-struct merge_and_renumber<index_sequence<I1...>, index_sequence<I2...>>
+-        : index_sequence < I1..., (sizeof...(I1) + I2)... > {};
+-
+-template<std::size_t N>
+-struct make_index_sequence
+-    : merge_and_renumber < typename make_index_sequence < N / 2 >::type,
+-      typename make_index_sequence < N - N / 2 >::type > {};
+-
+-template<> struct make_index_sequence<0> : index_sequence<> {};
+-template<> struct make_index_sequence<1> : index_sequence<0> {};
+-
+-template<typename... Ts>
+-using index_sequence_for = make_index_sequence<sizeof...(Ts)>;
+-
+-/*
+-Implementation of two C++17 constructs: conjunction, negation. This is needed
+-to avoid evaluating all the traits in a condition
+-
+-For example: not std::is_same<void, T>::value and has_value_type<T>::value
+-will not compile when T = void (on MSVC at least). Whereas
+-conjunction<negation<std::is_same<void, T>>, has_value_type<T>>::value will
+-stop evaluating if negation<...>::value == false
+-
+-Please note that those constructs must be used with caution, since symbols can
+-become very long quickly (which can slow down compilation and cause MSVC
+-internal compiler errors). Only use it when you have to (see example ahead).
+-*/
+-template<class...> struct conjunction : std::true_type {};
+-template<class B1> struct conjunction<B1> : B1 {};
+-template<class B1, class... Bn>
+-struct conjunction<B1, Bn...> : std::conditional<bool(B1::value), conjunction<Bn...>, B1>::type {};
+-
+-template<class B> struct negation : std::integral_constant<bool, not B::value> {};
+-
+ // dispatch utility (taken from ranges-v3)
+ template<unsigned N> struct priority_tag : priority_tag < N - 1 > {};
+ template<> struct priority_tag<0> {};
+@@ -123,7 +72,7 @@ template<class BasicJsonType, class CompatibleObjectType>
+ struct is_compatible_object_type
+ {
+     static auto constexpr value = is_compatible_object_type_impl <
+-                                  conjunction<negation<std::is_same<void, CompatibleObjectType>>,
++                                  std::conjunction<std::negation<std::is_same<void, CompatibleObjectType>>,
+                                   has_mapped_type<CompatibleObjectType>,
+                                   has_key_type<CompatibleObjectType>>::value,
+                                   typename BasicJsonType::object_t, CompatibleObjectType >::value;
+@@ -142,12 +91,12 @@ template<class BasicJsonType, class CompatibleArrayType>
+ struct is_compatible_array_type
+ {
+     static auto constexpr value =
+-        conjunction<negation<std::is_same<void, CompatibleArrayType>>,
+-        negation<is_compatible_object_type<
++        std::conjunction<std::negation<std::is_same<void, CompatibleArrayType>>,
++        std::negation<is_compatible_object_type<
+         BasicJsonType, CompatibleArrayType>>,
+-        negation<std::is_constructible<std::string_view,
++        std::negation<std::is_constructible<std::string_view,
+         CompatibleArrayType>>,
+-        negation<is_basic_json_nested_type<BasicJsonType, CompatibleArrayType>>,
++        std::negation<is_basic_json_nested_type<BasicJsonType, CompatibleArrayType>>,
+         has_value_type<CompatibleArrayType>,
+         has_iterator<CompatibleArrayType>>::value;
+ };
+@@ -239,7 +188,7 @@ struct is_compatible_complete_type
+ 
+ template <typename BasicJsonType, typename CompatibleType>
+ struct is_compatible_type
+-    : conjunction<is_complete_type<CompatibleType>,
++    : std::conjunction<is_complete_type<CompatibleType>,
+       is_compatible_complete_type<BasicJsonType, CompatibleType>>
+ {
+ };

@@ -1,0 +1,188 @@
+From 9d32f25cebcf608b8ce029e4d496241a2594ddcb Mon Sep 17 00:00:00 2001
+From: PJ Reiniger <pj.reiniger@gmail.com>
+Date: Mon, 12 Dec 2022 21:35:26 -0500
+Subject: [PATCH 06/11] Improved floating point handling
+
+---
+ .../nlohmann/detail/input/binary_reader.hpp   |  2 +-
+ .../nlohmann/detail/output/binary_writer.hpp  | 44 ++++++++++++++++---
+ include/nlohmann/detail/output/serializer.hpp | 32 +++++++-------
+ 3 files changed, 54 insertions(+), 24 deletions(-)
+
+diff --git a/include/nlohmann/detail/input/binary_reader.hpp b/include/nlohmann/detail/input/binary_reader.hpp
+index b6a8a1f7..ce3b52b9 100644
+--- a/include/nlohmann/detail/input/binary_reader.hpp
++++ b/include/nlohmann/detail/input/binary_reader.hpp
+@@ -134,7 +134,7 @@ class binary_reader
+ 
+     @note from http://stackoverflow.com/a/1001328/266378
+     */
+-    static constexpr bool little_endianess(int num = 1) noexcept
++    static bool little_endianess(int num = 1) noexcept
+     {
+         return (*reinterpret_cast<char*>(&num) == 1);
+     }
+diff --git a/include/nlohmann/detail/output/binary_writer.hpp b/include/nlohmann/detail/output/binary_writer.hpp
+index bea169de..983ff9e6 100644
+--- a/include/nlohmann/detail/output/binary_writer.hpp
++++ b/include/nlohmann/detail/output/binary_writer.hpp
+@@ -159,7 +159,7 @@ class binary_writer
+ 
+             case value_t::number_float: // Double-Precision Float
+             {
+-                oa->write_character(static_cast<CharType>(0xFB));
++                o << get_cbor_float_prefix(j.m_value.number_float);
+                 write_number(j.m_value.number_float);
+                 break;
+             }
+@@ -233,7 +233,7 @@ class binary_writer
+                     write_number(static_cast<uint32_t>(N));
+                 }
+                 // LCOV_EXCL_START
+-                else if (N <= (std::numeric_limits<uint64_t>::max)())
++                else /*if (N <= (std::numeric_limits<uint64_t>::max)())*/
+                 {
+                     oa->write_character(static_cast<CharType>(0xBB));
+                     write_number(static_cast<uint64_t>(N));
+@@ -750,7 +750,7 @@ class binary_writer
+     {
+         if (add_prefix)
+         {
+-            oa->write_character(static_cast<CharType>('D'));  // float64
++            o << get_ubjson_float_prefix(n);
+         }
+         write_number(n);
+     }
+@@ -919,7 +919,7 @@ class binary_writer
+ 
+             case value_t::number_unsigned:
+             {
+-                if (j.m_value.number_unsigned <= (std::numeric_limits<int8_t>::max)())
++                if (j.m_value.number_unsigned <= static_cast<uint64_t>((std::numeric_limits<int8_t>::max)()))
+                 {
+                     return 'i';
+                 }
+@@ -927,11 +927,11 @@ class binary_writer
+                 {
+                     return 'U';
+                 }
+-                else if (j.m_value.number_unsigned <= (std::numeric_limits<int16_t>::max)())
++                else if (j.m_value.number_unsigned <= static_cast<uint64_t>((std::numeric_limits<int16_t>::max)()))
+                 {
+                     return 'I';
+                 }
+-                else if (j.m_value.number_unsigned <= (std::numeric_limits<int32_t>::max)())
++                else if (j.m_value.number_unsigned <= static_cast<uint64_t>((std::numeric_limits<int32_t>::max)()))
+                 {
+                     return 'l';
+                 }
+@@ -942,7 +942,7 @@ class binary_writer
+             }
+ 
+             case value_t::number_float:
+-                return 'D';
++                return get_ubjson_float_prefix(j.m_value.number_float);
+ 
+             case value_t::string:
+                 return 'S';
+@@ -959,6 +959,36 @@ class binary_writer
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
++    static constexpr CharType get_cbor_float_prefix(float)
++    {
++        return static_cast<CharType>(0xFA);  // Single-Precision Float
++    }
++
++    static constexpr CharType get_cbor_float_prefix(double)
++    {
++        return static_cast<CharType>(0xFB);  // Double-Precision Float
++    }
++
++    static constexpr CharType get_msgpack_float_prefix(float)
++    {
++        return static_cast<CharType>(0xCA);  // float 32
++    }
++
++    static constexpr CharType get_msgpack_float_prefix(double)
++    {
++        return static_cast<CharType>(0xCB);  // float 64
++    }
++
++    static constexpr CharType get_ubjson_float_prefix(float)
++    {
++        return 'd';  // float 32
++    }
++
++    static constexpr CharType get_ubjson_float_prefix(double)
++    {
++        return 'D';  // float 64
++    }
++
+   private:
+     /// whether we can assume little endianess
+     const bool is_little_endian = json::binary_reader::little_endianess();
+diff --git a/include/nlohmann/detail/output/serializer.hpp b/include/nlohmann/detail/output/serializer.hpp
+index 5fd8293f..73c2db6f 100644
+--- a/include/nlohmann/detail/output/serializer.hpp
++++ b/include/nlohmann/detail/output/serializer.hpp
+@@ -46,11 +46,9 @@ class serializer
+     @param[in] ichar  indentation character to use
+     @param[in] indent_init_len  initial length of indentation string buffer
+     */
+-    serializer(raw_ostream& s, const char ichar)
+-        : o(s), loc(std::localeconv()),
+-          thousands_sep(loc->thousands_sep == nullptr ? '\0' : * (loc->thousands_sep)),
+-          decimal_point(loc->decimal_point == nullptr ? '\0' : * (loc->decimal_point)),
+-          indent_char(ichar), indent_string(512, indent_char)
++    serializer(raw_ostream& s, const char ichar, size_t indent_init_len = 512)
++        : o(s), indent_char(ichar),
++          indent_string(indent_init_len, indent_char)
+     {}
+ 
+     // delete because of pointer members
+@@ -445,6 +443,18 @@ class serializer
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
++    template <typename NumberType,
++              detail::enable_if_t<std::is_same_v<NumberType, uint64_t>, int> = 0>
++    bool is_negative_integer(NumberType x) {
++      return false;
++    }
++
++    template <typename NumberType,
++              detail::enable_if_t<std::is_same_v<NumberType, int64_t>, int> = 0>
++    bool is_negative_integer(NumberType x) {
++      return x < 0;
++    }
++
+     /*!
+     @brief dump an integer
+ 
+@@ -467,7 +477,7 @@ class serializer
+             return;
+         }
+ 
+-        const bool is_negative = (x <= 0) and (x != 0);  // see issue #755
++        const bool is_negative = is_negative_integer(x);  // see issue #755
+         std::size_t i = 0;
+ 
+         while (x != 0)
+@@ -645,16 +655,6 @@ class serializer
+     /// a (hopefully) large enough character buffer
+     std::array<char, 64> number_buffer{{}};
+ 
+-    /// the locale
+-    const std::lconv* loc = nullptr;
+-    /// the locale's thousand separator character
+-    const char thousands_sep = '\0';
+-    /// the locale's decimal point character
+-    const char decimal_point = '\0';
+-
+-    /// string buffer
+-    std::array<char, 512> string_buffer{{}};
+-
+     /// the indentation character
+     const char indent_char;
+     /// the indentation string

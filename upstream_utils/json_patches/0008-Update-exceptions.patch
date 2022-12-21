@@ -1,0 +1,103 @@
+From 03ec9b34129e8edc668282219dfbdd7f0e549301 Mon Sep 17 00:00:00 2001
+From: PJ Reiniger <pj.reiniger@gmail.com>
+Date: Mon, 12 Dec 2022 22:47:03 -0500
+Subject: [PATCH 08/11] Update exceptions
+
+---
+ include/nlohmann/detail/exceptions.hpp | 43 +++++++++++++++-----------
+ 1 file changed, 25 insertions(+), 18 deletions(-)
+
+diff --git a/include/nlohmann/detail/exceptions.hpp b/include/nlohmann/detail/exceptions.hpp
+index ef6f8374..efa0d741 100644
+--- a/include/nlohmann/detail/exceptions.hpp
++++ b/include/nlohmann/detail/exceptions.hpp
+@@ -54,17 +54,12 @@ class exception : public std::exception
+ 
+   protected:
+ //-------EXPORTED_FUNC_DEF_START exception
+-    exception(int id_, const char* what_arg)
++    exception(int id_, std::string_view what_arg)
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+  : id(id_), m(what_arg) {}
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
+-    static std::string name(const std::string& ename, int id_)
+-    {
+-        return "[json.exception." + ename + "." + std::to_string(id_) + "] ";
+-    }
+-
+   private:
+     /// an exception object as storage for error messages
+     std::runtime_error m;
+@@ -129,10 +124,10 @@ class parse_error : public exception
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+     {
+-        std::string w = exception::name("parse_error", id_) + "parse error" +
+-                        (byte_ != 0 ? (" at " + std::to_string(byte_)) : "") +
+-                        ": " + what_arg;
+-        return parse_error(id_, byte_, w.c_str());
++        if (byte_ != 0)
++            return parse_error(id_, byte_, fmt::format("[json.exception.parse_error.{}] parse error at {}: {}", id_, byte_, what_arg));
++        else
++            return parse_error(id_, byte_, fmt::format("[json.exception.parse_error.{}] parse error: {}", id_, what_arg));
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
+@@ -197,8 +192,15 @@ class invalid_iterator : public exception
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+     {
+-        std::string w = exception::name("invalid_iterator", id_) + what_arg;
+-        return invalid_iterator(id_, w.c_str());
++        return invalid_iterator(id_, fmt::format("[json.exception.invalid_iterator.{}] {}", id_, what_arg));
++    }
++//-------EXPORTED_FUNC_CONTENTS_END
++//-------EXPORTED_FUNC_DEF_START invalid_iterator
++    static invalid_iterator create(int id_, const std::string& what_arg, std::string_view type_info)
++//-------EXPORTED_FUNC_DEF_END
++//-------EXPORTED_FUNC_CONTENTS_START
++    {
++        return invalid_iterator(id_, fmt::format("[json.exception.invalid_iterator.{}] {} {}", id_, what_arg, type_info));
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
+@@ -253,8 +255,15 @@ class type_error : public exception
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+     {
+-        std::string w = exception::name("type_error", id_) + what_arg;
+-        return type_error(id_, w.c_str());
++        return type_error(id_, fmt::format("[json.exception.type_error.{}] {}", id_, what_arg));
++    }
++//-------EXPORTED_FUNC_CONTENTS_END
++//-------EXPORTED_FUNC_DEF_START type_error
++    static type_error create(int id_, const std::string& what_arg, std::string_view type_info)
++//-------EXPORTED_FUNC_DEF_END
++//-------EXPORTED_FUNC_CONTENTS_START
++    {
++        return type_error(id_, fmt::format("[json.exception.type_error.{}] {} {}", id_, what_arg, type_info));
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
+@@ -302,8 +311,7 @@ class out_of_range : public exception
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+     {
+-        std::string w = exception::name("out_of_range", id_) + what_arg;
+-        return out_of_range(id_, w.c_str());
++        return out_of_range(id_, fmt::format("[json.exception.out_of_range.{}] {}", id_, what_arg));
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
+@@ -343,8 +351,7 @@ class other_error : public exception
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+     {
+-        std::string w = exception::name("other_error", id_) + what_arg;
+-        return other_error(id_, w.c_str());
++        return other_error(id_, fmt::format("[json.exception.other_error.{}] {}", id_, what_arg));
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 

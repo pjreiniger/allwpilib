@@ -1,0 +1,17 @@
+load("//shared/bazel/rules:cc_rules.bzl", "wpilib_cc_static_and_shared_library")
+
+wpilib_cc_static_and_shared_library(
+    name = "llvm",
+    srcs = glob(["cpp/llvm/*"]),
+    hdrs = glob(["include/wpi/*.h"]),
+    includes = ["cpp/llvm"],
+    standard_deps = [
+        "//wpiutil/src/main/native/thirdparty/ghc",
+        "//wpiutil/src/main/native:mutex",
+    ],
+    strip_include_prefix = "include",
+    visibility = ["//visibility:public"],
+    wpi_maybe_shared_deps = [
+        "//wpiutil/src/main/native/thirdparty/fmtlib:fmtlib",
+    ],
+)

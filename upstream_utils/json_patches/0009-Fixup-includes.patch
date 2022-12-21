@@ -1,0 +1,297 @@
+From 538fc4ce87209ca13447cb5113d6fb2b73ab6ca4 Mon Sep 17 00:00:00 2001
+From: PJ Reiniger <pj.reiniger@gmail.com>
+Date: Tue, 20 Dec 2022 01:53:46 -0500
+Subject: [PATCH 09/11] Fixup includes
+
+---
+ include/nlohmann/detail/exceptions.hpp        |  3 ++
+ .../nlohmann/detail/input/binary_reader.hpp   | 20 ++++-------
+ include/nlohmann/detail/input/lexer.hpp       | 18 +++++++---
+ include/nlohmann/detail/input/parser.hpp      | 12 +++----
+ include/nlohmann/detail/json_pointer.hpp      | 15 ++++++--
+ .../nlohmann/detail/output/binary_writer.hpp  | 14 ++++----
+ include/nlohmann/detail/output/serializer.hpp | 21 ++++++------
+ include/nlohmann/json.hpp                     | 34 ++++++++++---------
+ 8 files changed, 75 insertions(+), 62 deletions(-)
+
+diff --git a/include/nlohmann/detail/exceptions.hpp b/include/nlohmann/detail/exceptions.hpp
+index efa0d741..b15324e7 100644
+--- a/include/nlohmann/detail/exceptions.hpp
++++ b/include/nlohmann/detail/exceptions.hpp
+@@ -3,6 +3,9 @@
+ #include <exception> // exception
+ #include <stdexcept> // runtime_error
+ #include <string> // to_string
++//-------EXPORTED_INCLUDE_START
++#include "fmt/format.h"
++//-------EXPORTED_INCLUDE_END
+ 
+ namespace nlohmann
+ {
+diff --git a/include/nlohmann/detail/input/binary_reader.hpp b/include/nlohmann/detail/input/binary_reader.hpp
+index ce3b52b9..b6505180 100644
+--- a/include/nlohmann/detail/input/binary_reader.hpp
++++ b/include/nlohmann/detail/input/binary_reader.hpp
+@@ -1,28 +1,20 @@
+ #pragma once
+ 
+-#include <algorithm> // generate_n
+-#include <array> // array
+-#include <cassert> // assert
+-#include <cmath> // ldexp
+ #include <cstddef> // size_t
+-#include <cstdint> // uint8_t, uint16_t, uint32_t, uint64_t
+-#include <cstring> // memcpy
+-#include <iomanip> // setw, setfill
+-#include <ios> // hex
+-#include <iterator> // back_inserter
+-#include <limits> // numeric_limits
+-#include <sstream> // stringstream
+ #include <string> // char_traits, string
+-#include <utility> // make_pair, move
+ 
+-#include <nlohmann/detail/input/input_adapters.hpp>
+-#include <nlohmann/detail/exceptions.hpp>
++#include <nlohmann/json.hpp>
+ #include <nlohmann/detail/macro_scope.hpp>
+ #include <nlohmann/detail/value_t.hpp>
++//-------EXPORTED_INCLUDE_START
++#include "fmt/format.h"
++#include "wpi/raw_istream.h"
++//-------EXPORTED_INCLUDE_END
+ 
+ namespace nlohmann
+ {
+ class json;
++class raw_istream;
+ }
+ 
+ namespace nlohmann
+diff --git a/include/nlohmann/detail/input/lexer.hpp b/include/nlohmann/detail/input/lexer.hpp
+index e6772c2a..6c8008dc 100644
+--- a/include/nlohmann/detail/input/lexer.hpp
++++ b/include/nlohmann/detail/input/lexer.hpp
+@@ -4,14 +4,22 @@
+ #include <cstddef> // size_t
+ #include <cstdlib> // strtof, strtod, strtold, strtoll, strtoull
+ #include <initializer_list> // initializer_list
+-#include <ios> // hex, uppercase
+-#include <iomanip> // setw, setfill
+-#include <sstream> // stringstream
+ #include <string> // char_traits, string
+-#include <vector> // vector
+ 
+ #include <nlohmann/detail/macro_scope.hpp>
+-#include <nlohmann/detail/input/input_adapters.hpp>
++
++#include "wpi/SmallString.h"
++#include "wpi/SmallVector.h"
++//-------EXPORTED_INCLUDE_START
++#include "fmt/format.h"
++#include "wpi/raw_istream.h"
++#include "wpi/raw_ostream.h"
++//-------EXPORTED_INCLUDE_END
++
++namespace wpi
++{
++class raw_istream;
++}
+ 
+ namespace nlohmann
+ {
+diff --git a/include/nlohmann/detail/input/parser.hpp b/include/nlohmann/detail/input/parser.hpp
+index e87be215..28f6c000 100644
+--- a/include/nlohmann/detail/input/parser.hpp
++++ b/include/nlohmann/detail/input/parser.hpp
+@@ -1,21 +1,19 @@
+ #pragma once
+ 
+-#include <cassert> // assert
+-#include <cmath> // isfinite
+ #include <cstdint> // uint8_t
+ #include <functional> // function
+-#include <string> // string
+-#include <utility> // move
+ 
+-#include <nlohmann/detail/exceptions.hpp>
+ #include <nlohmann/detail/macro_scope.hpp>
+-#include <nlohmann/detail/input/input_adapters.hpp>
+ #include <nlohmann/detail/input/lexer.hpp>
+-#include <nlohmann/detail/value_t.hpp>
++//-------EXPORTED_INCLUDE_START
++#include "wpi/json.h"
++#include "fmt/format.h"
++//-------EXPORTED_INCLUDE_END
+ 
+ namespace wpi
+ {
+ class json;
++class raw_istream;
+ }
+ 
+ namespace nlohmann
+diff --git a/include/nlohmann/detail/json_pointer.hpp b/include/nlohmann/detail/json_pointer.hpp
+index 870d0509..9dee4ec0 100644
+--- a/include/nlohmann/detail/json_pointer.hpp
++++ b/include/nlohmann/detail/json_pointer.hpp
+@@ -6,8 +6,19 @@
+ #include <vector> // vector
+ 
+ #include <nlohmann/detail/macro_scope.hpp>
+-#include <nlohmann/detail/exceptions.hpp>
+-#include <nlohmann/detail/value_t.hpp>
++//-------EXPORTED_INCLUDE_START
++#include "wpi/json.h"
++
++#include <numeric> // accumulate
++
++#include "fmt/format.h"
++#include "wpi/SmallString.h"
++#include "wpi/StringExtras.h"
++//-------EXPORTED_INCLUDE_END
++
++namespace wpi {
++class json;
++}
+ 
+ namespace nlohmann
+ {
+diff --git a/include/nlohmann/detail/output/binary_writer.hpp b/include/nlohmann/detail/output/binary_writer.hpp
+index 983ff9e6..3f36f4c3 100644
+--- a/include/nlohmann/detail/output/binary_writer.hpp
++++ b/include/nlohmann/detail/output/binary_writer.hpp
+@@ -1,17 +1,17 @@
+ #pragma once
+ 
+-#include <algorithm> // reverse
+-#include <array> // array
+-#include <cstdint> // uint8_t, uint16_t, uint32_t, uint64_t
+-#include <cstring> // memcpy
+-#include <limits> // numeric_limits
++#include <string_view>
+ 
+-#include <nlohmann/detail/input/binary_reader.hpp>
+-#include <nlohmann/detail/output/output_adapters.hpp>
++//-------EXPORTED_INCLUDE_START
++#include "wpi/json.h"
+ 
++#include "fmt/format.h"
++#include "wpi/raw_ostream.h"
++//-------EXPORTED_INCLUDE_END
+ namespace wpi
+ {
+ class json;
++class raw_ostream;
+ }
+ 
+ namespace nlohmann
+diff --git a/include/nlohmann/detail/output/serializer.hpp b/include/nlohmann/detail/output/serializer.hpp
+index 73c2db6f..9d962216 100644
+--- a/include/nlohmann/detail/output/serializer.hpp
++++ b/include/nlohmann/detail/output/serializer.hpp
+@@ -3,25 +3,24 @@
+ #include <algorithm> // reverse, remove, fill, find, none_of
+ #include <array> // array
+ #include <cassert> // assert
+-#include <ciso646> // and, or
+-#include <clocale> // localeconv, lconv
+ #include <cmath> // labs, isfinite, isnan, signbit
+ #include <cstddef> // size_t, ptrdiff_t
+ #include <cstdint> // uint8_t
+-#include <cstdio> // snprintf
+-#include <iomanip> // setfill
+-#include <iterator> // next
+-#include <limits> // numeric_limits
+ #include <string> // string
+-#include <sstream> // stringstream
+ #include <type_traits> // is_same
+ 
+-#include <nlohmann/detail/exceptions.hpp>
+-#include <nlohmann/detail/conversions/to_chars.hpp>
+ #include <nlohmann/detail/macro_scope.hpp>
+ #include <nlohmann/detail/meta.hpp>
+-#include <nlohmann/detail/output/output_adapters.hpp>
+-#include <nlohmann/detail/value_t.hpp>
++
++#include "wpi/raw_ostream.h"
++//-------EXPORTED_INCLUDE_START
++#include "fmt/format.h"
++#include "wpi/SmallString.h"
++#include "wpi/raw_os_ostream.h"
++
++#include "wpi/detail/conversions/json_to_chars.h"
++#include "wpi/json.h"
++//-------EXPORTED_INCLUDE_END
+ 
+ namespace nlohmann
+ {
+diff --git a/include/nlohmann/json.hpp b/include/nlohmann/json.hpp
+index 35d5da85..082bc4e0 100644
+--- a/include/nlohmann/json.hpp
++++ b/include/nlohmann/json.hpp
+@@ -35,16 +35,15 @@ SOFTWARE.
+ 
+ #include <algorithm> // all_of, find, for_each
+ #include <cassert> // assert
+-#include <ciso646> // and, not, or
+ #include <cstddef> // nullptr_t, ptrdiff_t, size_t
+ #include <functional> // hash, less
+ #include <initializer_list> // initializer_list
+-#include <iosfwd> // istream, ostream
+-#include <iterator> // iterator_traits, random_access_iterator_tag
+-#include <numeric> // accumulate
++#include <span>
+ #include <string> // string, stoi, to_string
+ #include <utility> // declval, forward, move, pair, swap
+ 
++#include "wpi/StringMap.h"
++
+ #include <nlohmann/json_fwd.hpp>
+ #include <nlohmann/detail/macro_scope.hpp>
+ #include <nlohmann/detail/meta.hpp>
+@@ -52,30 +51,33 @@ SOFTWARE.
+ #include <nlohmann/detail/value_t.hpp>
+ #include <nlohmann/detail/conversions/from_json.hpp>
+ #include <nlohmann/detail/conversions/to_json.hpp>
+-#include <nlohmann/detail/input/input_adapters.hpp>
+-#include <nlohmann/detail/input/lexer.hpp>
+-#include <nlohmann/detail/input/parser.hpp>
+ #include <nlohmann/detail/iterators/primitive_iterator.hpp>
+ #include <nlohmann/detail/iterators/internal_iterator.hpp>
+ #include <nlohmann/detail/iterators/iter_impl.hpp>
+ #include <nlohmann/detail/iterators/iteration_proxy.hpp>
+ #include <nlohmann/detail/iterators/json_reverse_iterator.hpp>
+-#include <nlohmann/detail/output/output_adapters.hpp>
+-#include <nlohmann/detail/input/binary_reader.hpp>
+-#include <nlohmann/detail/output/binary_writer.hpp>
+-#include <nlohmann/detail/output/serializer.hpp>
+ #include <nlohmann/detail/json_ref.hpp>
+ #include <nlohmann/detail/json_pointer.hpp>
+ #include <nlohmann/adl_serializer.hpp>
++//-------EXPORTED_INCLUDE_START
++#include "fmt/format.h"
++#include "wpi/raw_istream.h"
++#include "wpi/raw_ostream.h"
++#include "wpi/raw_os_ostream.h"
++
++#include "wpi/detail/input/json_parser.h"
++#include "wpi/detail/input/json_binary_reader.h"
++#include "wpi/detail/output/json_binary_writer.h"
++#include "wpi/detail/output/json_serializer.h"
++//-------EXPORTED_INCLUDE_END
+ 
+ namespace nlohmann
+ {
+-class JsonTest;
+ 
+-namespace detail
+-{
+-class binary_reader;
+-}
++class raw_istream;
++class raw_ostream;
++
++class JsonTest;
+ }
+ 
+ /*!

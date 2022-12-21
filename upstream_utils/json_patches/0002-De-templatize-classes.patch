@@ -1,0 +1,603 @@
+From fa90520d261bdf83cdb8223cb010c8abc04c8ca4 Mon Sep 17 00:00:00 2001
+From: PJ Reiniger <pj.reiniger@gmail.com>
+Date: Mon, 19 Dec 2022 03:20:28 -0500
+Subject: [PATCH 02/11] De-templatize classes
+
+---
+ .../nlohmann/detail/conversions/from_json.hpp |  18 +-
+ .../nlohmann/detail/input/binary_reader.hpp   |   6 +-
+ include/nlohmann/detail/input/lexer.hpp       |   1 -
+ include/nlohmann/detail/input/parser.hpp      |   8 +-
+ .../nlohmann/detail/iterators/iter_impl.hpp   |   6 +
+ include/nlohmann/detail/json_pointer.hpp      |   3 +-
+ include/nlohmann/detail/macro_scope.hpp       |  16 --
+ include/nlohmann/detail/meta.hpp              |   3 +-
+ .../nlohmann/detail/output/binary_writer.hpp  |  22 ++-
+ include/nlohmann/detail/output/serializer.hpp |   1 -
+ include/nlohmann/json.hpp                     | 164 +++---------------
+ include/nlohmann/json_fwd.hpp                 |  15 +-
+ 12 files changed, 79 insertions(+), 184 deletions(-)
+
+diff --git a/include/nlohmann/detail/conversions/from_json.hpp b/include/nlohmann/detail/conversions/from_json.hpp
+index eccc04f1..0a6d5c92 100644
+--- a/include/nlohmann/detail/conversions/from_json.hpp
++++ b/include/nlohmann/detail/conversions/from_json.hpp
+@@ -197,8 +197,24 @@ void from_json(const BasicJsonType& j, CompatibleArrayType& arr)
+     from_json_array_impl(j, arr, priority_tag<2> {});
+ }
+ 
++template<typename BasicJsonType>
++inline
++void from_json(const BasicJsonType& j, typename BasicJsonType::object_t& obj)
++{
++    if (!j.is_object())
++    {
++        JSON_THROW(type_error::create(302, "type must be object, but is", j.type_name()));
++    }
++
++    auto inner_object = j.template get_ptr<const typename BasicJsonType::object_t*>();
++    for (const auto& i : *inner_object) {
++        obj.try_emplace(i.first(), i.second);
++    }
++}
++
+ template<typename BasicJsonType, typename CompatibleObjectType,
+-         enable_if_t<is_compatible_object_type<BasicJsonType, CompatibleObjectType>::value, int> = 0>
++         enable_if_t<is_compatible_object_type<BasicJsonType, CompatibleObjectType>::value and
++                     not std::is_same<typename BasicJsonType::object_t, CompatibleObjectType>::value, int> = 0>
+ void from_json(const BasicJsonType& j, CompatibleObjectType& obj)
+ {
+     if (JSON_UNLIKELY(not j.is_object()))
+diff --git a/include/nlohmann/detail/input/binary_reader.hpp b/include/nlohmann/detail/input/binary_reader.hpp
+index 7d096053..5fe33d57 100644
+--- a/include/nlohmann/detail/input/binary_reader.hpp
++++ b/include/nlohmann/detail/input/binary_reader.hpp
+@@ -20,6 +20,11 @@
+ #include <nlohmann/detail/macro_scope.hpp>
+ #include <nlohmann/detail/value_t.hpp>
+ 
++namespace nlohmann
++{
++class json;
++}
++
+ namespace nlohmann
+ {
+ namespace detail
+@@ -31,7 +36,6 @@ namespace detail
+ /*!
+ @brief deserialization of CBOR and MessagePack values
+ */
+-template<typename BasicJsonType>
+ class binary_reader
+ {
+     using number_integer_t = typename BasicJsonType::number_integer_t;
+diff --git a/include/nlohmann/detail/input/lexer.hpp b/include/nlohmann/detail/input/lexer.hpp
+index 2210048d..087559f1 100644
+--- a/include/nlohmann/detail/input/lexer.hpp
++++ b/include/nlohmann/detail/input/lexer.hpp
+@@ -26,7 +26,6 @@ namespace detail
+ 
+ This class organizes the lexical analysis during JSON deserialization.
+ */
+-template<typename BasicJsonType>
+ class lexer
+ {
+     using number_integer_t = typename BasicJsonType::number_integer_t;
+diff --git a/include/nlohmann/detail/input/parser.hpp b/include/nlohmann/detail/input/parser.hpp
+index 43a1e0af..f90bee7f 100644
+--- a/include/nlohmann/detail/input/parser.hpp
++++ b/include/nlohmann/detail/input/parser.hpp
+@@ -13,6 +13,11 @@
+ #include <nlohmann/detail/input/lexer.hpp>
+ #include <nlohmann/detail/value_t.hpp>
+ 
++namespace wpi
++{
++class json;
++}
++
+ namespace nlohmann
+ {
+ namespace detail
+@@ -26,14 +31,13 @@ namespace detail
+ 
+ This class implements a recursive decent parser.
+ */
+-template<typename BasicJsonType>
+ class parser
+ {
+     using number_integer_t = typename BasicJsonType::number_integer_t;
+     using number_unsigned_t = typename BasicJsonType::number_unsigned_t;
+     using number_float_t = typename BasicJsonType::number_float_t;
+     using string_t = typename BasicJsonType::string_t;
+-    using lexer_t = lexer<BasicJsonType>;
++    using lexer_t = lexer;
+     using token_type = typename lexer_t::token_type;
+ 
+   public:
+diff --git a/include/nlohmann/detail/iterators/iter_impl.hpp b/include/nlohmann/detail/iterators/iter_impl.hpp
+index 52ede17b..6d62c2dc 100644
+--- a/include/nlohmann/detail/iterators/iter_impl.hpp
++++ b/include/nlohmann/detail/iterators/iter_impl.hpp
+@@ -11,6 +11,11 @@
+ #include <nlohmann/detail/meta.hpp>
+ #include <nlohmann/detail/value_t.hpp>
+ 
++namespace wpi
++{
++class JsonTest;
++}
++
+ namespace nlohmann
+ {
+ namespace detail
+@@ -45,6 +50,7 @@ class iter_impl
+     friend iter_impl<typename std::conditional<std::is_const<BasicJsonType>::value, typename std::remove_const<BasicJsonType>::type, const BasicJsonType>::type>;
+     friend BasicJsonType;
+     friend iteration_proxy<iter_impl>;
++    friend class ::wpi::JsonTest;
+ 
+     using object_t = typename BasicJsonType::object_t;
+     using array_t = typename BasicJsonType::array_t;
+diff --git a/include/nlohmann/detail/json_pointer.hpp b/include/nlohmann/detail/json_pointer.hpp
+index ea99b602..995d223c 100644
+--- a/include/nlohmann/detail/json_pointer.hpp
++++ b/include/nlohmann/detail/json_pointer.hpp
+@@ -11,12 +11,11 @@
+ 
+ namespace nlohmann
+ {
+-template<typename BasicJsonType>
+ class json_pointer
+ {
+     // allow basic_json to access private members
+-    NLOHMANN_BASIC_JSON_TPL_DECLARATION
+     friend class basic_json;
++    friend class JsonTest;
+ 
+   public:
+     /*!
+diff --git a/include/nlohmann/detail/macro_scope.hpp b/include/nlohmann/detail/macro_scope.hpp
+index e6752218..21a8fac0 100644
+--- a/include/nlohmann/detail/macro_scope.hpp
++++ b/include/nlohmann/detail/macro_scope.hpp
+@@ -77,22 +77,6 @@
+     #define JSON_HAS_CPP_14
+ #endif
+ 
+-// Ugly macros to avoid uglier copy-paste when specializing basic_json. They
+-// may be removed in the future once the class is split.
+-
+-#define NLOHMANN_BASIC_JSON_TPL_DECLARATION                                \
+-    template<template<typename, typename, typename...> class ObjectType,   \
+-             template<typename, typename...> class ArrayType,              \
+-             class StringType, class BooleanType, class NumberIntegerType, \
+-             class NumberUnsignedType, class NumberFloatType,              \
+-             template<typename> class AllocatorType,                       \
+-             template<typename, typename = void> class JSONSerializer>
+-
+-#define NLOHMANN_BASIC_JSON_TPL                                            \
+-    basic_json<ObjectType, ArrayType, StringType, BooleanType,             \
+-    NumberIntegerType, NumberUnsignedType, NumberFloatType,                \
+-    AllocatorType, JSONSerializer>
+-
+ /*!
+ @brief Helper to determine whether there's a key_type for T.
+ 
+diff --git a/include/nlohmann/detail/meta.hpp b/include/nlohmann/detail/meta.hpp
+index b251afb6..ca80089a 100644
+--- a/include/nlohmann/detail/meta.hpp
++++ b/include/nlohmann/detail/meta.hpp
+@@ -27,8 +27,7 @@ namespace detail
+ 
+ template<typename> struct is_basic_json : std::false_type {};
+ 
+-NLOHMANN_BASIC_JSON_TPL_DECLARATION
+-struct is_basic_json<NLOHMANN_BASIC_JSON_TPL> : std::true_type {};
++template<> struct is_basic_json<json> : std::true_type {};
+ 
+ // alias templates to reduce boilerplate
+ template<bool B, typename T = void>
+diff --git a/include/nlohmann/detail/output/binary_writer.hpp b/include/nlohmann/detail/output/binary_writer.hpp
+index 9743e03e..6e0d03ac 100644
+--- a/include/nlohmann/detail/output/binary_writer.hpp
++++ b/include/nlohmann/detail/output/binary_writer.hpp
+@@ -9,6 +9,11 @@
+ #include <nlohmann/detail/input/binary_reader.hpp>
+ #include <nlohmann/detail/output/output_adapters.hpp>
+ 
++namespace wpi
++{
++class json;
++}
++
+ namespace nlohmann
+ {
+ namespace detail
+@@ -20,9 +25,10 @@ namespace detail
+ /*!
+ @brief serialization to CBOR and MessagePack values
+ */
+-template<typename BasicJsonType, typename CharType>
+ class binary_writer
+ {
++    using CharType = unsigned char;
++
+   public:
+     /*!
+     @brief create a binary writer
+@@ -599,7 +605,7 @@ class binary_writer
+                 if (use_type and not j.m_value.array->empty())
+                 {
+                     assert(use_count);
+-                    const char first_prefix = ubjson_prefix(j.front());
++                    const CharType first_prefix = ubjson_prefix(j.front());
+                     const bool same_prefix = std::all_of(j.begin() + 1, j.end(),
+                                                          [this, first_prefix](const BasicJsonType & v)
+                     {
+@@ -610,7 +616,7 @@ class binary_writer
+                     {
+                         prefix_required = false;
+                         oa->write_character(static_cast<CharType>('$'));
+-                        oa->write_character(static_cast<CharType>(first_prefix));
++                        oa->write_character(first_prefix);
+                     }
+                 }
+ 
+@@ -644,7 +650,7 @@ class binary_writer
+                 if (use_type and not j.m_value.object->empty())
+                 {
+                     assert(use_count);
+-                    const char first_prefix = ubjson_prefix(j.front());
++                    const CharType first_prefix = ubjson_prefix(j.front());
+                     const bool same_prefix = std::all_of(j.begin(), j.end(),
+                                                          [this, first_prefix](const BasicJsonType & v)
+                     {
+@@ -655,7 +661,7 @@ class binary_writer
+                     {
+                         prefix_required = false;
+                         oa->write_character(static_cast<CharType>('$'));
+-                        oa->write_character(static_cast<CharType>(first_prefix));
++                        oa->write_character(first_prefix);
+                     }
+                 }
+ 
+@@ -706,7 +712,7 @@ class binary_writer
+ //-------EXPORTED_FUNC_CONTENTS_START
+     {
+         // step 1: write number to array of length NumberType
+-        std::array<CharType, sizeof(NumberType)> vec;
++        std::array<uint8_t, sizeof(NumberType)> vec;
+         std::memcpy(vec.data(), &n, sizeof(NumberType));
+ 
+         // step 2: write array to output (with possible reordering)
+@@ -862,7 +868,7 @@ class binary_writer
+           value that does not fit the previous limits.
+     */
+ //-------EXPORTED_FUNC_DEF_START json::binary_writer
+-    char ubjson_prefix(const BasicJsonType& j) const noexcept
++    CharType ubjson_prefix(const BasicJsonType& j) const noexcept
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+     {
+@@ -942,7 +948,7 @@ class binary_writer
+ 
+   private:
+     /// whether we can assume little endianess
+-    const bool is_little_endian = binary_reader<BasicJsonType>::little_endianess();
++    const bool is_little_endian = json::binary_reader::little_endianess();
+ 
+     /// the output
+     output_adapter_t<CharType> oa = nullptr;
+diff --git a/include/nlohmann/detail/output/serializer.hpp b/include/nlohmann/detail/output/serializer.hpp
+index 7db60fdf..fca55a88 100644
+--- a/include/nlohmann/detail/output/serializer.hpp
++++ b/include/nlohmann/detail/output/serializer.hpp
+@@ -31,7 +31,6 @@ namespace detail
+ // serialization //
+ ///////////////////
+ 
+-template<typename BasicJsonType>
+ class serializer
+ {
+     using string_t = typename BasicJsonType::string_t;
+diff --git a/include/nlohmann/json.hpp b/include/nlohmann/json.hpp
+index 35ca3976..5e6cb21d 100644
+--- a/include/nlohmann/json.hpp
++++ b/include/nlohmann/json.hpp
+@@ -68,6 +68,16 @@ SOFTWARE.
+ #include <nlohmann/detail/json_pointer.hpp>
+ #include <nlohmann/adl_serializer.hpp>
+ 
++namespace nlohmann
++{
++class JsonTest;
++
++namespace detail
++{
++class binary_reader;
++}
++}
++
+ /*!
+ @brief namespace for Niels Lohmann
+ @see https://github.com/nlohmann
+@@ -79,25 +89,6 @@ namespace nlohmann
+ /*!
+ @brief a class to store JSON values
+ 
+-@tparam ObjectType type for JSON objects (`std::map` by default; will be used
+-in @ref object_t)
+-@tparam ArrayType type for JSON arrays (`std::vector` by default; will be used
+-in @ref array_t)
+-@tparam StringType type for JSON strings and object keys (`std::string` by
+-default; will be used in @ref string_t)
+-@tparam BooleanType type for JSON booleans (`bool` by default; will be used
+-in @ref boolean_t)
+-@tparam NumberIntegerType type for JSON integer numbers (`int64_t` by
+-default; will be used in @ref number_integer_t)
+-@tparam NumberUnsignedType type for JSON unsigned integer numbers (@c
+-`uint64_t` by default; will be used in @ref number_unsigned_t)
+-@tparam NumberFloatType type for JSON floating-point numbers (`double` by
+-default; will be used in @ref number_float_t)
+-@tparam AllocatorType type of the allocator to use (`std::allocator` by
+-default)
+-@tparam JSONSerializer the serializer to resolve internal calls to `to_json()`
+-and `from_json()` (@ref adl_serializer by default)
+-
+ @requirement The class satisfies the following concept requirements:
+ - Basic
+  - [DefaultConstructible](http://en.cppreference.com/w/cpp/concept/DefaultConstructible):
+@@ -157,27 +148,26 @@ Format](http://rfc7159.net/rfc7159)
+ 
+ @nosubgrouping
+ */
+-NLOHMANN_BASIC_JSON_TPL_DECLARATION
+ class basic_json
+ {
+   private:
+     template<detail::value_t> friend struct detail::external_constructor;
+-    friend ::nlohmann::json_pointer<basic_json>;
+-    friend ::nlohmann::detail::parser<basic_json>;
+-    friend ::nlohmann::detail::serializer<basic_json>;
++    friend ::nlohmann::json_pointer;
++    friend ::nlohmann::detail::parser;
++    friend ::nlohmann::detail::serializer;
+     template<typename BasicJsonType>
+     friend class ::nlohmann::detail::iter_impl;
+-    template<typename BasicJsonType, typename CharType>
+     friend class ::nlohmann::detail::binary_writer;
+-    template<typename BasicJsonType>
+     friend class ::nlohmann::detail::binary_reader;
+ 
++    friend class JsonTest;
++
+     /// workaround type for MSVC
+-    using basic_json_t = NLOHMANN_BASIC_JSON_TPL;
++    using basic_json_t = json;
+ 
+     // convenience aliases for types residing in namespace detail;
+-    using lexer = ::nlohmann::detail::lexer<basic_json>;
+-    using parser = ::nlohmann::detail::parser<basic_json>;
++    using lexer = ::nlohmann::detail::lexer;
++    using parser = ::nlohmann::detail::parser;
+ 
+     using primitive_iterator_t = ::nlohmann::detail::primitive_iterator_t;
+     template<typename BasicJsonType>
+@@ -188,22 +178,19 @@ class basic_json
+     using iteration_proxy = ::nlohmann::detail::iteration_proxy<Iterator>;
+     template<typename Base> using json_reverse_iterator = ::nlohmann::detail::json_reverse_iterator<Base>;
+ 
+-    template<typename CharType>
+-    using output_adapter_t = ::nlohmann::detail::output_adapter_t<CharType>;
+-
+-    using binary_reader = ::nlohmann::detail::binary_reader<basic_json>;
+-    template<typename CharType> using binary_writer = ::nlohmann::detail::binary_writer<basic_json, CharType>;
++    using binary_reader = ::nlohmann::detail::binary_reader;
++    using binary_writer = ::nlohmann::detail::binary_writer;
+ 
+-    using serializer = ::nlohmann::detail::serializer<basic_json>;
++    using serializer = ::nlohmann::detail::serializer;
+ 
+   public:
+     using value_t = detail::value_t;
+     /// @copydoc nlohmann::json_pointer
+-    using json_pointer = ::nlohmann::json_pointer<basic_json>;
++    using json_pointer = ::nlohmann::json_pointer;
+     template<typename T, typename SFINAE>
+     using json_serializer = JSONSerializer<T, SFINAE>;
+     /// helper type for initializer lists of basic_json values
+-    using initializer_list_t = std::initializer_list<detail::json_ref<basic_json>>;
++    using initializer_list_t = std::initializer_list<detail::json_ref<json>>;
+ 
+     ////////////////
+     // exceptions //
+@@ -255,9 +242,9 @@ class basic_json
+     using allocator_type = AllocatorType<basic_json>;
+ 
+     /// the type of an element pointer
+-    using pointer = typename std::allocator_traits<allocator_type>::pointer;
++    using pointer = json*;
+     /// the type of an element const pointer
+-    using const_pointer = typename std::allocator_traits<allocator_type>::const_pointer;
++    using const_pointer = const json*;
+ 
+     /// an iterator for a basic_json container
+     using iterator = iter_impl<basic_json>;
+@@ -2527,29 +2514,6 @@ class basic_json
+         return *this;
+     }
+ 
+-    /*!
+-    @brief get special-case overload
+-
+-    This overloads converts the current @ref basic_json in a different
+-    @ref basic_json type
+-
+-    @tparam BasicJsonType == @ref basic_json
+-
+-    @return a copy of *this, converted into @tparam BasicJsonType
+-
+-    @complexity Depending on the implementation of the called `from_json()`
+-                method.
+-
+-    @since version 3.1.2
+-    */
+-    template<typename BasicJsonType, detail::enable_if_t<
+-                 not std::is_same<BasicJsonType, basic_json>::value and
+-                 detail::is_basic_json<BasicJsonType>::value, int> = 0>
+-    BasicJsonType get() const
+-    {
+-        return *this;
+-    }
+-
+     /*!
+     @brief get a value (explicit)
+ 
+@@ -3941,8 +3905,7 @@ class basic_json
+     @since version 1.0.0
+     */
+ //-------EXPORTED_FUNC_DEF_START json
+-    template<typename KeyT>
+-    iterator find(KeyT&& key)
++    iterator find(std::string_view key)
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+     {
+@@ -3962,8 +3925,7 @@ class basic_json
+     @copydoc find(KeyT&&)
+     */
+ //-------EXPORTED_FUNC_DEF_START json
+-    template<typename KeyT>
+-    const_iterator find(KeyT&& key) const
++    const_iterator find(std::string_view key) const
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+     {
+@@ -4000,8 +3962,7 @@ class basic_json
+     @since version 1.0.0
+     */
+ //-------EXPORTED_FUNC_DEF_START json
+-    template<typename KeyT>
+-    size_type count(KeyT&& key) const
++    size_type count(std::string_view key) const
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+     {
+@@ -6213,75 +6174,6 @@ class basic_json
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
+-    /*!
+-    @brief deserialize from an iterator range with contiguous storage
+-
+-    This function reads from an iterator range of a container with contiguous
+-    storage of 1-byte values. Compatible container types include
+-    `std::vector`, `std::string`, `std::array`, `std::valarray`, and
+-    `std::initializer_list`. Furthermore, C-style arrays can be used with
+-    `std::begin()`/`std::end()`. User-defined containers can be used as long
+-    as they implement random-access iterators and a contiguous storage.
+-
+-    @pre The iterator range is contiguous. Violating this precondition yields
+-    undefined behavior. **This precondition is enforced with an assertion.**
+-    @pre Each element in the range has a size of 1 byte. Violating this
+-    precondition yields undefined behavior. **This precondition is enforced
+-    with a static assertion.**
+-
+-    @warning There is no way to enforce all preconditions at compile-time. If
+-             the function is called with noncompliant iterators and with
+-             assertions switched off, the behavior is undefined and will most
+-             likely yield segmentation violation.
+-
+-    @tparam IteratorType iterator of container with contiguous storage
+-    @param[in] first  begin of the range to parse (included)
+-    @param[in] last  end of the range to parse (excluded)
+-    @param[in] cb  a parser callback function of type @ref parser_callback_t
+-    which is used to control the deserialization by filtering unwanted values
+-    (optional)
+-    @param[in] allow_exceptions  whether to throw exceptions in case of a
+-    parse error (optional, true by default)
+-
+-    @return result of the deserialization
+-
+-    @throw parse_error.101 in case of an unexpected token
+-    @throw parse_error.102 if to_unicode fails or surrogate error
+-    @throw parse_error.103 if to_unicode fails
+-
+-    @complexity Linear in the length of the input. The parser is a predictive
+-    LL(1) parser. The complexity can be higher if the parser callback function
+-    @a cb has a super-linear complexity.
+-
+-    @note A UTF-8 byte order mark is silently ignored.
+-
+-    @liveexample{The example below demonstrates the `parse()` function reading
+-    from an iterator range.,parse__iteratortype__parser_callback_t}
+-
+-    @since version 2.0.3
+-    */
+-    template<class IteratorType, typename std::enable_if<
+-                 std::is_base_of<
+-                     std::random_access_iterator_tag,
+-                     typename std::iterator_traits<IteratorType>::iterator_category>::value, int>::type = 0>
+-    static basic_json parse(IteratorType first, IteratorType last,
+-                            const parser_callback_t cb = nullptr,
+-                            const bool allow_exceptions = true)
+-    {
+-        basic_json result;
+-        parser(detail::input_adapter(first, last), cb, allow_exceptions).parse(true, result);
+-        return result;
+-    }
+-
+-    template<class IteratorType, typename std::enable_if<
+-                 std::is_base_of<
+-                     std::random_access_iterator_tag,
+-                     typename std::iterator_traits<IteratorType>::iterator_category>::value, int>::type = 0>
+-    static bool accept(IteratorType first, IteratorType last)
+-    {
+-        return parser(detail::input_adapter(first, last)).accept(true);
+-    }
+-
+     /*!
+     @brief deserialize from stream
+     @deprecated This stream operator is deprecated and will be removed in
+diff --git a/include/nlohmann/json_fwd.hpp b/include/nlohmann/json_fwd.hpp
+index 750adb64..2b6c5196 100644
+--- a/include/nlohmann/json_fwd.hpp
++++ b/include/nlohmann/json_fwd.hpp
+@@ -24,18 +24,6 @@ for serialization.
+ template<typename = void, typename = void>
+ struct adl_serializer;
+ 
+-template<template<typename U, typename V, typename... Args> class ObjectType =
+-         std::map,
+-         template<typename U, typename... Args> class ArrayType = std::vector,
+-         class StringType = std::string, class BooleanType = bool,
+-         class NumberIntegerType = std::int64_t,
+-         class NumberUnsignedType = std::uint64_t,
+-         class NumberFloatType = double,
+-         template<typename U> class AllocatorType = std::allocator,
+-         template<typename T, typename SFINAE = void> class JSONSerializer =
+-         adl_serializer>
+-class basic_json;
+-
+ /*!
+ @brief JSON Pointer
+ 
+@@ -47,7 +35,6 @@ within a JSON document. It can be used with functions `at` and
+ 
+ @since version 2.0.0
+ */
+-template<typename BasicJsonType>
+ class json_pointer;
+ 
+ /*!
+@@ -58,7 +45,7 @@ uses the standard template types.
+ 
+ @since version 1.0.0
+ */
+-using json = basic_json<>;
++class json;
+ }
+ 
+ #endif

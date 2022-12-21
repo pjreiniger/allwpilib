@@ -1,0 +1,105 @@
+From e8fcd627d03a9af2a8663d9fab11db2fdec3bc80 Mon Sep 17 00:00:00 2001
+From: PJ Reiniger <pj.reiniger@gmail.com>
+Date: Mon, 12 Dec 2022 21:24:41 -0500
+Subject: [PATCH 05/11] Update comments
+
+---
+ include/nlohmann/detail/conversions/from_json.hpp | 6 +++---
+ include/nlohmann/detail/conversions/to_json.hpp   | 2 +-
+ include/nlohmann/detail/output/serializer.hpp     | 6 ++++--
+ include/nlohmann/json.hpp                         | 6 +++---
+ 4 files changed, 11 insertions(+), 9 deletions(-)
+
+diff --git a/include/nlohmann/detail/conversions/from_json.hpp b/include/nlohmann/detail/conversions/from_json.hpp
+index 4fb0b8a9..406c5e67 100644
+--- a/include/nlohmann/detail/conversions/from_json.hpp
++++ b/include/nlohmann/detail/conversions/from_json.hpp
+@@ -336,9 +336,9 @@ struct from_json_fn
+ };
+ }
+ 
+-/// namespace to hold default `from_json` function
+-/// to see why this is required:
+-/// http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4381.html
++// namespace to hold default `from_json` function
++// to see why this is required:
++// http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4381.html
+ namespace
+ {
+ constexpr const auto& from_json = detail::static_const<detail::from_json_fn>::value;
+diff --git a/include/nlohmann/detail/conversions/to_json.hpp b/include/nlohmann/detail/conversions/to_json.hpp
+index bf631d3f..3897ff72 100644
+--- a/include/nlohmann/detail/conversions/to_json.hpp
++++ b/include/nlohmann/detail/conversions/to_json.hpp
+@@ -324,7 +324,7 @@ struct to_json_fn
+ };
+ }
+ 
+-/// namespace to hold default `to_json` function
++// namespace to hold default `to_json` function
+ namespace
+ {
+ constexpr const auto& to_json = detail::static_const<detail::to_json_fn>::value;
+diff --git a/include/nlohmann/detail/output/serializer.hpp b/include/nlohmann/detail/output/serializer.hpp
+index 4a1ae022..5fd8293f 100644
+--- a/include/nlohmann/detail/output/serializer.hpp
++++ b/include/nlohmann/detail/output/serializer.hpp
+@@ -44,6 +44,7 @@ class serializer
+     /*!
+     @param[in] s  output stream to serialize to
+     @param[in] ichar  indentation character to use
++    @param[in] indent_init_len  initial length of indentation string buffer
+     */
+     serializer(raw_ostream& s, const char ichar)
+         : o(s), loc(std::localeconv()),
+@@ -70,6 +71,7 @@ class serializer
+ 
+     @param[in] val             value to serialize
+     @param[in] pretty_print    whether the output shall be pretty-printed
++    @param[in] ensure_ascii    whether the output shall only use ASCII chars
+     @param[in] indent_step     the indent level
+     @param[in] current_indent  the current indent level (only used internally)
+     */
+@@ -293,9 +295,9 @@ class serializer
+ 
+     @param[in] s  the string to escape
+     @param[in] ensure_ascii  whether to escape non-ASCII characters with
+-                             \uXXXX sequences
++                             "\uXXXX" sequences
+ 
+-    @complexity Linear in the length of string @a s.
++    Complexity: Linear in the length of string @a s.
+     */
+ //-------EXPORTED_FUNC_DEF_START json::serializer
+     void dump_escaped(std::string_view s, const bool ensure_ascii)
+diff --git a/include/nlohmann/json.hpp b/include/nlohmann/json.hpp
+index 30bb3821..35d5da85 100644
+--- a/include/nlohmann/json.hpp
++++ b/include/nlohmann/json.hpp
+@@ -3444,7 +3444,7 @@ class basic_json
+     @return copy of the element at key @a key or @a default_value if @a key
+     is not found
+ 
+-    @throw type_error.306 if the JSON value is not an objec; in that case,
++    @throw type_error.306 if the JSON value is not an object; in that case,
+     using `value()` with a key makes no sense.
+ 
+     @complexity Logarithmic in the size of the container.
+@@ -5366,7 +5366,7 @@ class basic_json
+     @complexity Constant.
+ 
+     @liveexample{The example below shows how arrays can be swapped with
+-    `swap()`.,swap__array_t}
++    `swap()`.,swap__std_vector_json}
+ 
+     @since version 1.0.0
+     */
+@@ -5440,7 +5440,7 @@ class basic_json
+     @complexity Constant.
+ 
+     @liveexample{The example below shows how strings can be swapped with
+-    `swap()`.,swap__string_t}
++    `swap()`.,swap__std_string}
+ 
+     @since version 1.0.0
+     */

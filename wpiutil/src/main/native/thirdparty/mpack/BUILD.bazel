@@ -1,0 +1,11 @@
+load("//shared/bazel/rules:cc_rules.bzl", "wpilib_cc_static_and_shared_library")
+
+print(glob(["src/**"]))
+wpilib_cc_static_and_shared_library(
+    name = "mpack",
+    srcs = glob(["src/**"]),
+    hdrs = glob(["include/**/*.h"]),
+    includes = ["include"],
+    strip_include_prefix = "include",
+    visibility = ["//visibility:public"],
+)

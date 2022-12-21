@@ -1,0 +1,414 @@
+load("//shared/bazel/rules:cc_rules.bzl", "wpilib_cc_library", "wpilib_cc_static_and_shared_library")
+#load("//shared/bazel/rules/jni:cc_jni.bzl", "wpilib_jni_cc_library")
+
+wpilib_cc_library(
+    name = "mutex",
+    hdrs = [
+        "include/wpi/mutex.h",
+        "include/wpi/priority_mutex.h",
+    ],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+)
+
+wpilib_cc_library(
+    name = "priority_queue",
+    hdrs = ["include/wpi/priority_queue.h"],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+)
+
+wpilib_cc_library(
+    name = "condition_variable",
+    hdrs = ["include/wpi/condition_variable.h"],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":mutex",
+    ],
+)
+
+wpilib_cc_library(
+    name = "NullDeleter",
+    hdrs = ["include/wpi/NullDeleter.h"],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+)
+
+wpilib_cc_static_and_shared_library(
+    name = "spinlock",
+    hdrs = ["include/wpi/spinlock.h"],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+    wpi_maybe_shared_deps = [
+        "//wpiutil/src/main/native/thirdparty/llvm:llvm",
+    ],
+)
+
+wpilib_cc_static_and_shared_library(
+    name = "StackTrace",
+    srcs = ["cpp/StackTraceWrap.cpp"] + select({
+#        "//shared/bazel/toolchains/conditions:bionic": [
+#            "unix/Demangle.cpp",
+#            "unix/StackTrace.cpp",
+#        ],
+#        "//shared/bazel/toolchains/conditions:raspbian": [
+#            "unix/Demangle.cpp",
+#            "unix/StackTrace.cpp",
+#        ],
+#        "//shared/bazel/toolchains/conditions:roborio": [
+#            "unix/Demangle.cpp",
+#            "unix/StackTrace.cpp",
+#        ],
+        "@bazel_tools//src/conditions:darwin": [
+            "unix/Demangle.cpp",
+            "unix/StackTrace.cpp",
+        ],
+        "@bazel_tools//src/conditions:linux_x86_64": [
+            "unix/Demangle.cpp",
+            "unix/StackTrace.cpp",
+        ],
+        "@bazel_tools//src/conditions:windows": [
+            "windows/Demangle.cpp",
+            "windows/StackTrace.cpp",
+            "windows/StackWalker.cpp",
+            "windows/StackWalker.h",
+        ],
+    }),
+    hdrs = [
+        "include/wpi/Demangle.h",
+        "include/wpi/StackTrace.h",
+    ],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+    wpi_maybe_shared_deps = [
+        "//wpiutil/src/main/native/thirdparty/llvm:llvm",
+    ],
+)
+
+wpilib_cc_static_and_shared_library(
+    name = "timestamp",
+    srcs = ["cpp/timestamp.cpp"],
+    hdrs = ["include/wpi/timestamp.h"],
+    includes = ["include/"],
+    strip_include_prefix = "include",
+    visibility = ["//visibility:public"],
+)
+
+wpilib_cc_library(
+    name = "SymbolExports",
+    hdrs = ["include/wpi/SymbolExports.h"],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+)
+
+wpilib_cc_library(
+    name = "static_circular_buffer",
+    hdrs = ["include/wpi/static_circular_buffer.h"],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+)
+
+wpilib_cc_library(
+    name = "UidVector",
+    hdrs = ["include/wpi/UidVector.h"],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+)
+
+wpilib_cc_library(
+    name = "SpanExtras",
+    hdrs = ["include/wpi/SpanExtras.h"],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+)
+
+wpilib_cc_static_and_shared_library(
+    name = "SafeThread",
+    srcs = ["cpp/SafeThread.cpp"],
+    hdrs = ["include/wpi/SafeThread.h"],
+    includes = ["include/"],
+    standard_deps = [
+        ":condition_variable",
+    ],
+    visibility = ["//visibility:public"],
+    wpi_maybe_shared_deps = [
+        ":Synchronization",
+    ]
+)
+
+wpilib_cc_library(
+    name = "ConcurrentQueue",
+    hdrs = ["include/wpi/ConcurrentQueue.h"],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":condition_variable",
+        ":mutex",
+    ],
+)
+
+wpilib_cc_static_and_shared_library(
+    name = "CallbackManager",
+    hdrs = ["include/wpi/CallbackManager.h"],
+    includes = ["include/"],
+    standard_deps = [
+        ":UidVector",
+        ":condition_variable",
+        ":mutex",
+    ],
+    visibility = ["//visibility:public"],
+    wpi_maybe_shared_deps = [
+        ":SafeThread",
+        "//wpiutil/src/main/native/thirdparty/llvm:llvm",
+    ],
+)
+
+wpilib_cc_static_and_shared_library(
+    name = "array",
+    hdrs = ["include/wpi/array.h"],
+    includes = ["include/"],
+    standard_deps = [
+        ":UidVector",
+        ":condition_variable",
+        ":mutex",
+    ],
+    visibility = ["//visibility:public"],
+    wpi_maybe_shared_deps = [
+        "//wpiutil/src/main/native/thirdparty/llvm:llvm",
+    ],
+)
+
+wpilib_cc_library(
+    name = "Algorithm",
+    hdrs = ["include/wpi/Algorithm.h"],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+)
+
+wpilib_cc_library(
+    name = "interpolating_map",
+    hdrs = ["include/wpi/interpolating_map.h"],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+)
+
+wpilib_cc_library(
+    name = "deprecated",
+    hdrs = ["include/wpi/deprecated.h"],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+)
+
+wpilib_cc_library(
+    name = "circular_buffer",
+    hdrs = [
+        "include/wpi/circular_buffer.h",
+        "include/wpi/circular_buffer.inc",
+    ],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+)
+
+wpilib_cc_static_and_shared_library(
+    name = "leb128",
+    srcs = ["cpp/leb128.cpp"],
+    hdrs = ["include/wpi/leb128.h"],
+    includes = ["include/"],
+    standard_deps = [
+        ":SpanExtras",
+    ],
+    visibility = ["//visibility:public"],
+    wpi_maybe_shared_deps = [
+        ":raw_istream",
+    ],
+)
+
+wpilib_cc_static_and_shared_library(
+    name = "Logger",
+    srcs = ["cpp/Logger.cpp"],
+    hdrs = ["include/wpi/Logger.h"],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+    wpi_maybe_shared_deps = [
+        "//wpiutil/src/main/native/thirdparty/fmtlib:fmtlib",
+    ],
+)
+
+wpilib_cc_static_and_shared_library(
+    name = "sha1",
+    srcs = ["cpp/sha1.cpp"],
+    hdrs = ["include/wpi/sha1.h"],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+    wpi_maybe_shared_deps = [
+        ":raw_istream",
+        "//wpiutil/src/main/native/thirdparty/llvm:llvm",
+    ],
+)
+
+wpilib_cc_static_and_shared_library(
+    name = "fmt",
+    hdrs = ["include/wpi/fmt/raw_ostream.h"],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+    wpi_maybe_shared_deps = [
+        "//wpiutil/src/main/native/thirdparty/fmtlib:fmtlib",
+        "//wpiutil/src/main/native/thirdparty/llvm:llvm",
+    ],
+)
+
+wpilib_cc_static_and_shared_library(
+    name = "jni_util",
+    hdrs = ["include/wpi/jni_util.h"],
+    includes = ["include/"],
+    standard_deps = [
+        #":mutex",
+    ],
+    visibility = ["//visibility:public"],
+    wpi_maybe_shared_deps = [
+        ":SafeThread",
+        "//wpiutil/src/main/native/thirdparty/llvm:llvm",
+    ],
+)
+
+wpilib_cc_library(
+    name = "nodiscard",
+    hdrs = ["include/wpi/nodiscard.h"],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+)
+
+wpilib_cc_static_and_shared_library(
+    name = "Synchronization",
+    srcs = ["cpp/Synchronization.cpp"],
+    hdrs = ["include/wpi/Synchronization.h"],
+    includes = ["include/"],
+    standard_deps = [
+        ":condition_variable",
+        ":UidVector",
+    ],
+    visibility = ["//visibility:public"],
+    wpi_maybe_shared_deps = [
+        "//wpiutil/src/main/native/thirdparty/llvm:llvm",
+    ],
+)
+
+wpilib_cc_static_and_shared_library(
+    name = "DataLog",
+    srcs = ["cpp/DataLog.cpp"],
+    hdrs = ["include/wpi/DataLog.h"],
+    includes = ["include/"],
+    standard_deps = [
+        ":condition_variable",
+        ":mutex",
+    ],
+    visibility = ["//visibility:public"],
+    wpi_maybe_shared_deps = [
+        ":Synchronization",
+        "//wpiutil/src/main/native/thirdparty/llvm:llvm",
+        ":Logger",
+        ":timestamp",
+    ],
+)
+
+wpilib_cc_static_and_shared_library(
+    name = "DataLogReader",
+    srcs = ["cpp/DataLogReader.cpp"],
+    hdrs = ["include/wpi/DataLogReader.h"],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+    wpi_maybe_shared_deps = [
+        "//wpiutil/src/main/native/thirdparty/llvm:llvm",
+        ":DataLog",
+    ],
+)
+
+wpilib_cc_static_and_shared_library(
+    name = "fs",
+    srcs = ["cpp/fs.cpp"],
+    hdrs = ["include/wpi/fs.h"],
+    includes = ["include/"],
+    standard_deps = [
+    ],
+    visibility = ["//visibility:public"],
+    wpi_maybe_shared_deps = [
+        "//wpiutil/src/main/native/thirdparty/llvm:llvm",
+    ],
+)
+
+wpilib_cc_static_and_shared_library(
+    name = "MappedFileRegion",
+    srcs = ["cpp/MappedFileRegion.cpp"],
+    hdrs = ["include/wpi/MappedFileRegion.h"],
+    includes = ["include/"],
+    standard_deps = [
+    ],
+    visibility = ["//visibility:public"],
+    wpi_maybe_shared_deps = [
+        "//wpiutil/src/main/native/thirdparty/llvm:llvm",
+    ],
+)
+
+wpilib_cc_static_and_shared_library(
+    name = "Base64",
+    srcs = ["cpp/Base64.cpp"],
+    hdrs = ["include/wpi/Base64.h"],
+    includes = ["include/"],
+    standard_deps = [
+    ],
+    visibility = ["//visibility:public"],
+    wpi_maybe_shared_deps = [
+        "//wpiutil/src/main/native/thirdparty/llvm:llvm",
+    ],
+)
+
+wpilib_cc_static_and_shared_library(
+    name = "future",
+    srcs = ["cpp/future.cpp"],
+    hdrs = ["include/wpi/future.h"],
+    includes = ["include/"],
+    standard_deps = [
+        ":condition_variable",
+        ":mutex",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+wpilib_cc_static_and_shared_library(
+    name = "sendable",
+    srcs = glob(["cpp/sendable/*.cpp"]),
+    hdrs = glob(["include/wpi/sendable/*.h"]),
+    includes = ["include/"],
+    standard_deps = [
+        ":UidVector",
+        ":SymbolExports",
+    ],
+    visibility = ["//visibility:public"],
+    wpi_maybe_shared_deps = [
+        "//wpiutil/src/main/native/thirdparty/llvm:llvm",
+    ],
+)
+
+wpilib_cc_static_and_shared_library(
+    name = "raw_istream",
+    srcs = ["cpp/raw_istream.cpp"],
+    hdrs = ["include/wpi/raw_istream.h"],
+    includes = ["include/"],
+    visibility = ["//visibility:public"],
+    wpi_maybe_shared_deps = [
+        "//wpiutil/src/main/native/thirdparty/llvm:llvm",
+    ],
+)
+
+#wpilib_jni_cc_library(
+#    name = "wpiutiljni",
+#    srcs = ["cpp/jni/WPIUtilJNI.cpp"],
+#    java_dep = "//wpiutil/src/main/java/edu/wpi/first/util:WPIUtilJNI",
+#    visibility = ["//visibility:public"],
+#    wpi_maybe_shared_deps = [
+#        ":Synchronization",
+#        ":jni_util",
+#        ":timestamp",
+#    ],
+#)

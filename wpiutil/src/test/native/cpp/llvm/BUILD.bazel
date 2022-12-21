@@ -1,0 +1,11 @@
+load("//shared/bazel/rules:cc_rules.bzl", "wpilib_cc_test")
+
+wpilib_cc_test(
+    name = "llvm-test",
+    srcs = glob(["*.cpp"]),
+    deps = [
+        "//wpiutil/src/main/native/thirdparty/llvm:llvm.static",
+        "@gtest//:gtest_main"
+    ]
+
+)

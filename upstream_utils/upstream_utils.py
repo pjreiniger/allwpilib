@@ -22,8 +22,12 @@ def clone_repo(url, treeish, shallow=True):
 
     repo = os.path.basename(url)
     dest = os.path.join(os.getcwd(), repo)
+
     if dest.endswith(".git"):
         dest = dest[:-4]
+    
+    os.chdir(cwd)
+    return dest
 
     # Clone Git repository into current directory or update it
     if not os.path.exists(dest):
@@ -35,6 +39,7 @@ def clone_repo(url, treeish, shallow=True):
     else:
         os.chdir(dest)
         subprocess.run(["git", "fetch", "origin", treeish])
+
 
     # Get list of heads
     # Example output of "git ls-remote --heads":

@@ -1,0 +1,12 @@
+load("//shared/bazel/rules:cc_rules.bzl", "wpilib_cc_test")
+
+wpilib_cc_test(
+    name = "sigslog-test",
+    srcs = glob(["*.cpp"]),
+    deps = [
+        "//wpiutil/src/main/native/thirdparty/sigslot",
+#        "//wpiutil:slots",
+        "@gtest//:gtest_main"
+    ]
+
+)

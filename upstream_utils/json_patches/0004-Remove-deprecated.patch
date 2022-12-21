@@ -1,0 +1,167 @@
+From e61a36436f1f82802e89af2927bb5813c55fd596 Mon Sep 17 00:00:00 2001
+From: PJ Reiniger <pj.reiniger@gmail.com>
+Date: Mon, 12 Dec 2022 21:22:02 -0500
+Subject: [PATCH 04/11] Remove deprecated
+
+---
+ include/nlohmann/detail/macro_scope.hpp   |  9 ---
+ include/nlohmann/detail/macro_unscope.hpp |  1 -
+ include/nlohmann/json.hpp                 | 99 -----------------------
+ 3 files changed, 109 deletions(-)
+
+diff --git a/include/nlohmann/detail/macro_scope.hpp b/include/nlohmann/detail/macro_scope.hpp
+index 21a8fac0..fc5f8377 100644
+--- a/include/nlohmann/detail/macro_scope.hpp
++++ b/include/nlohmann/detail/macro_scope.hpp
+@@ -26,15 +26,6 @@
+     #pragma GCC diagnostic ignored "-Wdocumentation"
+ #endif
+ 
+-// allow for portable deprecation warnings
+-#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+-    #define JSON_DEPRECATED __attribute__((deprecated))
+-#elif defined(_MSC_VER)
+-    #define JSON_DEPRECATED __declspec(deprecated)
+-#else
+-    #define JSON_DEPRECATED
+-#endif
+-
+ // allow to disable exceptions
+ #if (defined(__cpp_exceptions) || defined(__EXCEPTIONS) || defined(_CPPUNWIND)) && !defined(JSON_NOEXCEPTION)
+     #define JSON_THROW(exception) throw exception
+diff --git a/include/nlohmann/detail/macro_unscope.hpp b/include/nlohmann/detail/macro_unscope.hpp
+index 99a0abdf..509a7d9f 100644
+--- a/include/nlohmann/detail/macro_unscope.hpp
++++ b/include/nlohmann/detail/macro_unscope.hpp
+@@ -14,7 +14,6 @@
+ #undef JSON_TRY
+ #undef JSON_LIKELY
+ #undef JSON_UNLIKELY
+-#undef JSON_DEPRECATED
+ #undef JSON_HAS_CPP_14
+ #undef JSON_HAS_CPP_17
+ #undef NLOHMANN_BASIC_JSON_TPL_DECLARATION
+diff --git a/include/nlohmann/json.hpp b/include/nlohmann/json.hpp
+index b33e244b..30bb3821 100644
+--- a/include/nlohmann/json.hpp
++++ b/include/nlohmann/json.hpp
+@@ -4247,77 +4247,6 @@ class basic_json
+     }
+ 
+   public:
+-    /*!
+-    @brief wrapper to access iterator member functions in range-based for
+-
+-    This function allows to access @ref iterator::key() and @ref
+-    iterator::value() during range-based for loops. In these loops, a
+-    reference to the JSON values is returned, so there is no access to the
+-    underlying iterator.
+-
+-    For loop without iterator_wrapper:
+-
+-    @code{cpp}
+-    for (auto it = j_object.begin(); it != j_object.end(); ++it)
+-    {
+-        std::cout << "key: " << it.key() << ", value:" << it.value() << '\n';
+-    }
+-    @endcode
+-
+-    Range-based for loop without iterator proxy:
+-
+-    @code{cpp}
+-    for (auto it : j_object)
+-    {
+-        // "it" is of type json::reference and has no key() member
+-        std::cout << "value: " << it << '\n';
+-    }
+-    @endcode
+-
+-    Range-based for loop with iterator proxy:
+-
+-    @code{cpp}
+-    for (auto it : json::iterator_wrapper(j_object))
+-    {
+-        std::cout << "key: " << it.key() << ", value:" << it.value() << '\n';
+-    }
+-    @endcode
+-
+-    @note When iterating over an array, `key()` will return the index of the
+-          element as string (see example).
+-
+-    @param[in] ref  reference to a JSON value
+-    @return iteration proxy object wrapping @a ref with an interface to use in
+-            range-based for loops
+-
+-    @liveexample{The following code shows how the wrapper is used,iterator_wrapper}
+-
+-    @exceptionsafety Strong guarantee: if an exception is thrown, there are no
+-    changes in the JSON value.
+-
+-    @complexity Constant.
+-
+-    @note The name of this function is not yet final and may change in the
+-    future.
+-
+-    @deprecated This stream operator is deprecated and will be removed in
+-                future 4.0.0 of the library. Please use @ref items() instead;
+-                that is, replace `json::iterator_wrapper(j)` with `j.items()`.
+-    */
+-    JSON_DEPRECATED
+-    static iteration_proxy<iterator> iterator_wrapper(reference ref) noexcept
+-    {
+-        return ref.items();
+-    }
+-
+-    /*!
+-    @copydoc iterator_wrapper(reference)
+-    */
+-    JSON_DEPRECATED
+-    static iteration_proxy<const_iterator> iterator_wrapper(const_reference ref) noexcept
+-    {
+-        return ref.items();
+-    }
+ 
+     /*!
+     @brief helper to access iterator member functions in range-based for
+@@ -6028,20 +5957,6 @@ class basic_json
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
+-    /*!
+-    @brief serialize to stream
+-    @deprecated This stream operator is deprecated and will be removed in
+-                future 4.0.0 of the library. Please use
+-                @ref operator<<(std::ostream&, const basic_json&)
+-                instead; that is, replace calls like `j >> o;` with `o << j;`.
+-    @since version 1.0.0; deprecated since version 3.0.0
+-    */
+-    JSON_DEPRECATED
+-    friend std::ostream& operator>>(const basic_json& j, std::ostream& o)
+-    {
+-        return o << j;
+-    }
+-
+     /// @}
+ 
+ 
+@@ -6183,20 +6098,6 @@ class basic_json
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
+-    /*!
+-    @brief deserialize from stream
+-    @deprecated This stream operator is deprecated and will be removed in
+-                version 4.0.0 of the library. Please use
+-                @ref operator>>(std::istream&, basic_json&)
+-                instead; that is, replace calls like `j << i;` with `i >> j;`.
+-    @since version 1.0.0; deprecated since version 3.0.0
+-    */
+-    JSON_DEPRECATED
+-    friend std::istream& operator<<(basic_json& j, std::istream& i)
+-    {
+-        return operator>>(i, j);
+-    }
+-
+     /*!
+     @brief deserialize from stream
+ 
