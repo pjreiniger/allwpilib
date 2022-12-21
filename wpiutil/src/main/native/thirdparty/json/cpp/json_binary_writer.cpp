@@ -117,7 +117,7 @@ void json::binary_writer::write_cbor(const json& j)
             break;
         }
 
-        case value_t::number_float: // Double-Precision Float
+        case value_t::number_float:
         {
             o << get_cbor_float_prefix(j.m_value.number_float);
             write_number(j.m_value.number_float);
@@ -340,7 +340,7 @@ void json::binary_writer::write_msgpack(const json& j)
             break;
         }
 
-        case value_t::number_float: // float 64
+        case value_t::number_float:
         {
             o << get_msgpack_float_prefix(j.m_value.number_float);
             write_number(j.m_value.number_float);

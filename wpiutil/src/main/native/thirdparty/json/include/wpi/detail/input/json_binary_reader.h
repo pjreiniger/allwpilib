@@ -4,7 +4,9 @@
 #include <string> // char_traits, string
 
 #include "wpi/json.h"
+#include "wpi/detail/input/json_sax.h"
 #include "wpi/detail/json_macro_scope.h"
+#include "wpi/detail/meta/json_is_sax.h"
 #include "wpi/detail/json_value_t.h"
 
 namespace wpi
@@ -20,10 +22,12 @@ namespace wpi
 ///////////////////
 
 /*!
-@brief deserialization of CBOR and MessagePack values
+@brief deserialization of CBOR, MessagePack, and UBJSON values
 */
 class json::binary_reader
 {
+    using SAX = detail::json_sax_dom_parser;
+    using json_sax_t = SAX;
 
   public:
     /*!
@@ -36,40 +40,15 @@ class json::binary_reader
     }
 
     /*!
-    @brief create a JSON value from CBOR input
-
+    @param[in] format  the binary format to parse
+    @param[in] sax_    a SAX event processor
     @param[in] strict  whether to expect the input to be consumed completed
-    @return JSON value created from CBOR input
 
-    @throw parse_error.110 if input ended unexpectedly or the end of file was
-                           not reached when @a strict was set to true
-    @throw parse_error.112 if unsupported byte was read
+    @return
     */
-    json parse_cbor(const bool strict);
-
-    /*!
-    @brief create a JSON value from MessagePack input
-
-    @param[in] strict  whether to expect the input to be consumed completed
-    @return JSON value created from MessagePack input
-
-    @throw parse_error.110 if input ended unexpectedly or the end of file was
-                           not reached when @a strict was set to true
-    @throw parse_error.112 if unsupported byte was read
-    */
-    json parse_msgpack(const bool strict);
-
-    /*!
-    @brief create a JSON value from UBJSON input
-
-    @param[in] strict  whether to expect the input to be consumed completed
-    @return JSON value created from UBJSON input
-
-    @throw parse_error.110 if input ended unexpectedly or the end of file was
-                           not reached when @a strict was set to true
-    @throw parse_error.112 if unsupported byte was read
-    */
-    json parse_ubjson(const bool strict);
+    bool sax_parse(const input_format_t format,
+                   json_sax_t* sax_,
+                   const bool strict = true);
 
     /*!
     @brief determine system byte order
@@ -88,17 +67,24 @@ class json::binary_reader
     @param[in] get_char  whether a new character should be retrieved from the
                          input (true, default) or whether the last read
                          character should be considered instead
-    */
-    json parse_cbor_internal(const bool get_char = true);
 
-    json parse_msgpack_internal();
+    @return whether a valid CBOR value was passed to the SAX parser
+    */
+    bool parse_cbor_internal(const bool get_char = true);
+
+    /*!
+    @return whether a valid MessagePack value was passed to the SAX parser
+    */
+    bool parse_msgpack_internal();
 
     /*!
     @param[in] get_char  whether a new character should be retrieved from the
                          input (true, default) or whether the last read
                          character should be considered instead
+
+    @return whether a valid UBJSON value was passed to the SAX parser
     */
-    json parse_ubjson_internal(const bool get_char = true)
+    bool parse_ubjson_internal(const bool get_char = true)
     {
         return get_ubjson_value(get_char ? get_ignore_noop() : current);
     }
@@ -123,32 +109,32 @@ class json::binary_reader
     @brief read a number from the input
 
     @tparam NumberType the type of the number
+    @param[out] result  number of type @a NumberType
 
-    @return number of type @a NumberType
+    @return whether conversion completed
 
     @note This function needs to respect the system's endianess, because
-          bytes in CBOR and MessagePack are stored in network order (big
-          endian) and therefore need reordering on little endian systems.
-
-    @throw parse_error.110 if input has less than `sizeof(NumberType)` bytes
+          bytes in CBOR, MessagePack, and UBJSON are stored in network order
+          (big endian) and therefore need reordering on little endian systems.
     */
-    template<typename NumberType> NumberType get_number();
+    template<typename NumberType>
+    bool get_number(NumberType& result);
 
     /*!
     @brief create a string by reading characters from the input
 
-    @param[in] len number of bytes to read
+    @tparam NumberType the type of the number
+    @param[in] len number of characters to read
+    @param[out] string created by reading @a len bytes
+
+    @return whether string creation completed
 
     @note We can not reserve @a len bytes for the result, because @a len
           may be too large. Usually, @ref unexpect_eof() detects the end of
           the input before we run out of string memory.
-
-    @return string created by reading @a len bytes
-
-    @throw parse_error.110 if input has less than @a len bytes
     */
     template<typename NumberType>
-    std::string get_string(const NumberType len);
+    bool get_string(const NumberType len, std::string& result);
 
     /*!
     @brief reads a CBOR string
@@ -157,18 +143,25 @@ class json::binary_reader
     string length and then copies this number of bytes into a string.
     Additionally, CBOR's strings with indefinite lengths are supported.
 
-    @return string
+    @param[out] result  created string
 
-    @throw parse_error.110 if input ended
-    @throw parse_error.113 if an unexpected byte is read
+    @return whether string creation completed
     */
-    std::string get_cbor_string();
+    bool get_cbor_string(std::string& result);
 
-    template<typename NumberType>
-    json get_cbor_array(const NumberType len);
+    /*!
+    @param[in] len  the length of the array or std::size_t(-1) for an
+                    array of indefinite size
+    @return whether array creation completed
+    */
+    bool get_cbor_array(const std::size_t len);
 
-    template<typename NumberType>
-    json get_cbor_object(const NumberType len);
+    /*!
+    @param[in] len  the length of the object or std::size_t(-1) for an
+                    object of indefinite size
+    @return whether object creation completed
+    */
+    bool get_cbor_object(const std::size_t len);
 
     /*!
     @brief reads a MessagePack string
@@ -176,18 +169,23 @@ class json::binary_reader
     This function first reads starting bytes to determine the expected
     string length and then copies this number of bytes into a string.
 
-    @return string
+    @param[out] result  created string
 
-    @throw parse_error.110 if input ended
-    @throw parse_error.113 if an unexpected byte is read
+    @return whether string creation completed
     */
-    std::string get_msgpack_string();
+    bool get_msgpack_string(std::string& result);
 
-    template<typename NumberType>
-    json get_msgpack_array(const NumberType len);
+    /*!
+    @param[in] len  the length of the array
+    @return whether array creation completed
+    */
+    bool get_msgpack_array(const std::size_t len);
 
-    template<typename NumberType>
-    json get_msgpack_object(const NumberType len);
+    /*!
+    @param[in] len  the length of the object
+    @return whether object creation completed
+    */
+    bool get_msgpack_object(const std::size_t len);
 
     /*!
     @brief reads a UBJSON string
@@ -196,16 +194,20 @@ class json::binary_reader
     indicating a string, or in case of an object key where the 'S' byte can be
     left out.
 
+    @param[out] result   created string
     @param[in] get_char  whether a new character should be retrieved from the
                          input (true, default) or whether the last read
                          character should be considered instead
 
-    @return string
-
-    @throw parse_error.110 if input ended
-    @throw parse_error.113 if an unexpected byte is read
+    @return whether string creation completed
     */
-    std::string get_ubjson_string(const bool get_char = true);
+    bool get_ubjson_string(std::string& result, const bool get_char = true);
+
+    /*!
+    @param[out] result  determined size
+    @return whether size determination completed
+    */
+    bool get_ubjson_size_value(std::size_t& result);
 
     /*!
     @brief determine the type and size for a container
@@ -213,27 +215,37 @@ class json::binary_reader
     In the optimized UBJSON format, a type and a size can be provided to allow
     for a more compact representation.
 
-    @return pair of the size and the type
+    @param[out] result  pair of the size and the type
+
+    @return whether pair creation completed
     */
-    std::pair<std::size_t, int> get_ubjson_size_type();
-
-    json get_ubjson_value(const int prefix);
-
-    json get_ubjson_array();
-
-    json get_ubjson_object();
+    bool get_ubjson_size_type(std::pair<std::size_t, int>& result);
 
     /*!
-    @brief throw if end of input is not reached
-    @throw parse_error.110 if input not ended
+    @param prefix  the previously read or set type prefix
+    @return whether value creation completed
     */
-    void expect_eof() const;
+    bool get_ubjson_value(const int prefix);
 
     /*!
-    @briefthrow if end of input is reached
-    @throw parse_error.110 if input ended
+    @return whether array creation completed
     */
-    void unexpect_eof() const;
+    bool get_ubjson_array();
+
+    /*!
+    @return whether object creation completed
+    */
+    bool get_ubjson_object();
+
+    /*!
+    @return whether the last read character is not EOF
+    */
+    bool unexpect_eof() const;
+
+    /*!
+    @return a string representation of the last read byte
+    */
+    std::string get_token_string() const;
 
   private:
     /// input adapter
@@ -247,5 +259,8 @@ class json::binary_reader
 
     /// whether we can assume little endianess
     const bool is_little_endian = little_endianess();
+
+    /// the SAX parser
+    json_sax_t* sax = nullptr;
 };
 }

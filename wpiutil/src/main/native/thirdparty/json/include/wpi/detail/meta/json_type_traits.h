@@ -1,12 +1,12 @@
 #pragma once
 
 #include <ciso646> // not
-#include <cstddef> // size_t
 #include <limits> // numeric_limits
-#include <type_traits> // conditional, enable_if, false_type, integral_constant, is_constructible, is_integral, is_same, remove_cv, remove_reference, true_type
+#include <type_traits> // false_type, is_constructible, is_integral, is_same, true_type
 #include <utility> // declval
 
 #include "wpi/json_fwd.h"
+#include "wpi/detail/meta/json_cpp_future.h"
 #include "wpi/detail/json_macro_scope.h"
 
 namespace wpi
@@ -28,17 +28,6 @@ namespace detail
 template<typename> struct is_json : std::false_type {};
 
 template<> struct is_json<json> : std::true_type {};
-
-// alias templates to reduce boilerplate
-template<bool B, typename T = void>
-using enable_if_t = typename std::enable_if<B, T>::type;
-
-template<typename T>
-using uncvref_t = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
-
-// dispatch utility (taken from ranges-v3)
-template<unsigned N> struct priority_tag : priority_tag < N - 1 > {};
-template<> struct priority_tag<0> {};
 
 ////////////////////////
 // has_/is_ functions //
@@ -68,6 +57,17 @@ struct is_compatible_object_type_impl<true, RealType, CompatibleObjectType>
         std::is_constructible<typename RealType::mapped_type, typename CompatibleObjectType::mapped_type>::value;
 };
 
+template<bool B, class RealType, class CompatibleStringType>
+struct is_compatible_string_type_impl : std::false_type {};
+
+template<class RealType, class CompatibleStringType>
+struct is_compatible_string_type_impl<true, RealType, CompatibleStringType>
+{
+    static constexpr auto value =
+        std::is_same<typename RealType::value_type, typename CompatibleStringType::value_type>::value and
+        std::is_constructible<RealType, CompatibleStringType>::value;
+};
+
 template<class BasicJsonType, class CompatibleObjectType>
 struct is_compatible_object_type
 {
@@ -76,6 +76,15 @@ struct is_compatible_object_type
                                   has_mapped_type<CompatibleObjectType>,
                                   has_key_type<CompatibleObjectType>>::value,
                                   typename BasicJsonType::object_t, CompatibleObjectType >::value;
+};
+
+template<class BasicJsonType, class CompatibleStringType>
+struct is_compatible_string_type
+{
+    static auto constexpr value = is_compatible_string_type_impl <
+                                  std::conjunction<std::negation<std::is_same<void, CompatibleStringType>>,
+                                  has_value_type<CompatibleStringType>>::value,
+                                  std::string, CompatibleStringType >::value;
 };
 
 template<typename BasicJsonType, typename T>
@@ -192,15 +201,5 @@ struct is_compatible_type
       is_compatible_complete_type<BasicJsonType, CompatibleType>>
 {
 };
-
-// taken from ranges-v3
-template<typename T>
-struct static_const
-{
-    static constexpr T value{};
-};
-
-template<typename T>
-constexpr T static_const<T>::value;
 }
 }
