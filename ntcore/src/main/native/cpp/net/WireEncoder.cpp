@@ -22,7 +22,7 @@ using namespace mpack;
 void nt::net::WireEncodePublish(wpi::raw_ostream& os, int64_t pubuid,
                                 std::string_view name, std::string_view typeStr,
                                 const wpi::json& properties) {
-  wpi::detail::serializer s{os, ' ', 0};
+  wpi::json::serializer s{os, ' ', 0};
   os << "{\"method\":\"" << PublishMsg::kMethodStr << "\",\"params\":{";
   os << "\"name\":\"";
   s.dump_escaped(name, false);
@@ -36,7 +36,7 @@ void nt::net::WireEncodePublish(wpi::raw_ostream& os, int64_t pubuid,
 }
 
 void nt::net::WireEncodeUnpublish(wpi::raw_ostream& os, int64_t pubuid) {
-  wpi::detail::serializer s{os, ' ', 0};
+  wpi::json::serializer s{os, ' ', 0};
   os << "{\"method\":\"" << UnpublishMsg::kMethodStr << "\",\"params\":{";
   os << "\"pubuid\":";
   s.dump_integer(pubuid);
@@ -46,7 +46,7 @@ void nt::net::WireEncodeUnpublish(wpi::raw_ostream& os, int64_t pubuid) {
 void nt::net::WireEncodeSetProperties(wpi::raw_ostream& os,
                                       std::string_view name,
                                       const wpi::json& update) {
-  wpi::detail::serializer s{os, ' ', 0};
+  wpi::json::serializer s{os, ' ', 0};
   os << "{\"method\":\"" << SetPropertiesMsg::kMethodStr << "\",\"params\":{";
   os << "\"name\":\"";
   s.dump_escaped(name, false);
@@ -57,7 +57,7 @@ void nt::net::WireEncodeSetProperties(wpi::raw_ostream& os,
 
 template <typename T>
 static void EncodePrefixes(wpi::raw_ostream& os, std::span<const T> topicNames,
-                           wpi::detail::serializer& s) {
+                           wpi::json::serializer& s) {
   os << '[';
   bool first = true;
   for (auto&& name : topicNames) {
@@ -77,7 +77,7 @@ template <typename T>
 static void WireEncodeSubscribeImpl(wpi::raw_ostream& os, int64_t subuid,
                                     std::span<const T> topicNames,
                                     const PubSubOptionsImpl& options) {
-  wpi::detail::serializer s{os, ' ', 0};
+  wpi::json::serializer s{os, ' ', 0};
   os << "{\"method\":\"" << SubscribeMsg::kMethodStr << "\",\"params\":{";
   os << "\"options\":{";
   bool first = true;
@@ -126,7 +126,7 @@ void nt::net::WireEncodeSubscribe(wpi::raw_ostream& os, int64_t subuid,
 }
 
 void nt::net::WireEncodeUnsubscribe(wpi::raw_ostream& os, int64_t subHandle) {
-  wpi::detail::serializer s{os, ' ', 0};
+  wpi::json::serializer s{os, ' ', 0};
   os << "{\"method\":\"" << UnsubscribeMsg::kMethodStr << "\",\"params\":{";
   os << "\"subuid\":";
   s.dump_integer(subHandle);
@@ -156,7 +156,7 @@ void nt::net::WireEncodeAnnounce(wpi::raw_ostream& os, std::string_view name,
                                  int64_t id, std::string_view typeStr,
                                  const wpi::json& properties,
                                  std::optional<int64_t> pubHandle) {
-  wpi::detail::serializer s{os, ' ', 0};
+  wpi::json::serializer s{os, ' ', 0};
   os << "{\"method\":\"" << AnnounceMsg::kMethodStr << "\",\"params\":{";
   os << "\"id\":";
   s.dump_integer(id);
@@ -175,7 +175,7 @@ void nt::net::WireEncodeAnnounce(wpi::raw_ostream& os, std::string_view name,
 
 void nt::net::WireEncodeUnannounce(wpi::raw_ostream& os, std::string_view name,
                                    int64_t id) {
-  wpi::detail::serializer s{os, ' ', 0};
+  wpi::json::serializer s{os, ' ', 0};
   os << "{\"method\":\"" << UnannounceMsg::kMethodStr << "\",\"params\":{";
   os << "\"id\":";
   s.dump_integer(id);
@@ -187,7 +187,7 @@ void nt::net::WireEncodeUnannounce(wpi::raw_ostream& os, std::string_view name,
 void nt::net::WireEncodePropertiesUpdate(wpi::raw_ostream& os,
                                          std::string_view name,
                                          const wpi::json& update, bool ack) {
-  wpi::detail::serializer s{os, ' ', 0};
+  wpi::json::serializer s{os, ' ', 0};
   os << "{\"method\":\"" << PropertiesUpdateMsg::kMethodStr
      << "\",\"params\":{";
   os << "\"name\":\"";

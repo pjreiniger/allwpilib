@@ -46,9 +46,9 @@ TEST(JsonVersionTest, Meta)
     EXPECT_EQ(j["url"], "https://github.com/wpilibsuite/allwpilib");
     EXPECT_EQ(j["version"], json(
     {
-        {"string", "3.2.0"},
+        {"string", "3.3.0"},
         {"major", 3},
-        {"minor", 2},
+        {"minor", 3},
         {"patch", 0}
     }));
 }

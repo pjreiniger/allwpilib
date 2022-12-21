@@ -1,7 +1,7 @@
-From aae0cb7455031ec8ba398c57f8b38e7073834461 Mon Sep 17 00:00:00 2001
+From a13dc6110faa134bcbd3a9e49dddaee30c3bf25a Mon Sep 17 00:00:00 2001
 From: PJ Reiniger <pj.reiniger@gmail.com>
 Date: Tue, 20 Dec 2022 22:27:12 -0500
-Subject: [PATCH 11/11] De-inner-class
+Subject: [PATCH 11/12] De-inner-class
 
 ---
  .../nlohmann/detail/input/binary_reader.hpp   |  5 +---
@@ -12,10 +12,10 @@ Subject: [PATCH 11/11] De-inner-class
  5 files changed, 9 insertions(+), 42 deletions(-)
 
 diff --git a/include/nlohmann/detail/input/binary_reader.hpp b/include/nlohmann/detail/input/binary_reader.hpp
-index b6505180..6334c779 100644
+index c57e2d78..adeae5c1 100644
 --- a/include/nlohmann/detail/input/binary_reader.hpp
 +++ b/include/nlohmann/detail/input/binary_reader.hpp
-@@ -19,8 +19,6 @@ class raw_istream;
+@@ -26,8 +26,6 @@ class raw_istream;
  
  namespace nlohmann
  {
@@ -24,25 +24,25 @@ index b6505180..6334c779 100644
  ///////////////////
  // binary reader //
  ///////////////////
-@@ -28,7 +26,7 @@ namespace detail
+@@ -35,7 +33,7 @@ namespace detail
  /*!
- @brief deserialization of CBOR and MessagePack values
+ @brief deserialization of CBOR, MessagePack, and UBJSON values
  */
 -class binary_reader
 +class json::binary_reader
  {
      using number_integer_t = typename BasicJsonType::number_integer_t;
      using number_unsigned_t = typename BasicJsonType::number_unsigned_t;
-@@ -1452,4 +1450,3 @@ class binary_reader
-     const bool is_little_endian = little_endianess();
+@@ -1790,4 +1788,3 @@ class binary_reader
+     json_sax_t* sax = nullptr;
  };
  }
 -}
 diff --git a/include/nlohmann/detail/input/lexer.hpp b/include/nlohmann/detail/input/lexer.hpp
-index 6c8008dc..a820f286 100644
+index c41d9c7f..eb95cc87 100644
 --- a/include/nlohmann/detail/input/lexer.hpp
 +++ b/include/nlohmann/detail/input/lexer.hpp
-@@ -7,6 +7,7 @@
+@@ -8,6 +8,7 @@
  #include <string> // char_traits, string
  
  #include <nlohmann/detail/macro_scope.hpp>
@@ -50,7 +50,7 @@ index 6c8008dc..a820f286 100644
  
  #include "wpi/SmallString.h"
  #include "wpi/SmallVector.h"
-@@ -23,8 +24,6 @@ class raw_istream;
+@@ -24,8 +25,6 @@ class raw_istream;
  
  namespace nlohmann
  {
@@ -59,7 +59,7 @@ index 6c8008dc..a820f286 100644
  ///////////
  // lexer //
  ///////////
-@@ -34,7 +33,7 @@ namespace detail
+@@ -35,7 +34,7 @@ namespace detail
  
  This class organizes the lexical analysis during JSON deserialization.
  */
@@ -68,16 +68,16 @@ index 6c8008dc..a820f286 100644
  {
      using number_integer_t = typename BasicJsonType::number_integer_t;
      using number_unsigned_t = typename BasicJsonType::number_unsigned_t;
-@@ -1375,4 +1374,3 @@ scan_number_done:
+@@ -1427,4 +1426,3 @@ scan_number_done:
      const char decimal_point_char = '.';
  };
  }
 -}
 diff --git a/include/nlohmann/detail/input/parser.hpp b/include/nlohmann/detail/input/parser.hpp
-index 7d60c66a..c31801dc 100644
+index 31a1eaa9..3a4cbf1f 100644
 --- a/include/nlohmann/detail/input/parser.hpp
 +++ b/include/nlohmann/detail/input/parser.hpp
-@@ -18,8 +18,6 @@ class raw_istream;
+@@ -20,8 +20,6 @@ class raw_istream;
  
  namespace nlohmann
  {
@@ -86,7 +86,7 @@ index 7d60c66a..c31801dc 100644
  ////////////
  // parser //
  ////////////
-@@ -29,35 +27,16 @@ namespace detail
+@@ -31,35 +29,16 @@ namespace detail
  
  This class implements a recursive decent parser.
  */
@@ -124,13 +124,13 @@ index 7d60c66a..c31801dc 100644
      /// a parser reading from an input adapter
      explicit parser(raw_istream& s,
                      const parser_callback_t cb = nullptr,
-@@ -614,4 +593,3 @@ class parser
+@@ -503,4 +482,3 @@ class parser
      const bool allow_exceptions = true;
  };
  }
 -}
 diff --git a/include/nlohmann/detail/output/binary_writer.hpp b/include/nlohmann/detail/output/binary_writer.hpp
-index 6063baa4..d35b3ab7 100644
+index 5ab0fd97..2e9edcda 100644
 --- a/include/nlohmann/detail/output/binary_writer.hpp
 +++ b/include/nlohmann/detail/output/binary_writer.hpp
 @@ -2,9 +2,9 @@
@@ -168,18 +168,18 @@ index 6063baa4..d35b3ab7 100644
  }
 -}
 diff --git a/include/nlohmann/detail/output/serializer.hpp b/include/nlohmann/detail/output/serializer.hpp
-index a8df2801..329d6b8f 100644
+index fb8f3d1a..92b90752 100644
 --- a/include/nlohmann/detail/output/serializer.hpp
 +++ b/include/nlohmann/detail/output/serializer.hpp
-@@ -11,6 +11,7 @@
+@@ -13,6 +13,7 @@
  
  #include <nlohmann/detail/macro_scope.hpp>
- #include <nlohmann/detail/meta.hpp>
+ #include <nlohmann/detail/meta/cpp_future.hpp>
 +#include <nlohmann/json.hpp>
  
  #include "wpi/raw_ostream.h"
  //-------EXPORTED_INCLUDE_START
-@@ -19,18 +20,15 @@
+@@ -21,18 +22,15 @@
  #include "wpi/raw_os_ostream.h"
  
  #include "wpi/detail/conversions/json_to_chars.h"
@@ -199,7 +199,7 @@ index a8df2801..329d6b8f 100644
  {
      using string_t = typename BasicJsonType::string_t;
      using number_float_t = typename BasicJsonType::number_float_t;
-@@ -574,4 +572,3 @@ class serializer
+@@ -576,4 +574,3 @@ class serializer
      string_t indent_string;
  };
  }

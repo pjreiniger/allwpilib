@@ -1,18 +1,19 @@
-From 2280c6951122c7052ae8bee8ad6157031a032d8a Mon Sep 17 00:00:00 2001
+From 6ffeee21157844a44bb0247a1521927a0e23a05c Mon Sep 17 00:00:00 2001
 From: PJ Reiniger <pj.reiniger@gmail.com>
 Date: Mon, 19 Dec 2022 03:13:12 -0500
-Subject: [PATCH 01/11] Export functions to cpp files
+Subject: [PATCH 01/12] Export functions to cpp files
 
 ---
  include/nlohmann/detail/exceptions.hpp        |  27 +-
- .../nlohmann/detail/input/binary_reader.hpp   |  88 ++++++
- include/nlohmann/detail/input/lexer.hpp       |  48 ++++
- include/nlohmann/detail/input/parser.hpp      |  24 ++
+ .../nlohmann/detail/input/binary_reader.hpp   |  84 ++++++
+ include/nlohmann/detail/input/json_sax.hpp    |  36 +++
+ include/nlohmann/detail/input/lexer.hpp       |  52 ++++
+ include/nlohmann/detail/input/parser.hpp      |  16 ++
  include/nlohmann/detail/json_pointer.hpp      |  60 ++++
  .../nlohmann/detail/output/binary_writer.hpp  |  32 +++
  include/nlohmann/detail/output/serializer.hpp |  16 ++
- include/nlohmann/json.hpp                     | 266 +++++++++++++++++-
- 8 files changed, 553 insertions(+), 8 deletions(-)
+ include/nlohmann/json.hpp                     | 262 +++++++++++++++++-
+ 9 files changed, 577 insertions(+), 8 deletions(-)
 
 diff --git a/include/nlohmann/detail/exceptions.hpp b/include/nlohmann/detail/exceptions.hpp
 index b73d7b1f..ef6f8374 100644
@@ -115,91 +116,58 @@ index b73d7b1f..ef6f8374 100644
    private:
      other_error(int id_, const char* what_arg) : exception(id_, what_arg) {}
 diff --git a/include/nlohmann/detail/input/binary_reader.hpp b/include/nlohmann/detail/input/binary_reader.hpp
-index d4ca38f5..7d096053 100644
+index 05ab36f3..df6bb3b0 100644
 --- a/include/nlohmann/detail/input/binary_reader.hpp
 +++ b/include/nlohmann/detail/input/binary_reader.hpp
-@@ -59,7 +59,10 @@ class binary_reader
-                            not reached when @a strict was set to true
-     @throw parse_error.112 if unsupported byte was read
-     */
-+//-------EXPORTED_FUNC_DEF_START json::binary_reader
-     BasicJsonType parse_cbor(const bool strict)
-+//-------EXPORTED_FUNC_DEF_END
-+//-------EXPORTED_FUNC_CONTENTS_START
-     {
-         const auto res = parse_cbor_internal();
-         if (strict)
-@@ -69,6 +72,7 @@ class binary_reader
-         }
-         return res;
-     }
-+//-------EXPORTED_FUNC_CONTENTS_END
+@@ -59,9 +59,12 @@ class binary_reader
  
-     /*!
-     @brief create a JSON value from MessagePack input
-@@ -80,7 +84,10 @@ class binary_reader
-                            not reached when @a strict was set to true
-     @throw parse_error.112 if unsupported byte was read
+     @return
      */
 +//-------EXPORTED_FUNC_DEF_START json::binary_reader
-     BasicJsonType parse_msgpack(const bool strict)
+     bool sax_parse(const input_format_t format,
+                    json_sax_t* sax_,
+                    const bool strict = true)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
-         const auto res = parse_msgpack_internal();
-         if (strict)
-@@ -90,6 +97,7 @@ class binary_reader
-         }
-         return res;
-     }
-+//-------EXPORTED_FUNC_CONTENTS_END
+         sax = sax_;
+         bool result = false;
+@@ -106,6 +109,7 @@ class binary_reader
  
-     /*!
-     @brief create a JSON value from UBJSON input
-@@ -101,7 +109,10 @@ class binary_reader
-                            not reached when @a strict was set to true
-     @throw parse_error.112 if unsupported byte was read
-     */
-+//-------EXPORTED_FUNC_DEF_START json::binary_reader
-     BasicJsonType parse_ubjson(const bool strict)
-+//-------EXPORTED_FUNC_DEF_END
-+//-------EXPORTED_FUNC_CONTENTS_START
-     {
-         const auto res = parse_ubjson_internal();
-         if (strict)
-@@ -111,6 +122,7 @@ class binary_reader
-         }
-         return res;
+         return result;
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
      @brief determine system byte order
-@@ -130,7 +142,10 @@ class binary_reader
-                          input (true, default) or whether the last read
-                          character should be considered instead
+@@ -127,7 +131,10 @@ class binary_reader
+ 
+     @return whether a valid CBOR value was passed to the SAX parser
      */
 +//-------EXPORTED_FUNC_DEF_START json::binary_reader
-     BasicJsonType parse_cbor_internal(const bool get_char = true)
+     bool parse_cbor_internal(const bool get_char = true)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
          switch (get_char ? get() : current)
          {
-@@ -446,8 +461,12 @@ class binary_reader
+@@ -454,11 +461,15 @@ class binary_reader
              }
          }
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
+     /*!
+     @return whether a valid MessagePack value was passed to the SAX parser
+     */
 +//-------EXPORTED_FUNC_DEF_START json::binary_reader
-     BasicJsonType parse_msgpack_internal()
+     bool parse_msgpack_internal()
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
          switch (get())
          {
-@@ -771,6 +790,7 @@ class binary_reader
+@@ -816,6 +827,7 @@ class binary_reader
              }
          }
      }
@@ -207,7 +175,7 @@ index d4ca38f5..7d096053 100644
  
      /*!
      @param[in] get_char  whether a new character should be retrieved from the
-@@ -791,16 +811,23 @@ class binary_reader
+@@ -838,16 +850,23 @@ class binary_reader
  
      @return character read from the input
      */
@@ -231,7 +199,7 @@ index d4ca38f5..7d096053 100644
      {
          do
          {
-@@ -810,6 +837,7 @@ class binary_reader
+@@ -857,6 +876,7 @@ class binary_reader
  
          return current;
      }
@@ -239,253 +207,440 @@ index d4ca38f5..7d096053 100644
  
      /*
      @brief read a number from the input
-@@ -824,7 +852,10 @@ class binary_reader
- 
-     @throw parse_error.110 if input has less than `sizeof(NumberType)` bytes
+@@ -870,8 +890,11 @@ class binary_reader
+           bytes in CBOR, MessagePack, and UBJSON are stored in network order
+           (big endian) and therefore need reordering on little endian systems.
      */
 +//-------EXPORTED_FUNC_DEF_START json::binary_reader
-     template<typename NumberType> NumberType get_number()
+     template<typename NumberType>
+     bool get_number(NumberType& result)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
          // step 1: read input into array with system's byte order
          std::array<uint8_t, sizeof(NumberType)> vec;
-@@ -849,6 +880,7 @@ class binary_reader
+@@ -898,6 +921,7 @@ class binary_reader
          std::memcpy(&result, vec.data(), sizeof(NumberType));
-         return result;
+         return true;
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
      @brief create a string by reading characters from the input
-@@ -863,8 +895,11 @@ class binary_reader
- 
-     @throw parse_error.110 if input has less than @a len bytes
+@@ -912,8 +936,11 @@ class binary_reader
+           may be too large. Usually, @ref unexpect_eof() detects the end of
+           the input before we run out of string memory.
      */
 +//-------EXPORTED_FUNC_DEF_START json::binary_reader
      template<typename NumberType>
-     string_t get_string(const NumberType len)
+     bool get_string(const NumberType len, string_t& result)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
-         string_t result;
-         std::generate_n(std::back_inserter(result), len, [this]()
-@@ -875,6 +910,7 @@ class binary_reader
+         bool success = true;
+         std::generate_n(std::back_inserter(result), len, [this, &success]()
+@@ -927,6 +954,7 @@ class binary_reader
          });
-         return result;
+         return success;
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
      @brief reads a CBOR string
-@@ -888,7 +924,10 @@ class binary_reader
-     @throw parse_error.110 if input ended
-     @throw parse_error.113 if an unexpected byte is read
+@@ -939,7 +967,10 @@ class binary_reader
+ 
+     @return whether string creation completed
      */
 +//-------EXPORTED_FUNC_DEF_START json::binary_reader
-     string_t get_cbor_string()
+     bool get_cbor_string(string_t& result)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
-         unexpect_eof();
- 
-@@ -961,9 +1000,13 @@ class binary_reader
+         if (JSON_UNLIKELY(not unexpect_eof()))
+         {
+@@ -1022,13 +1053,17 @@ class binary_reader
              }
          }
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
+     /*!
+     @param[in] len  the length of the array or std::size_t(-1) for an
+                     array of indefinite size
+     @return whether array creation completed
+     */
 +//-------EXPORTED_FUNC_DEF_START json::binary_reader
-     template<typename NumberType>
-     BasicJsonType get_cbor_array(const NumberType len)
+     bool get_cbor_array(const std::size_t len)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
-         BasicJsonType result = value_t::array;
-         std::generate_n(std::back_inserter(*result.m_value.array), len, [this]()
-@@ -972,9 +1015,13 @@ class binary_reader
-         });
-         return result;
+         if (JSON_UNLIKELY(not sax->start_array(len)))
+         {
+@@ -1056,13 +1091,17 @@ class binary_reader
+ 
+         return sax->end_array();
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
+     /*!
+     @param[in] len  the length of the object or std::size_t(-1) for an
+                     object of indefinite size
+     @return whether object creation completed
+     */
 +//-------EXPORTED_FUNC_DEF_START json::binary_reader
-     template<typename NumberType>
-     BasicJsonType get_cbor_object(const NumberType len)
+     bool get_cbor_object(const std::size_t len)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
-         BasicJsonType result = value_t::object;
-         std::generate_n(std::inserter(*result.m_value.object,
-@@ -988,6 +1035,7 @@ class binary_reader
-         });
-         return result;
+         if (not JSON_UNLIKELY(sax->start_object(len)))
+         {
+@@ -1106,6 +1145,7 @@ class binary_reader
+ 
+         return sax->end_object();
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
      @brief reads a MessagePack string
-@@ -1000,7 +1048,10 @@ class binary_reader
-     @throw parse_error.110 if input ended
-     @throw parse_error.113 if an unexpected byte is read
+@@ -1117,7 +1157,10 @@ class binary_reader
+ 
+     @return whether string creation completed
      */
 +//-------EXPORTED_FUNC_DEF_START json::binary_reader
-     string_t get_msgpack_string()
+     bool get_msgpack_string(string_t& result)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
-         unexpect_eof();
- 
-@@ -1067,9 +1118,13 @@ class binary_reader
+         if (JSON_UNLIKELY(not unexpect_eof()))
+         {
+@@ -1188,12 +1231,16 @@ class binary_reader
              }
          }
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
 +//-------EXPORTED_FUNC_DEF_START json::binary_reader
-     template<typename NumberType>
-     BasicJsonType get_msgpack_array(const NumberType len)
+     /*!
+     @param[in] len  the length of the array
+     @return whether array creation completed
+     */
+     bool get_msgpack_array(const std::size_t len)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
-         BasicJsonType result = value_t::array;
-         std::generate_n(std::back_inserter(*result.m_value.array), len, [this]()
-@@ -1078,9 +1133,13 @@ class binary_reader
-         });
-         return result;
+         if (JSON_UNLIKELY(not sax->start_array(len)))
+         {
+@@ -1210,12 +1257,16 @@ class binary_reader
+ 
+         return sax->end_array();
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
+     /*!
+     @param[in] len  the length of the object
+     @return whether object creation completed
+     */
 +//-------EXPORTED_FUNC_DEF_START json::binary_reader
-     template<typename NumberType>
-     BasicJsonType get_msgpack_object(const NumberType len)
+     bool get_msgpack_object(const std::size_t len)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
-         BasicJsonType result = value_t::object;
-         std::generate_n(std::inserter(*result.m_value.object,
-@@ -1094,6 +1153,7 @@ class binary_reader
-         });
-         return result;
+         if (JSON_UNLIKELY(not sax->start_object(len)))
+         {
+@@ -1240,6 +1291,7 @@ class binary_reader
+ 
+         return sax->end_object();
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
      @brief reads a UBJSON string
-@@ -1111,7 +1171,10 @@ class binary_reader
-     @throw parse_error.110 if input ended
-     @throw parse_error.113 if an unexpected byte is read
+@@ -1255,7 +1307,10 @@ class binary_reader
+ 
+     @return whether string creation completed
      */
 +//-------EXPORTED_FUNC_DEF_START json::binary_reader
-     string_t get_ubjson_string(const bool get_char = true)
+     bool get_ubjson_string(string_t& result, const bool get_char = true)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
          if (get_char)
          {
-@@ -1139,6 +1202,7 @@ class binary_reader
-                                                "expected a UBJSON string; last byte: 0x" + ss.str()));
+@@ -1304,12 +1359,16 @@ class binary_reader
+                 return sax->parse_error(chars_read, last_token, parse_error::create(113, chars_read, "expected a UBJSON string; last byte: 0x" + last_token));
+         }
+     }
++//-------EXPORTED_FUNC_CONTENTS_END
+ 
+     /*!
+     @param[out] result  determined size
+     @return whether size determination completed
+     */
++//-------EXPORTED_FUNC_DEF_START json::binary_reader
+     bool get_ubjson_size_value(std::size_t& result)
++//-------EXPORTED_FUNC_DEF_END
++//-------EXPORTED_FUNC_CONTENTS_START
+     {
+         switch (get_ignore_noop())
+         {
+@@ -1375,6 +1434,7 @@ class binary_reader
+             }
          }
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
      @brief determine the type and size for a container
-@@ -1148,7 +1212,10 @@ class binary_reader
+@@ -1386,7 +1446,10 @@ class binary_reader
  
-     @return pair of the size and the type
+     @return whether pair creation completed
      */
 +//-------EXPORTED_FUNC_DEF_START json::binary_reader
-     std::pair<std::size_t, int> get_ubjson_size_type()
+     bool get_ubjson_size_type(std::pair<std::size_t, int>& result)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
-         std::size_t sz = string_t::npos;
-         int tc = 0;
-@@ -1177,8 +1244,12 @@ class binary_reader
- 
-         return std::make_pair(sz, tc);
+         result.first = string_t::npos; // size
+         result.second = 0; // type
+@@ -1420,12 +1483,16 @@ class binary_reader
+         }
+         return true;
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
+     /*!
+     @param prefix  the previously read or set type prefix
+     @return whether value creation completed
+     */
 +//-------EXPORTED_FUNC_DEF_START json::binary_reader
-     BasicJsonType get_ubjson_value(const int prefix)
+     bool get_ubjson_value(const int prefix)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
          switch (prefix)
          {
-@@ -1238,8 +1309,12 @@ class binary_reader
-                                                "error reading UBJSON; last byte: 0x" + ss.str()));
-         }
-     }
-+//-------EXPORTED_FUNC_CONTENTS_END
- 
-+//-------EXPORTED_FUNC_DEF_START json::binary_reader
-     BasicJsonType get_ubjson_array()
-+//-------EXPORTED_FUNC_DEF_END
-+//-------EXPORTED_FUNC_CONTENTS_START
-     {
-         BasicJsonType result = value_t::array;
-         const auto size_and_type = get_ubjson_size_type();
-@@ -1283,8 +1358,12 @@ class binary_reader
- 
-         return result;
-     }
-+//-------EXPORTED_FUNC_CONTENTS_END
- 
-+//-------EXPORTED_FUNC_DEF_START json::binary_reader
-     BasicJsonType get_ubjson_object()
-+//-------EXPORTED_FUNC_DEF_END
-+//-------EXPORTED_FUNC_CONTENTS_START
-     {
-         BasicJsonType result = value_t::object;
-         const auto size_and_type = get_ubjson_size_type();
-@@ -1332,30 +1411,39 @@ class binary_reader
- 
-         return result;
-     }
-+//-------EXPORTED_FUNC_CONTENTS_END
- 
-     /*!
-     @brief throw if end of input is not reached
-     @throw parse_error.110 if input not ended
-     */
-+//-------EXPORTED_FUNC_DEF_START json::binary_reader
-     void expect_eof() const
-+//-------EXPORTED_FUNC_DEF_END
-+//-------EXPORTED_FUNC_CONTENTS_START
-     {
-         if (JSON_UNLIKELY(current != std::char_traits<char>::eof()))
-         {
-             JSON_THROW(parse_error::create(110, chars_read, "expected end of input"));
+@@ -1517,11 +1584,15 @@ class binary_reader
+             }
          }
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
-     @briefthrow if end of input is reached
-     @throw parse_error.110 if input ended
+     @return whether array creation completed
      */
 +//-------EXPORTED_FUNC_DEF_START json::binary_reader
-     void unexpect_eof() const
+     bool get_ubjson_array()
++//-------EXPORTED_FUNC_DEF_END
++//-------EXPORTED_FUNC_CONTENTS_START
+     {
+         std::pair<std::size_t, int> size_and_type;
+         if (JSON_UNLIKELY(not get_ubjson_size_type(size_and_type)))
+@@ -1579,11 +1650,15 @@ class binary_reader
+ 
+         return sax->end_array();
+     }
++//-------EXPORTED_FUNC_CONTENTS_END
+ 
+     /*!
+     @return whether object creation completed
+     */
++//-------EXPORTED_FUNC_DEF_START json::binary_reader
+     bool get_ubjson_object()
++//-------EXPORTED_FUNC_DEF_END
++//-------EXPORTED_FUNC_CONTENTS_START
+     {
+         std::pair<std::size_t, int> size_and_type;
+         if (JSON_UNLIKELY(not get_ubjson_size_type(size_and_type)))
+@@ -1654,11 +1729,15 @@ class binary_reader
+ 
+         return sax->end_object();
+     }
++//-------EXPORTED_FUNC_CONTENTS_END
+ 
+     /*!
+     @return whether the last read character is not EOF
+     */
++//-------EXPORTED_FUNC_DEF_START json::binary_reader
+     bool unexpect_eof() const
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
          if (JSON_UNLIKELY(current == std::char_traits<char>::eof()))
          {
-             JSON_THROW(parse_error::create(110, chars_read, "unexpected end of input"));
+@@ -1666,16 +1745,21 @@ class binary_reader
          }
+         return true;
+     }
++//-------EXPORTED_FUNC_CONTENTS_END
+ 
+     /*!
+     @return a string representation of the last read byte
+     */
++//-------EXPORTED_FUNC_DEF_START json::binary_reader
+     std::string get_token_string() const
++//-------EXPORTED_FUNC_DEF_END
++//-------EXPORTED_FUNC_CONTENTS_START
+     {
+         char cr[3];
+         snprintf(cr, 3, "%.2hhX", static_cast<unsigned char>(current));
+         return std::string{cr};
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
    private:
      /// input adapter
+diff --git a/include/nlohmann/detail/input/json_sax.hpp b/include/nlohmann/detail/input/json_sax.hpp
+index 1705a861..5278b8bd 100644
+--- a/include/nlohmann/detail/input/json_sax.hpp
++++ b/include/nlohmann/detail/input/json_sax.hpp
+@@ -193,7 +193,10 @@ class json_sax_dom_parser
+         return true;
+     }
+ 
++//-------EXPORTED_FUNC_DEF_START json_sax_dom_parser
+     bool start_object(std::size_t len)
++//-------EXPORTED_FUNC_DEF_END
++//-------EXPORTED_FUNC_CONTENTS_START
+     {
+         ref_stack.push_back(handle_value(BasicJsonType::value_t::object));
+ 
+@@ -205,6 +208,7 @@ class json_sax_dom_parser
+ 
+         return true;
+     }
++//-------EXPORTED_FUNC_CONTENTS_END
+ 
+     bool key(string_t& val)
+     {
+@@ -219,7 +223,10 @@ class json_sax_dom_parser
+         return true;
+     }
+ 
++//-------EXPORTED_FUNC_DEF_START json_sax_dom_parser
+     bool start_array(std::size_t len)
++//-------EXPORTED_FUNC_DEF_END
++//-------EXPORTED_FUNC_CONTENTS_START
+     {
+         ref_stack.push_back(handle_value(BasicJsonType::value_t::array));
+ 
+@@ -231,6 +238,7 @@ class json_sax_dom_parser
+ 
+         return true;
+     }
++//-------EXPORTED_FUNC_CONTENTS_END
+ 
+     bool end_array()
+     {
+@@ -238,8 +246,11 @@ class json_sax_dom_parser
+         return true;
+     }
+ 
++//-------EXPORTED_FUNC_DEF_START json_sax_dom_parser
+     bool parse_error(std::size_t, const std::string&,
+                      const detail::exception& ex)
++//-------EXPORTED_FUNC_DEF_END
++//-------EXPORTED_FUNC_CONTENTS_START
+     {
+         errored = true;
+         if (allow_exceptions)
+@@ -265,6 +276,7 @@ class json_sax_dom_parser
+         }
+         return false;
+     }
++//-------EXPORTED_FUNC_CONTENTS_END
+ 
+     constexpr bool is_errored() const
+     {
+@@ -370,7 +382,10 @@ class json_sax_dom_callback_parser
+         return true;
+     }
+ 
++//-------EXPORTED_FUNC_DEF_START json_sax_dom_callback_parser
+     bool start_object(std::size_t len)
++//-------EXPORTED_FUNC_DEF_END
++//-------EXPORTED_FUNC_CONTENTS_START
+     {
+         // check callback for object start
+         const bool keep = callback(static_cast<int>(ref_stack.size()), parse_event_t::object_start, discarded);
+@@ -391,8 +406,12 @@ class json_sax_dom_callback_parser
+ 
+         return true;
+     }
++//-------EXPORTED_FUNC_CONTENTS_END
+ 
++//-------EXPORTED_FUNC_DEF_START json_sax_dom_callback_parser
+     bool key(string_t& val)
++//-------EXPORTED_FUNC_DEF_END
++//-------EXPORTED_FUNC_CONTENTS_START
+     {
+         BasicJsonType k = BasicJsonType(val);
+ 
+@@ -408,8 +427,12 @@ class json_sax_dom_callback_parser
+ 
+         return true;
+     }
++//-------EXPORTED_FUNC_CONTENTS_END
+ 
++//-------EXPORTED_FUNC_DEF_START json_sax_dom_callback_parser
+     bool end_object()
++//-------EXPORTED_FUNC_DEF_END
++//-------EXPORTED_FUNC_CONTENTS_START
+     {
+         if (ref_stack.back())
+         {
+@@ -443,8 +466,12 @@ class json_sax_dom_callback_parser
+ 
+         return true;
+     }
++//-------EXPORTED_FUNC_CONTENTS_END
+ 
++//-------EXPORTED_FUNC_DEF_START json_sax_dom_callback_parser
+     bool start_array(std::size_t len)
++//-------EXPORTED_FUNC_DEF_END
++//-------EXPORTED_FUNC_CONTENTS_START
+     {
+         const bool keep = callback(static_cast<int>(ref_stack.size()), parse_event_t::array_start, discarded);
+         keep_stack.push_back(keep);
+@@ -464,8 +491,12 @@ class json_sax_dom_callback_parser
+ 
+         return true;
+     }
++//-------EXPORTED_FUNC_CONTENTS_END
+ 
++//-------EXPORTED_FUNC_DEF_START json_sax_dom_callback_parser
+     bool end_array()
++//-------EXPORTED_FUNC_DEF_END
++//-------EXPORTED_FUNC_CONTENTS_START
+     {
+         bool keep = true;
+ 
+@@ -495,9 +526,13 @@ class json_sax_dom_callback_parser
+ 
+         return true;
+     }
++//-------EXPORTED_FUNC_CONTENTS_END
+ 
++//-------EXPORTED_FUNC_DEF_START json_sax_dom_callback_parser
+     bool parse_error(std::size_t, const std::string&,
+                      const detail::exception& ex)
++//-------EXPORTED_FUNC_DEF_END
++//-------EXPORTED_FUNC_CONTENTS_START
+     {
+         errored = true;
+         if (allow_exceptions)
+@@ -523,6 +558,7 @@ class json_sax_dom_callback_parser
+         }
+         return false;
+     }
++//-------EXPORTED_FUNC_CONTENTS_END
+ 
+     constexpr bool is_errored() const
+     {
 diff --git a/include/nlohmann/detail/input/lexer.hpp b/include/nlohmann/detail/input/lexer.hpp
-index 98cc1b69..2210048d 100644
+index 44165ff0..0cc9a8c1 100644
 --- a/include/nlohmann/detail/input/lexer.hpp
 +++ b/include/nlohmann/detail/input/lexer.hpp
-@@ -58,7 +58,10 @@ class lexer
+@@ -56,7 +56,10 @@ class lexer
      };
  
      /// return name of values of type token_type (only used for errors)
@@ -497,13 +652,13 @@ index 98cc1b69..2210048d 100644
          switch (t)
          {
 @@ -98,9 +101,14 @@ class lexer
-                 return "unknown token"; // LCOV_EXCL_LINE
+                 // LCOV_EXCL_STOP
          }
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
 +//-------EXPORTED_FUNC_DEF_START json::lexer
-     explicit lexer(detail::input_adapter_t adapter)
+     explicit lexer(detail::input_adapter_t&& adapter)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
          : ia(std::move(adapter)), decimal_point_char(get_decimal_point()) {}
@@ -579,7 +734,7 @@ index 98cc1b69..2210048d 100644
      {
          // reset token_buffer to store the number's bytes
          reset();
-@@ -1035,14 +1058,18 @@ scan_number_done:
+@@ -1037,14 +1060,18 @@ scan_number_done:
  
          return token_type::value_float;
      }
@@ -598,7 +753,7 @@ index 98cc1b69..2210048d 100644
      {
          assert(current == literal_text[0]);
          for (std::size_t i = 1; i < length; ++i)
-@@ -1055,18 +1082,23 @@ scan_number_done:
+@@ -1057,18 +1084,23 @@ scan_number_done:
          }
          return return_type;
      }
@@ -622,7 +777,7 @@ index 98cc1b69..2210048d 100644
  
      /*
      @brief get next character from the input
-@@ -1078,7 +1110,10 @@ scan_number_done:
+@@ -1080,7 +1112,10 @@ scan_number_done:
  
      @return character read from the input
      */
@@ -632,22 +787,27 @@ index 98cc1b69..2210048d 100644
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
          ++chars_read;
-         current = ia->get_character();
-@@ -1088,9 +1123,13 @@ scan_number_done:
+         if (next_unget)
+@@ -1099,6 +1134,7 @@ scan_number_done:
          }
          return current;
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
-     /// unget current character (return it again on next get)
+     /*!
+     @brief unget current character (read it again on next get)
+@@ -1108,7 +1144,10 @@ scan_number_done:
+     token_string. The next call to get() will behave as if the unget character
+     is read again.
+     */
 +//-------EXPORTED_FUNC_DEF_START json::lexer
      void unget()
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
+         next_unget = true;
          --chars_read;
-         if (JSON_LIKELY(current != std::char_traits<char>::eof()))
-@@ -1100,6 +1139,7 @@ scan_number_done:
+@@ -1118,6 +1157,7 @@ scan_number_done:
              token_string.pop_back();
          }
      }
@@ -655,7 +815,7 @@ index 98cc1b69..2210048d 100644
  
      /// add a character to token_buffer
      void add(int c)
-@@ -1149,7 +1189,10 @@ scan_number_done:
+@@ -1167,7 +1207,10 @@ scan_number_done:
      /// return the last read token (for errors only).  Will never contain EOF
      /// (an arbitrary value that is not a valid char value, often -1), because
      /// 255 may legitimately occur.  May contain NUL, which should be escaped.
@@ -666,7 +826,7 @@ index 98cc1b69..2210048d 100644
      {
          // escape control characters
          std::string result;
-@@ -1172,6 +1215,7 @@ scan_number_done:
+@@ -1189,6 +1232,7 @@ scan_number_done:
  
          return result;
      }
@@ -674,18 +834,31 @@ index 98cc1b69..2210048d 100644
  
      /// return syntax error message
      constexpr const char* get_error_message() const noexcept
-@@ -1183,7 +1227,10 @@ scan_number_done:
-     // actual scanner
-     /////////////////////
+@@ -1204,7 +1248,10 @@ scan_number_done:
+     @brief skip the UTF-8 byte order mark
+     @return true iff there is no BOM or the correct BOM has been skipped
+     */
++//-------EXPORTED_FUNC_DEF_START json::lexer
+     bool skip_bom()
++//-------EXPORTED_FUNC_DEF_END
++//-------EXPORTED_FUNC_CONTENTS_START
+     {
+         if (get() == 0xEF)
+         {
+@@ -1227,8 +1274,12 @@ scan_number_done:
+             return true;
+         }
+     }
++//-------EXPORTED_FUNC_CONTENTS_END
  
 +//-------EXPORTED_FUNC_DEF_START json::lexer
      token_type scan()
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
-         // read next character and ignore whitespace
-         do
-@@ -1246,6 +1293,7 @@ scan_number_done:
+         // initially, skip the BOM
+         if (chars_read == 0 and not skip_bom())
+@@ -1298,6 +1349,7 @@ scan_number_done:
                  return token_type::parse_error;
          }
      }
@@ -694,10 +867,10 @@ index 98cc1b69..2210048d 100644
    private:
      /// input adapter
 diff --git a/include/nlohmann/detail/input/parser.hpp b/include/nlohmann/detail/input/parser.hpp
-index e58aaaf9..43a1e0af 100644
+index 70d92a26..6177a1e0 100644
 --- a/include/nlohmann/detail/input/parser.hpp
 +++ b/include/nlohmann/detail/input/parser.hpp
-@@ -73,7 +73,10 @@ class parser
+@@ -78,7 +78,10 @@ class parser
      @throw parse_error.102 if to_unicode fails or surrogate error
      @throw parse_error.103 if to_unicode fails
      */
@@ -706,17 +879,17 @@ index e58aaaf9..43a1e0af 100644
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
-         // read first token
-         get_token();
-@@ -102,6 +105,7 @@ class parser
-             result = nullptr;
+         if (callback)
+         {
+@@ -130,6 +133,7 @@ class parser
+             }
          }
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
      @brief public accept interface
-@@ -109,7 +113,10 @@ class parser
+@@ -137,7 +141,10 @@ class parser
      @param[in] strict  whether to expect the last token to be EOF
      @return whether the input is a proper JSON text
      */
@@ -725,86 +898,50 @@ index e58aaaf9..43a1e0af 100644
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
-         // read first token
-         get_token();
-@@ -122,6 +129,7 @@ class parser
-         // strict => last token must be EOF
-         return not strict or (get_token() == token_type::end_of_input);
+         json_sax_acceptor<BasicJsonType> sax_acceptor;
+         return sax_parse(&sax_acceptor, strict);
+@@ -159,10 +166,14 @@ class parser
+ 
+         return result;
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
    private:
-     /*!
-@@ -130,7 +138,10 @@ class parser
-     @throw parse_error.102 if to_unicode fails or surrogate error
-     @throw parse_error.103 if to_unicode fails
-     */
 +//-------EXPORTED_FUNC_DEF_START json::parser
-     void parse_internal(bool keep, BasicJsonType& result)
+     template <typename SAX>
+     bool sax_parse_internal(SAX* sax)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
-         // never parse after a parse error was detected
-         assert(not errored);
-@@ -408,6 +419,7 @@ class parser
-             result.m_type = value_t::discarded;
-         }
-     }
-+//-------EXPORTED_FUNC_CONTENTS_END
- 
-     /*!
-     @brief the actual acceptor
-@@ -419,7 +431,10 @@ class parser
- 
-     This invariant makes sure that no token needs to be "unput".
-     */
-+//-------EXPORTED_FUNC_DEF_START json::parser
-     bool accept_internal()
-+//-------EXPORTED_FUNC_DEF_END
-+//-------EXPORTED_FUNC_CONTENTS_START
-     {
-         switch (last_token)
-         {
-@@ -521,6 +536,7 @@ class parser
-                 return false;
+         // stack to remember the hieararchy of structured values we are parsing
+         // true = array; false = object
+@@ -446,6 +457,7 @@ class parser
+             }
          }
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /// get next token from lexer
      token_type get_token()
-@@ -531,7 +547,10 @@ class parser
-     /*!
-     @throw parse_error.101 if expected token did not occur
-     */
-+//-------EXPORTED_FUNC_DEF_START json::parser
-     bool expect(token_type t)
-+//-------EXPORTED_FUNC_DEF_END
-+//-------EXPORTED_FUNC_CONTENTS_START
-     {
-         if (JSON_UNLIKELY(t != last_token))
-         {
-@@ -549,8 +568,12 @@ class parser
- 
-         return true;
+@@ -453,7 +465,10 @@ class parser
+         return (last_token = m_lexer.scan());
      }
-+//-------EXPORTED_FUNC_CONTENTS_END
  
 +//-------EXPORTED_FUNC_DEF_START json::parser
-     [[noreturn]] void throw_exception() const
+     std::string exception_message(const token_type expected)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
          std::string error_msg = "syntax error - ";
          if (last_token == token_type::parse_error)
-@@ -570,6 +593,7 @@ class parser
+@@ -473,6 +488,7 @@ class parser
  
-         JSON_THROW(parse_error::create(101, m_lexer.get_position(), error_msg));
+         return error_msg;
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
    private:
-     /// current level of recursion
+     /// callback function
 diff --git a/include/nlohmann/detail/json_pointer.hpp b/include/nlohmann/detail/json_pointer.hpp
 index fce8001a..ea99b602 100644
 --- a/include/nlohmann/detail/json_pointer.hpp
@@ -1083,7 +1220,7 @@ index fce8001a..ea99b602 100644
      friend bool operator==(json_pointer const& lhs,
                             json_pointer const& rhs) noexcept
 diff --git a/include/nlohmann/detail/output/binary_writer.hpp b/include/nlohmann/detail/output/binary_writer.hpp
-index 1b15bdaf..9743e03e 100644
+index 71e5ec81..5c2aa9ce 100644
 --- a/include/nlohmann/detail/output/binary_writer.hpp
 +++ b/include/nlohmann/detail/output/binary_writer.hpp
 @@ -37,7 +37,10 @@ class binary_writer
@@ -1218,7 +1355,7 @@ index 1b15bdaf..9743e03e 100644
            value that does not fit the previous limits.
      */
 +//-------EXPORTED_FUNC_DEF_START json::binary_writer
-     char ubjson_prefix(const BasicJsonType& j) const noexcept
+     CharType ubjson_prefix(const BasicJsonType& j) const noexcept
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
@@ -1230,13 +1367,13 @@ index 1b15bdaf..9743e03e 100644
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
-   private:
-     /// whether we can assume little endianess
+     static constexpr CharType get_cbor_float_prefix(float)
+     {
 diff --git a/include/nlohmann/detail/output/serializer.hpp b/include/nlohmann/detail/output/serializer.hpp
-index a6442644..7db60fdf 100644
+index e2655f04..be1545b6 100644
 --- a/include/nlohmann/detail/output/serializer.hpp
 +++ b/include/nlohmann/detail/output/serializer.hpp
-@@ -74,10 +74,13 @@ class serializer
+@@ -71,10 +71,13 @@ class serializer
      @param[in] indent_step     the indent level
      @param[in] current_indent  the current indent level (only used internally)
      */
@@ -1250,7 +1387,7 @@ index a6442644..7db60fdf 100644
      {
          switch (val.m_type)
          {
-@@ -265,6 +268,7 @@ class serializer
+@@ -262,6 +265,7 @@ class serializer
              }
          }
      }
@@ -1258,7 +1395,7 @@ index a6442644..7db60fdf 100644
  
    private:
      /*!
-@@ -281,7 +285,10 @@ class serializer
+@@ -278,7 +282,10 @@ class serializer
  
      @complexity Linear in the length of string @a s.
      */
@@ -1269,15 +1406,15 @@ index a6442644..7db60fdf 100644
      {
          uint32_t codepoint;
          uint8_t state = UTF8_ACCEPT;
-@@ -422,6 +429,7 @@ class serializer
-             JSON_THROW(type_error::create(316, "incomplete UTF-8 string; last byte: 0x" + ss.str()));
+@@ -419,6 +426,7 @@ class serializer
+             JSON_THROW(type_error::create(316, "incomplete UTF-8 string; last byte: 0x" + sn));
          }
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
      @brief dump an integer
-@@ -477,7 +485,10 @@ class serializer
+@@ -474,7 +482,10 @@ class serializer
  
      @param[in] x  floating-point number to dump
      */
@@ -1288,7 +1425,7 @@ index a6442644..7db60fdf 100644
      {
          // NaN / inf
          if (not std::isfinite(x))
-@@ -554,6 +565,7 @@ class serializer
+@@ -551,6 +562,7 @@ class serializer
              o->write_characters(".0", 2);
          }
      }
@@ -1296,7 +1433,7 @@ index a6442644..7db60fdf 100644
  
      /*!
      @brief check whether a string is UTF-8 encoded
-@@ -576,7 +588,10 @@ class serializer
+@@ -573,7 +585,10 @@ class serializer
      @copyright Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
      @sa http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
      */
@@ -1307,7 +1444,7 @@ index a6442644..7db60fdf 100644
      {
          static const std::array<uint8_t, 400> utf8d =
          {
-@@ -607,6 +622,7 @@ class serializer
+@@ -604,6 +619,7 @@ class serializer
          state = utf8d[256u + state * 16u + type];
          return state;
      }
@@ -1316,10 +1453,10 @@ index a6442644..7db60fdf 100644
    private:
      /// the output of the serializer
 diff --git a/include/nlohmann/json.hpp b/include/nlohmann/json.hpp
-index 7ecf631f..35ca3976 100644
+index 52c301cf..2f240704 100644
 --- a/include/nlohmann/json.hpp
 +++ b/include/nlohmann/json.hpp
-@@ -305,7 +305,10 @@ class basic_json
+@@ -315,7 +315,10 @@ class basic_json
  
      @since 2.1.0
      */
@@ -1330,7 +1467,7 @@ index 7ecf631f..35ca3976 100644
      {
          basic_json result;
  
-@@ -359,6 +362,7 @@ class basic_json
+@@ -369,6 +372,7 @@ class basic_json
  #endif
          return result;
      }
@@ -1338,7 +1475,7 @@ index 7ecf631f..35ca3976 100644
  
  
      ///////////////////////////
-@@ -880,7 +884,10 @@ class basic_json
+@@ -890,7 +894,10 @@ class basic_json
          /// constructor for numbers (floating-point)
          json_value(number_float_t v) noexcept : number_float(v) {}
          /// constructor for empty values of a given type
@@ -1349,7 +1486,7 @@ index 7ecf631f..35ca3976 100644
          {
              switch (t)
              {
-@@ -943,6 +950,7 @@ class basic_json
+@@ -953,6 +960,7 @@ class basic_json
                  }
              }
          }
@@ -1357,7 +1494,7 @@ index 7ecf631f..35ca3976 100644
  
          /// constructor for strings
          json_value(const string_t& value)
-@@ -980,7 +988,10 @@ class basic_json
+@@ -990,7 +998,10 @@ class basic_json
              array = create<array_t>(std::move(value));
          }
  
@@ -1368,7 +1505,7 @@ index 7ecf631f..35ca3976 100644
          {
              switch (t)
              {
-@@ -1014,6 +1025,7 @@ class basic_json
+@@ -1024,6 +1035,7 @@ class basic_json
                  }
              }
          }
@@ -1376,7 +1513,7 @@ index 7ecf631f..35ca3976 100644
      };
  
      /*!
-@@ -1389,9 +1401,12 @@ class basic_json
+@@ -1398,9 +1410,12 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1389,7 +1526,7 @@ index 7ecf631f..35ca3976 100644
      {
          // check if each element is an array with two elements whose first
          // element is a string
-@@ -1440,6 +1455,7 @@ class basic_json
+@@ -1449,6 +1464,7 @@ class basic_json
  
          assert_invariant();
      }
@@ -1397,7 +1534,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief explicitly create an array from an initializer list
-@@ -1548,12 +1564,16 @@ class basic_json
+@@ -1557,12 +1573,16 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1414,7 +1551,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief construct a JSON container given an iterator range
-@@ -1737,7 +1757,10 @@ class basic_json
+@@ -1746,7 +1766,10 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1425,7 +1562,7 @@ index 7ecf631f..35ca3976 100644
          : m_type(other.m_type)
      {
          // check of passed value is valid
-@@ -1793,6 +1816,7 @@ class basic_json
+@@ -1802,6 +1825,7 @@ class basic_json
  
          assert_invariant();
      }
@@ -1433,7 +1570,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief move constructor
-@@ -1820,7 +1844,10 @@ class basic_json
+@@ -1829,7 +1853,10 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1444,7 +1581,7 @@ index 7ecf631f..35ca3976 100644
          : m_type(std::move(other.m_type)),
            m_value(std::move(other.m_value))
      {
-@@ -1833,6 +1860,7 @@ class basic_json
+@@ -1842,6 +1869,7 @@ class basic_json
  
          assert_invariant();
      }
@@ -1452,7 +1589,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief copy assignment
-@@ -1857,12 +1885,15 @@ class basic_json
+@@ -1866,12 +1894,15 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1468,7 +1605,7 @@ index 7ecf631f..35ca3976 100644
      {
          // check that passed value is valid
          other.assert_invariant();
-@@ -1874,6 +1905,7 @@ class basic_json
+@@ -1883,6 +1914,7 @@ class basic_json
          assert_invariant();
          return *this;
      }
@@ -1476,7 +1613,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief destructor
-@@ -1943,8 +1975,11 @@ class basic_json
+@@ -1952,8 +1984,11 @@ class basic_json
      @since version 1.0.0; indentation character @a indent_char, option
             @a ensure_ascii and exceptions added in version 3.0.0
      */
@@ -1488,7 +1625,7 @@ index 7ecf631f..35ca3976 100644
      {
          string_t result;
          serializer s(detail::output_adapter<char, string_t>(result), indent_char);
-@@ -1960,6 +1995,7 @@ class basic_json
+@@ -1969,6 +2004,7 @@ class basic_json
  
          return result;
      }
@@ -1496,7 +1633,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief return the type of the JSON value (explicit)
-@@ -2341,7 +2377,10 @@ class basic_json
+@@ -2350,7 +2386,10 @@ class basic_json
      //////////////////
  
      /// get a boolean (explicit)
@@ -1507,7 +1644,7 @@ index 7ecf631f..35ca3976 100644
      {
          if (JSON_LIKELY(is_boolean()))
          {
-@@ -2350,6 +2389,7 @@ class basic_json
+@@ -2359,6 +2398,7 @@ class basic_json
  
          JSON_THROW(type_error::create(302, "type must be boolean, but is " + std::string(type_name())));
      }
@@ -1515,7 +1652,7 @@ index 7ecf631f..35ca3976 100644
  
      /// get a pointer to the value (object)
      object_t* get_impl_ptr(object_t* /*unused*/) noexcept
-@@ -2869,7 +2909,10 @@ class basic_json
+@@ -2896,7 +2936,10 @@ class basic_json
      written using `at()`. It also demonstrates the different exceptions that
      can be thrown.,at__size_type}
      */
@@ -1526,7 +1663,7 @@ index 7ecf631f..35ca3976 100644
      {
          // at only works for arrays
          if (JSON_LIKELY(is_array()))
-@@ -2889,6 +2932,7 @@ class basic_json
+@@ -2916,6 +2959,7 @@ class basic_json
              JSON_THROW(type_error::create(304, "cannot use at() with " + std::string(type_name())));
          }
      }
@@ -1534,7 +1671,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief access specified array element with bounds checking
-@@ -2916,7 +2960,10 @@ class basic_json
+@@ -2943,7 +2987,10 @@ class basic_json
      `at()`. It also demonstrates the different exceptions that can be thrown.,
      at__size_type_const}
      */
@@ -1545,7 +1682,7 @@ index 7ecf631f..35ca3976 100644
      {
          // at only works for arrays
          if (JSON_LIKELY(is_array()))
-@@ -2936,6 +2983,7 @@ class basic_json
+@@ -2963,6 +3010,7 @@ class basic_json
              JSON_THROW(type_error::create(304, "cannot use at() with " + std::string(type_name())));
          }
      }
@@ -1553,7 +1690,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief access specified object element with bounds checking
-@@ -2967,7 +3015,10 @@ class basic_json
+@@ -2994,7 +3042,10 @@ class basic_json
      written using `at()`. It also demonstrates the different exceptions that
      can be thrown.,at__object_t_key_type}
      */
@@ -1564,7 +1701,7 @@ index 7ecf631f..35ca3976 100644
      {
          // at only works for objects
          if (JSON_LIKELY(is_object()))
-@@ -2987,6 +3038,7 @@ class basic_json
+@@ -3014,6 +3065,7 @@ class basic_json
              JSON_THROW(type_error::create(304, "cannot use at() with " + std::string(type_name())));
          }
      }
@@ -1572,7 +1709,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief access specified object element with bounds checking
-@@ -3018,7 +3070,10 @@ class basic_json
+@@ -3045,7 +3097,10 @@ class basic_json
      `at()`. It also demonstrates the different exceptions that can be thrown.,
      at__object_t_key_type_const}
      */
@@ -1583,7 +1720,7 @@ index 7ecf631f..35ca3976 100644
      {
          // at only works for objects
          if (JSON_LIKELY(is_object()))
-@@ -3038,6 +3093,7 @@ class basic_json
+@@ -3065,6 +3120,7 @@ class basic_json
              JSON_THROW(type_error::create(304, "cannot use at() with " + std::string(type_name())));
          }
      }
@@ -1591,7 +1728,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief access specified array element
-@@ -3064,7 +3120,10 @@ class basic_json
+@@ -3091,7 +3147,10 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1602,15 +1739,15 @@ index 7ecf631f..35ca3976 100644
      {
          // implicitly convert null value to an empty array
          if (is_null())
-@@ -3090,6 +3149,7 @@ class basic_json
+@@ -3117,6 +3176,7 @@ class basic_json
  
-         JSON_THROW(type_error::create(305, "cannot use operator[] with " + std::string(type_name())));
+         JSON_THROW(type_error::create(305, "cannot use operator[] with a numeric argument with " + std::string(type_name())));
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
      @brief access specified array element
-@@ -3110,7 +3170,10 @@ class basic_json
+@@ -3137,7 +3197,10 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1621,15 +1758,15 @@ index 7ecf631f..35ca3976 100644
      {
          // const operator[] only works for arrays
          if (JSON_LIKELY(is_array()))
-@@ -3120,6 +3183,7 @@ class basic_json
+@@ -3147,6 +3210,7 @@ class basic_json
  
-         JSON_THROW(type_error::create(305, "cannot use operator[] with " + std::string(type_name())));
+         JSON_THROW(type_error::create(305, "cannot use operator[] with a numeric argument with " + std::string(type_name())));
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
      @brief access specified object element
-@@ -3148,7 +3212,10 @@ class basic_json
+@@ -3175,7 +3239,10 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1640,15 +1777,15 @@ index 7ecf631f..35ca3976 100644
      {
          // implicitly convert null value to an empty object
          if (is_null())
-@@ -3166,6 +3233,7 @@ class basic_json
+@@ -3193,6 +3260,7 @@ class basic_json
  
-         JSON_THROW(type_error::create(305, "cannot use operator[] with " + std::string(type_name())));
+         JSON_THROW(type_error::create(305, "cannot use operator[] with a string argument with " + std::string(type_name())));
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
      @brief read-only access specified object element
-@@ -3197,7 +3265,10 @@ class basic_json
+@@ -3224,7 +3292,10 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1659,15 +1796,15 @@ index 7ecf631f..35ca3976 100644
      {
          // const operator[] only works for objects
          if (JSON_LIKELY(is_object()))
-@@ -3208,6 +3279,7 @@ class basic_json
+@@ -3235,6 +3306,7 @@ class basic_json
  
-         JSON_THROW(type_error::create(305, "cannot use operator[] with " + std::string(type_name())));
+         JSON_THROW(type_error::create(305, "cannot use operator[] with a string argument with " + std::string(type_name())));
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
      @brief access specified object element
-@@ -3775,7 +3847,10 @@ class basic_json
+@@ -3802,7 +3874,10 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1678,7 +1815,7 @@ index 7ecf631f..35ca3976 100644
      {
          // this erase only works for objects
          if (JSON_LIKELY(is_object()))
-@@ -3785,6 +3860,7 @@ class basic_json
+@@ -3812,6 +3887,7 @@ class basic_json
  
          JSON_THROW(type_error::create(307, "cannot use erase() with " + std::string(type_name())));
      }
@@ -1686,7 +1823,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief remove element from a JSON array given an index
-@@ -3810,7 +3886,10 @@ class basic_json
+@@ -3837,7 +3913,10 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1697,7 +1834,7 @@ index 7ecf631f..35ca3976 100644
      {
          // this erase only works for arrays
          if (JSON_LIKELY(is_array()))
-@@ -3827,6 +3906,7 @@ class basic_json
+@@ -3854,6 +3933,7 @@ class basic_json
              JSON_THROW(type_error::create(307, "cannot use erase() with " + std::string(type_name())));
          }
      }
@@ -1705,7 +1842,7 @@ index 7ecf631f..35ca3976 100644
  
      /// @}
  
-@@ -3860,8 +3940,11 @@ class basic_json
+@@ -3887,8 +3967,11 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1717,7 +1854,7 @@ index 7ecf631f..35ca3976 100644
      {
          auto result = end();
  
-@@ -3872,13 +3955,17 @@ class basic_json
+@@ -3899,13 +3982,17 @@ class basic_json
  
          return result;
      }
@@ -1735,7 +1872,7 @@ index 7ecf631f..35ca3976 100644
      {
          auto result = cend();
  
-@@ -3889,6 +3976,7 @@ class basic_json
+@@ -3916,6 +4003,7 @@ class basic_json
  
          return result;
      }
@@ -1743,7 +1880,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief returns the number of occurrences of a key in a JSON object
-@@ -3911,12 +3999,16 @@ class basic_json
+@@ -3938,12 +4026,16 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1760,7 +1897,7 @@ index 7ecf631f..35ca3976 100644
  
      /// @}
  
-@@ -4390,7 +4482,10 @@ class basic_json
+@@ -4417,7 +4509,10 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1771,7 +1908,7 @@ index 7ecf631f..35ca3976 100644
      {
          switch (m_type)
          {
-@@ -4419,6 +4514,7 @@ class basic_json
+@@ -4446,6 +4541,7 @@ class basic_json
              }
          }
      }
@@ -1779,7 +1916,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief returns the number of elements
-@@ -4462,7 +4558,10 @@ class basic_json
+@@ -4489,7 +4585,10 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1790,7 +1927,7 @@ index 7ecf631f..35ca3976 100644
      {
          switch (m_type)
          {
-@@ -4491,6 +4590,7 @@ class basic_json
+@@ -4518,6 +4617,7 @@ class basic_json
              }
          }
      }
@@ -1798,7 +1935,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief returns the maximum possible number of elements
-@@ -4532,7 +4632,10 @@ class basic_json
+@@ -4559,7 +4659,10 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1809,7 +1946,7 @@ index 7ecf631f..35ca3976 100644
      {
          switch (m_type)
          {
-@@ -4555,6 +4658,7 @@ class basic_json
+@@ -4582,6 +4685,7 @@ class basic_json
              }
          }
      }
@@ -1817,7 +1954,7 @@ index 7ecf631f..35ca3976 100644
  
      /// @}
  
-@@ -4602,7 +4706,10 @@ class basic_json
+@@ -4629,7 +4733,10 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1828,7 +1965,7 @@ index 7ecf631f..35ca3976 100644
      {
          switch (m_type)
          {
-@@ -4652,6 +4759,7 @@ class basic_json
+@@ -4679,6 +4786,7 @@ class basic_json
                  break;
          }
      }
@@ -1836,7 +1973,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief add an object to an array
-@@ -4673,7 +4781,10 @@ class basic_json
+@@ -4700,7 +4808,10 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1847,7 +1984,7 @@ index 7ecf631f..35ca3976 100644
      {
          // push_back only works for null objects or arrays
          if (JSON_UNLIKELY(not(is_null() or is_array())))
-@@ -4694,6 +4805,7 @@ class basic_json
+@@ -4721,6 +4832,7 @@ class basic_json
          // invalidate object
          val.m_type = value_t::null;
      }
@@ -1855,7 +1992,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief add an object to an array
-@@ -4709,7 +4821,10 @@ class basic_json
+@@ -4736,7 +4848,10 @@ class basic_json
      @brief add an object to an array
      @copydoc push_back(basic_json&&)
      */
@@ -1866,7 +2003,7 @@ index 7ecf631f..35ca3976 100644
      {
          // push_back only works for null objects or arrays
          if (JSON_UNLIKELY(not(is_null() or is_array())))
-@@ -4728,6 +4843,7 @@ class basic_json
+@@ -4755,6 +4870,7 @@ class basic_json
          // add element to array
          m_value.array->push_back(val);
      }
@@ -1874,7 +2011,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief add an object to an array
-@@ -4814,7 +4930,10 @@ class basic_json
+@@ -4841,7 +4957,10 @@ class basic_json
      @liveexample{The example shows how initializer lists are treated as
      objects when possible.,push_back__initializer_list}
      */
@@ -1885,7 +2022,7 @@ index 7ecf631f..35ca3976 100644
      {
          if (is_object() and init.size() == 2 and (*init.begin())->is_string())
          {
-@@ -4827,6 +4946,7 @@ class basic_json
+@@ -4854,6 +4973,7 @@ class basic_json
              push_back(basic_json(init));
          }
      }
@@ -1893,7 +2030,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief add an object to an object
-@@ -4956,7 +5076,10 @@ class basic_json
+@@ -5003,7 +5123,10 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1904,7 +2041,7 @@ index 7ecf631f..35ca3976 100644
      {
          // insert only works for arrays
          if (JSON_LIKELY(is_array()))
-@@ -4975,6 +5098,7 @@ class basic_json
+@@ -5020,6 +5143,7 @@ class basic_json
  
          JSON_THROW(type_error::create(309, "cannot use insert() with " + std::string(type_name())));
      }
@@ -1912,7 +2049,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief inserts element
-@@ -5009,7 +5133,10 @@ class basic_json
+@@ -5054,7 +5178,10 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1923,7 +2060,7 @@ index 7ecf631f..35ca3976 100644
      {
          // insert only works for arrays
          if (JSON_LIKELY(is_array()))
-@@ -5028,6 +5155,7 @@ class basic_json
+@@ -5071,6 +5198,7 @@ class basic_json
  
          JSON_THROW(type_error::create(309, "cannot use insert() with " + std::string(type_name())));
      }
@@ -1931,7 +2068,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief inserts elements
-@@ -5059,7 +5187,10 @@ class basic_json
+@@ -5102,7 +5230,10 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1942,15 +2079,15 @@ index 7ecf631f..35ca3976 100644
      {
          // insert only works for arrays
          if (JSON_UNLIKELY(not is_array()))
-@@ -5092,6 +5223,7 @@ class basic_json
-                                          last.m_it.array_iterator);
-         return result;
+@@ -5130,6 +5261,7 @@ class basic_json
+         // insert to array and return iterator
+         return insert_iterator(pos, first.m_it.array_iterator, last.m_it.array_iterator);
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
      @brief inserts elements
-@@ -5117,7 +5249,10 @@ class basic_json
+@@ -5155,7 +5287,10 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1961,15 +2098,15 @@ index 7ecf631f..35ca3976 100644
      {
          // insert only works for arrays
          if (JSON_UNLIKELY(not is_array()))
-@@ -5136,6 +5271,7 @@ class basic_json
-         result.m_it.array_iterator = m_value.array->insert(pos.m_it.array_iterator, ilist.begin(), ilist.end());
-         return result;
+@@ -5172,6 +5307,7 @@ class basic_json
+         // insert to array and return iterator
+         return insert_iterator(pos, ilist.begin(), ilist.end());
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
      @brief inserts elements
-@@ -5160,7 +5296,10 @@ class basic_json
+@@ -5196,7 +5332,10 @@ class basic_json
  
      @since version 3.0.0
      */
@@ -1980,7 +2117,7 @@ index 7ecf631f..35ca3976 100644
      {
          // insert only works for objects
          if (JSON_UNLIKELY(not is_object()))
-@@ -5182,6 +5321,7 @@ class basic_json
+@@ -5218,6 +5357,7 @@ class basic_json
  
          m_value.object->insert(first.m_it.object_iterator, last.m_it.object_iterator);
      }
@@ -1988,7 +2125,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief updates a JSON object from another object, overwriting existing keys
-@@ -5202,7 +5342,10 @@ class basic_json
+@@ -5238,7 +5378,10 @@ class basic_json
  
      @since version 3.0.0
      */
@@ -1999,7 +2136,7 @@ index 7ecf631f..35ca3976 100644
      {
          // implicitly convert null value to an empty object
          if (is_null())
-@@ -5226,6 +5369,7 @@ class basic_json
+@@ -5262,6 +5405,7 @@ class basic_json
              m_value.object->operator[](it.key()) = it.value();
          }
      }
@@ -2007,7 +2144,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief updates a JSON object from another object, overwriting existing keys
-@@ -5253,7 +5397,10 @@ class basic_json
+@@ -5289,7 +5433,10 @@ class basic_json
  
      @since version 3.0.0
      */
@@ -2018,7 +2155,7 @@ index 7ecf631f..35ca3976 100644
      {
          // implicitly convert null value to an empty object
          if (is_null())
-@@ -5286,6 +5433,7 @@ class basic_json
+@@ -5322,6 +5469,7 @@ class basic_json
              m_value.object->operator[](it.key()) = it.value();
          }
      }
@@ -2026,7 +2163,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief exchanges the values
-@@ -5336,7 +5484,10 @@ class basic_json
+@@ -5372,7 +5520,10 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -2037,7 +2174,7 @@ index 7ecf631f..35ca3976 100644
      {
          // swap only works for arrays
          if (JSON_LIKELY(is_array()))
-@@ -5348,6 +5499,7 @@ class basic_json
+@@ -5384,6 +5535,7 @@ class basic_json
              JSON_THROW(type_error::create(310, "cannot use swap() with " + std::string(type_name())));
          }
      }
@@ -2045,7 +2182,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief exchanges the values
-@@ -5369,7 +5521,10 @@ class basic_json
+@@ -5405,7 +5557,10 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -2056,7 +2193,7 @@ index 7ecf631f..35ca3976 100644
      {
          // swap only works for objects
          if (JSON_LIKELY(is_object()))
-@@ -5381,6 +5536,7 @@ class basic_json
+@@ -5417,6 +5572,7 @@ class basic_json
              JSON_THROW(type_error::create(310, "cannot use swap() with " + std::string(type_name())));
          }
      }
@@ -2064,7 +2201,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief exchanges the values
-@@ -5402,7 +5558,10 @@ class basic_json
+@@ -5438,7 +5594,10 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -2075,7 +2212,7 @@ index 7ecf631f..35ca3976 100644
      {
          // swap only works for strings
          if (JSON_LIKELY(is_string()))
-@@ -5414,6 +5573,7 @@ class basic_json
+@@ -5450,6 +5609,7 @@ class basic_json
              JSON_THROW(type_error::create(310, "cannot use swap() with " + std::string(type_name())));
          }
      }
@@ -2083,7 +2220,7 @@ index 7ecf631f..35ca3976 100644
  
      /// @}
  
-@@ -5464,8 +5624,13 @@ class basic_json
+@@ -5500,8 +5660,13 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -2097,7 +2234,7 @@ index 7ecf631f..35ca3976 100644
          const auto lhs_type = lhs.type();
          const auto rhs_type = rhs.type();
  
-@@ -5528,6 +5693,7 @@ class basic_json
+@@ -5564,6 +5729,7 @@ class basic_json
  
          return false;
      }
@@ -2105,7 +2242,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief comparison: equal
-@@ -5622,8 +5788,12 @@ class basic_json
+@@ -5658,8 +5824,12 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -2118,7 +2255,7 @@ index 7ecf631f..35ca3976 100644
          const auto lhs_type = lhs.type();
          const auto rhs_type = rhs.type();
  
-@@ -5689,6 +5859,7 @@ class basic_json
+@@ -5725,6 +5895,7 @@ class basic_json
          // because MSVC has problems otherwise.
          return operator<(lhs_type, rhs_type);
      }
@@ -2126,7 +2263,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief comparison: less than
-@@ -5890,7 +6061,10 @@ class basic_json
+@@ -5926,7 +6097,10 @@ class basic_json
  
      @since version 1.0.0; indentation character added in version 3.0.0
      */
@@ -2137,7 +2274,7 @@ index 7ecf631f..35ca3976 100644
      {
          // read width member and use it as indentation parameter if nonzero
          const bool pretty_print = (o.width() > 0);
-@@ -5904,6 +6078,7 @@ class basic_json
+@@ -5940,6 +6114,7 @@ class basic_json
          s.dump(j, pretty_print, false, static_cast<unsigned int>(indentation));
          return o;
      }
@@ -2145,12 +2282,12 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief serialize to stream
-@@ -5991,36 +6166,52 @@ class basic_json
+@@ -6027,19 +6202,27 @@ class basic_json
  
      @since version 2.0.3 (contiguous containers)
      */
 +//-------EXPORTED_FUNC_DEF_START json
-     static basic_json parse(detail::input_adapter i,
+     static basic_json parse(detail::input_adapter&& i,
                              const parser_callback_t cb = nullptr,
                              const bool allow_exceptions = true)
 +//-------EXPORTED_FUNC_DEF_END
@@ -2159,46 +2296,43 @@ index 7ecf631f..35ca3976 100644
          basic_json result;
          parser(i, cb, allow_exceptions).parse(true, result);
          return result;
+     }
++//-------EXPORTED_FUNC_CONTENTS_END
+ 
++//-------EXPORTED_FUNC_DEF_START json
+     static bool accept(detail::input_adapter&& i)
++//-------EXPORTED_FUNC_DEF_END
++//-------EXPORTED_FUNC_CONTENTS_START
+     {
+         return parser(i).accept(true);
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
-     @copydoc basic_json parse(detail::input_adapter, const parser_callback_t)
+     @brief generate SAX events
+@@ -6097,10 +6280,13 @@ class basic_json
+ 
+     @since version 3.2.0
      */
 +//-------EXPORTED_FUNC_DEF_START json
-     static basic_json parse(detail::input_adapter& i,
-                             const parser_callback_t cb = nullptr,
-                             const bool allow_exceptions = true)
+     template <typename SAX>
+     static bool sax_parse(detail::input_adapter&& i, SAX* sax,
+                           input_format_t format = input_format_t::json,
+                           const bool strict = true)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
-         basic_json result;
-         parser(i, cb, allow_exceptions).parse(true, result);
-         return result;
-     }
-+//-------EXPORTED_FUNC_CONTENTS_END
- 
-+//-------EXPORTED_FUNC_DEF_START json
-     static bool accept(detail::input_adapter i)
-+//-------EXPORTED_FUNC_DEF_END
-+//-------EXPORTED_FUNC_CONTENTS_START
-     {
-         return parser(i).accept(true);
-     }
-+//-------EXPORTED_FUNC_CONTENTS_END
- 
-+//-------EXPORTED_FUNC_DEF_START json
-     static bool accept(detail::input_adapter& i)
-+//-------EXPORTED_FUNC_DEF_END
-+//-------EXPORTED_FUNC_CONTENTS_START
-     {
-         return parser(i).accept(true);
+         assert(sax);
+         switch (format)
+@@ -6111,6 +6297,7 @@ class basic_json
+                 return detail::binary_reader<basic_json, SAX>(std::move(i)).sax_parse(format, sax, strict);
+         }
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
      @brief deserialize from an iterator range with contiguous storage
-@@ -6130,11 +6321,14 @@ class basic_json
+@@ -6229,11 +6416,14 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -2214,7 +2348,7 @@ index 7ecf631f..35ca3976 100644
  
      /// @}
  
-@@ -6172,7 +6366,10 @@ class basic_json
+@@ -6271,7 +6461,10 @@ class basic_json
      @since version 1.0.0, public since 2.1.0, `const char*` and `noexcept`
      since 3.0.0
      */
@@ -2225,7 +2359,7 @@ index 7ecf631f..35ca3976 100644
      {
          {
              switch (m_type)
-@@ -6194,6 +6391,7 @@ class basic_json
+@@ -6293,6 +6486,7 @@ class basic_json
              }
          }
      }
@@ -2233,7 +2367,7 @@ index 7ecf631f..35ca3976 100644
  
  
    private:
-@@ -6303,22 +6501,32 @@ class basic_json
+@@ -6402,22 +6596,32 @@ class basic_json
  
      @since version 2.0.9
      */
@@ -2268,7 +2402,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief create a MessagePack serialization of a given JSON value
-@@ -6400,22 +6608,32 @@ class basic_json
+@@ -6499,22 +6703,32 @@ class basic_json
  
      @since version 2.0.9
      */
@@ -2303,7 +2437,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief create a UBJSON serialization of a given JSON value
-@@ -6497,26 +6715,36 @@ class basic_json
+@@ -6596,26 +6810,36 @@ class basic_json
  
      @since version 3.1.0
      */
@@ -2342,55 +2476,67 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief create a JSON value from an input in CBOR format
-@@ -6611,11 +6839,15 @@ class basic_json
-            consume input adapters, removed start_index parameter, and added
-            @a strict parameter since 3.0.0
+@@ -6714,15 +6938,19 @@ class basic_json
+            @a strict parameter since 3.0.0; added @allow_exceptions parameter
+            since 3.2.0
      */
 +//-------EXPORTED_FUNC_DEF_START json
-     static basic_json from_cbor(detail::input_adapter i,
-                                 const bool strict = true)
+     static basic_json from_cbor(detail::input_adapter&& i,
+                                 const bool strict = true,
+                                 const bool allow_exceptions = true)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
-         return binary_reader(i).parse_cbor(strict);
+         basic_json result;
+         detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);
+         const bool res = binary_reader(detail::input_adapter(i)).sax_parse(input_format_t::cbor, &sdp, strict);
+         return res ? result : basic_json(value_t::discarded);
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
-     @copydoc from_cbor(detail::input_adapter, const bool)
-@@ -6700,11 +6932,15 @@ class basic_json
-            consume input adapters, removed start_index parameter, and added
-            @a strict parameter since 3.0.0
+     @copydoc from_cbor(detail::input_adapter, const bool, const bool)
+@@ -6817,15 +7045,19 @@ class basic_json
+            @a strict parameter since 3.0.0; added @allow_exceptions parameter
+            since 3.2.0
      */
 +//-------EXPORTED_FUNC_DEF_START json
-     static basic_json from_msgpack(detail::input_adapter i,
-                                    const bool strict = true)
+     static basic_json from_msgpack(detail::input_adapter&& i,
+                                    const bool strict = true,
+                                    const bool allow_exceptions = true)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
-         return binary_reader(i).parse_msgpack(strict);
+         basic_json result;
+         detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);
+         const bool res = binary_reader(detail::input_adapter(i)).sax_parse(input_format_t::msgpack, &sdp, strict);
+         return res ? result : basic_json(value_t::discarded);
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
-     @copydoc from_msgpack(detail::input_adapter, const bool)
-@@ -6769,11 +7005,15 @@ class basic_json
+     @copydoc from_msgpack(detail::input_adapter, const bool, const bool)
+@@ -6899,15 +7131,19 @@ class basic_json
  
-     @since version 3.1.0
+     @since version 3.1.0; added @allow_exceptions parameter since 3.2.0
      */
 +//-------EXPORTED_FUNC_DEF_START json
-     static basic_json from_ubjson(detail::input_adapter i,
-                                   const bool strict = true)
+     static basic_json from_ubjson(detail::input_adapter&& i,
+                                   const bool strict = true,
+                                   const bool allow_exceptions = true)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
-         return binary_reader(i).parse_ubjson(strict);
+         basic_json result;
+         detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);
+         const bool res = binary_reader(detail::input_adapter(i)).sax_parse(input_format_t::ubjson, &sdp, strict);
+         return res ? result : basic_json(value_t::discarded);
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
-     template<typename A1, typename A2,
-              detail::enable_if_t<std::is_constructible<detail::input_adapter, A1, A2>::value, int> = 0>
-@@ -7063,7 +7303,10 @@ class basic_json
+     /*!
+     @copydoc from_ubjson(detail::input_adapter, const bool, const bool)
+@@ -7205,7 +7441,10 @@ class basic_json
  
      @since version 2.0.0
      */
@@ -2401,7 +2547,7 @@ index 7ecf631f..35ca3976 100644
      {
          // make a working copy to apply the patch to
          basic_json result = *this;
-@@ -7327,6 +7570,7 @@ class basic_json
+@@ -7471,6 +7710,7 @@ class basic_json
  
          return result;
      }
@@ -2409,7 +2555,7 @@ index 7ecf631f..35ca3976 100644
  
      /*!
      @brief creates a diff as a JSON patch
-@@ -7361,8 +7605,11 @@ class basic_json
+@@ -7505,8 +7745,11 @@ class basic_json
  
      @since version 2.0.0
      */
@@ -2421,7 +2567,7 @@ index 7ecf631f..35ca3976 100644
      {
          // the patch
          basic_json result(value_t::array);
-@@ -7485,6 +7732,7 @@ class basic_json
+@@ -7629,6 +7872,7 @@ class basic_json
  
          return result;
      }
@@ -2429,7 +2575,7 @@ index 7ecf631f..35ca3976 100644
  
      /// @}
  
-@@ -7537,7 +7785,10 @@ class basic_json
+@@ -7681,7 +7925,10 @@ class basic_json
  
      @since version 3.0.0
      */
@@ -2440,7 +2586,7 @@ index 7ecf631f..35ca3976 100644
      {
          if (patch.is_object())
          {
-@@ -7562,6 +7813,7 @@ class basic_json
+@@ -7706,6 +7953,7 @@ class basic_json
              *this = patch;
          }
      }

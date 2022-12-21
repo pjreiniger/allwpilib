@@ -1625,7 +1625,7 @@ bool SImpl::PersistentChanged() {
 }
 
 static void DumpValue(wpi::raw_ostream& os, const Value& value,
-                      wpi::detail::serializer& s) {
+                      wpi::json::serializer& s) {
   switch (value.type()) {
     case NT_BOOLEAN:
       if (value.GetBoolean()) {
@@ -1737,7 +1737,7 @@ static void DumpValue(wpi::raw_ostream& os, const Value& value,
 }
 
 void SImpl::DumpPersistent(wpi::raw_ostream& os) {
-  wpi::detail::serializer s{os, ' ', 16};
+  wpi::json::serializer s{os, ' ', 16};
   os << "[\n";
   bool first = true;
   for (const auto& topic : m_topics) {

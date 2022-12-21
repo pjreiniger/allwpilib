@@ -432,9 +432,9 @@ TEST(JsonElementNonObjectOperatorAccessTest, Null)
     EXPECT_NO_THROW(j_nonobject["foo"]);
     EXPECT_NO_THROW(j_nonobject2[json::object_t::key_type("foo")]);
     EXPECT_THROW_MSG(j_const_nonobject["foo"], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with null");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with null");
     EXPECT_THROW_MSG(j_const_nonobject[json::object_t::key_type("foo")], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with null");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with null");
 }
 
 TEST(JsonElementNonObjectOperatorAccessTest, Boolean)
@@ -442,13 +442,13 @@ TEST(JsonElementNonObjectOperatorAccessTest, Boolean)
     json j_nonobject(json::value_t::boolean);
     const json j_const_nonobject(j_nonobject);
     EXPECT_THROW_MSG(j_nonobject["foo"], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with boolean");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with boolean");
     EXPECT_THROW_MSG(j_nonobject[json::object_t::key_type("foo")], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with boolean");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with boolean");
     EXPECT_THROW_MSG(j_const_nonobject["foo"], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with boolean");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with boolean");
     EXPECT_THROW_MSG(j_const_nonobject[json::object_t::key_type("foo")], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with boolean");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with boolean");
 }
 
 TEST(JsonElementNonObjectOperatorAccessTest, String)
@@ -456,13 +456,13 @@ TEST(JsonElementNonObjectOperatorAccessTest, String)
     json j_nonobject(json::value_t::string);
     const json j_const_nonobject(j_nonobject);
     EXPECT_THROW_MSG(j_nonobject["foo"], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with string");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with string");
     EXPECT_THROW_MSG(j_nonobject[json::object_t::key_type("foo")], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with string");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with string");
     EXPECT_THROW_MSG(j_const_nonobject["foo"], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with string");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with string");
     EXPECT_THROW_MSG(j_const_nonobject[json::object_t::key_type("foo")], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with string");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with string");
 }
 
 TEST(JsonElementNonObjectOperatorAccessTest, Array)
@@ -470,13 +470,13 @@ TEST(JsonElementNonObjectOperatorAccessTest, Array)
     json j_nonobject(json::value_t::array);
     const json j_const_nonobject(j_nonobject);
     EXPECT_THROW_MSG(j_nonobject["foo"], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with array");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with array");
     EXPECT_THROW_MSG(j_nonobject[json::object_t::key_type("foo")], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with array");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with array");
     EXPECT_THROW_MSG(j_const_nonobject["foo"], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with array");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with array");
     EXPECT_THROW_MSG(j_const_nonobject[json::object_t::key_type("foo")], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with array");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with array");
 }
 
 TEST(JsonElementNonObjectOperatorAccessTest, Integer)
@@ -484,13 +484,13 @@ TEST(JsonElementNonObjectOperatorAccessTest, Integer)
     json j_nonobject(json::value_t::number_integer);
     const json j_const_nonobject(j_nonobject);
     EXPECT_THROW_MSG(j_nonobject["foo"], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with number");
     EXPECT_THROW_MSG(j_nonobject[json::object_t::key_type("foo")], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with number");
     EXPECT_THROW_MSG(j_const_nonobject["foo"], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with number");
     EXPECT_THROW_MSG(j_const_nonobject[json::object_t::key_type("foo")], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with number");
 }
 
 TEST(JsonElementNonObjectOperatorAccessTest, Unsigned)
@@ -498,13 +498,13 @@ TEST(JsonElementNonObjectOperatorAccessTest, Unsigned)
     json j_nonobject(json::value_t::number_unsigned);
     const json j_const_nonobject(j_nonobject);
     EXPECT_THROW_MSG(j_nonobject["foo"], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with number");
     EXPECT_THROW_MSG(j_nonobject[json::object_t::key_type("foo")], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with number");
     EXPECT_THROW_MSG(j_const_nonobject["foo"], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with number");
     EXPECT_THROW_MSG(j_const_nonobject[json::object_t::key_type("foo")], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with number");
 }
 
 TEST(JsonElementNonObjectOperatorAccessTest, Float)
@@ -512,13 +512,13 @@ TEST(JsonElementNonObjectOperatorAccessTest, Float)
     json j_nonobject(json::value_t::number_float);
     const json j_const_nonobject(j_nonobject);
     EXPECT_THROW_MSG(j_nonobject["foo"], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with number");
     EXPECT_THROW_MSG(j_nonobject[json::object_t::key_type("foo")], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with number");
     EXPECT_THROW_MSG(j_const_nonobject["foo"], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with number");
     EXPECT_THROW_MSG(j_const_nonobject[json::object_t::key_type("foo")], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+                     "[json.exception.type_error.305] cannot use operator[] with a string argument with number");
 }
 
 class JsonElementObjectRemoveTest : public ::testing::Test,

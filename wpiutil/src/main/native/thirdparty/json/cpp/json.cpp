@@ -126,7 +126,7 @@ json::json_value::json_value(value_t t)
             object = nullptr;  // silence warning, see #821
             if (JSON_UNLIKELY(t == value_t::null))
             {
-                JSON_THROW(other_error::create(500, "961c151d2e87f2686a955a9be24d316f1362bf21 3.2.0")); // LCOV_EXCL_LINE
+                JSON_THROW(other_error::create(500, "961c151d2e87f2686a955a9be24d316f1362bf21 3.3.0")); // LCOV_EXCL_LINE
             }
             break;
         }
@@ -456,7 +456,7 @@ json::reference json::operator[](size_type idx)
         return m_value.array->operator[](idx);
     }
 
-    JSON_THROW(type_error::create(305, "cannot use operator[] with", type_name()));
+    JSON_THROW(type_error::create(305, "cannot use operator[] with a numeric argument with", type_name()));
 }
 
 json::const_reference json::operator[](size_type idx) const
@@ -467,7 +467,7 @@ json::const_reference json::operator[](size_type idx) const
         return m_value.array->operator[](idx);
     }
 
-    JSON_THROW(type_error::create(305, "cannot use operator[] with", type_name()));
+    JSON_THROW(type_error::create(305, "cannot use operator[] with a numeric argument with", type_name()));
 }
 
 json::reference json::operator[](std::string_view key)
@@ -486,7 +486,7 @@ json::reference json::operator[](std::string_view key)
         return m_value.object->operator[](key);
     }
 
-    JSON_THROW(type_error::create(305, "cannot use operator[] with", type_name()));
+    JSON_THROW(type_error::create(305, "cannot use operator[] with a string argument with", type_name()));
 }
 
 json::const_reference json::operator[](std::string_view key) const
@@ -498,7 +498,7 @@ json::const_reference json::operator[](std::string_view key) const
         return m_value.object->find(key)->second;
     }
 
-    JSON_THROW(type_error::create(305, "cannot use operator[] with", type_name()));
+    JSON_THROW(type_error::create(305, "cannot use operator[] with a string argument with", type_name()));
 }
 
 json::size_type json::erase(std::string_view key)
@@ -762,9 +762,7 @@ json::iterator json::insert(const_iterator pos, const json& val)
         }
 
         // insert to array and return iterator
-        iterator result(this);
-        result.m_it.array_iterator = m_value.array->insert(pos.m_it.array_iterator, val);
-        return result;
+        return insert_iterator(pos, val);
     }
 
     JSON_THROW(type_error::create(309, "cannot use insert() with", type_name()));
@@ -782,9 +780,7 @@ json::iterator json::insert(const_iterator pos, size_type cnt, const json& val)
         }
 
         // insert to array and return iterator
-        iterator result(this);
-        result.m_it.array_iterator = m_value.array->insert(pos.m_it.array_iterator, cnt, val);
-        return result;
+        return insert_iterator(pos, cnt, val);
     }
 
     JSON_THROW(type_error::create(309, "cannot use insert() with", type_name()));
@@ -816,12 +812,7 @@ json::iterator json::insert(const_iterator pos, const_iterator first, const_iter
     }
 
     // insert to array and return iterator
-    iterator result(this);
-    result.m_it.array_iterator = m_value.array->insert(
-                                     pos.m_it.array_iterator,
-                                     first.m_it.array_iterator,
-                                     last.m_it.array_iterator);
-    return result;
+    return insert_iterator(pos, first.m_it.array_iterator, last.m_it.array_iterator);
 }
 
 json::iterator json::insert(const_iterator pos, initializer_list_t ilist)
@@ -839,9 +830,7 @@ json::iterator json::insert(const_iterator pos, initializer_list_t ilist)
     }
 
     // insert to array and return iterator
-    iterator result(this);
-    result.m_it.array_iterator = m_value.array->insert(pos.m_it.array_iterator, ilist.begin(), ilist.end());
-    return result;
+    return insert_iterator(pos, ilist.begin(), ilist.end());
 }
 
 void json::insert(const_iterator first, const_iterator last)
@@ -1107,13 +1096,6 @@ bool operator<(json::const_reference lhs, json::const_reference rhs) noexcept
 raw_ostream& operator<<(raw_ostream& o, const json& j)
 {
     j.dump(o, 0);
-    return o;
-}
-
-std::ostream& operator<<(std::ostream& o, const json& j)
-{
-    raw_os_ostream os(o);
-    j.dump(os, 0);
     return o;
 }
 

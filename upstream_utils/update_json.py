@@ -29,7 +29,7 @@ def run_basic_json_replacement(all_files):
         content = content.replace("json_pointer::json", "json")
         content = content.replace("parser::json", "json")
 
-        for x in ["json_parser", "json_pointer", "json_serializer", "binary_writer"]:
+        for x in ["json_parser", "json_pointer", "json_serializer", "binary_writer", "json_sax"]:
             if x in wpi_file:
                 content = content.replace("BasicJsonType", "json")
                 content = content.replace("BasicJsonType", "json")
@@ -102,8 +102,66 @@ def run_global_replacements(wpi_files):
 
         content = content.replace("const std::string& what_arg", "std::string_view what_arg")
         content = content.replace("const char* what_arg", "std::string_view what_arg")
+        content = content.replace("exception::exception(int exception::id_, std::string_view what_arg)", "exception::exception(int id_, std::string_view what_arg)")
 
         content = content.replace("namespace nlohmann", "namespace wpi")
+        content = content.replace("json::lexer::std::char_traits<char>::int_type json::lexer::get()", "std::char_traits<char>::int_type json::lexer::get()")
+
+        content = content.replace("""json::binary_writer::template<typename json::binary_writer::NumberType>
+    void write_number(const NumberType n)""", """template<typename NumberType>
+void json::binary_writer::write_number(const NumberType n)""")
+
+        content = content.replace("""json::binary_writer::template<typename json::binary_writer::NumberType, typename std::enable_if<
+                 std::is_floating_point<NumberType>::value, int>::type>
+    void write_number_with_ubjson_prefix(const NumberType n,
+                                         const bool add_prefix)""", """template<typename NumberType, typename std::enable_if<
+                 std::is_floating_point<NumberType>::value, int>::type>
+void json::binary_writer::write_number_with_ubjson_prefix(const NumberType n,
+                                         const bool add_prefix)""")
+
+        content = content.replace("""json::binary_writer::template<typename json::binary_writer::NumberType, typename std::enable_if<
+                 std::is_unsigned<NumberType>::value, int>::type>
+    void write_number_with_ubjson_prefix(const NumberType n,
+                                         const bool add_prefix)""", """template<typename NumberType, typename std::enable_if<
+                 std::is_unsigned<NumberType>::value, int>::type>
+void json::binary_writer::write_number_with_ubjson_prefix(const NumberType n,
+                                         const bool add_prefix)""")
+
+        content = content.replace("""json::binary_writer::template<typename json::binary_writer::NumberType, typename std::enable_if<
+                 std::is_signed<NumberType>::value and
+                 not std::is_floating_point<NumberType>::value, int>::type>
+    void write_number_with_ubjson_prefix(const NumberType n,
+                                         const bool add_prefix)""", """template<typename NumberType, typename std::enable_if<
+                 std::is_signed<NumberType>::value and
+                 not std::is_floating_point<NumberType>::value, int>::type>
+void json::binary_writer::write_number_with_ubjson_prefix(const NumberType n,
+                                         const bool add_prefix)""")
+
+        content = content.replace("json::json(json&& json::other) noexcept", "json::json(json&& other) noexcept")
+        content = content.replace('#include "/json_wpi/json.h"', '#include "wpi/json.h"')
+        content = content.replace("json::bool", "bool")
+        content = content.replace("""json::template json::<typename SAX>
+    bool sax_parse(raw_istream& is, SAX* sax,
+                          input_format_t format = input_format_t::json,
+                          const bool strict)""", """template <typename SAX>
+bool json::sax_parse(raw_istream& is, SAX* sax,
+                      input_format_t format,
+                      const bool strict)""")
+
+        content = content.replace("""json::binary_reader::template<typename json::binary_reader::NumberType>
+    bool get_number(NumberType& result)""", """template<typename NumberType>
+bool json::binary_reader::get_number(NumberType& result)""")
+
+        content = content.replace("""json::binary_reader::template<typename json::binary_reader::NumberType>
+    bool get_string(const NumberType len, std::string& result)""", """template<typename NumberType>
+bool json::binary_reader::get_string(const NumberType len, std::string& result)""")
+
+        content = content.replace("""json::parser::template json::parser::<typename SAX>
+    bool sax_parse_internal(SAX* sax)""", """template <typename SAX>
+bool json::parser::sax_parse_internal(SAX* sax)""")
+        content = content.replace("void json::parser::parse(const bool strict, json::parser::BasicJsonType& result)", "void json::parser::parse(const bool strict, json& result)")
+
+        content = content.replace("void json::serializer::dump(const json::serializer::BasicJsonType& val, const bool pretty_print,", "void json::serializer::dump(const json& val, const bool pretty_print,")
 
         # Fix exception throwing
         content = re.sub(
@@ -118,6 +176,15 @@ def run_global_replacements(wpi_files):
             """(\s+?)JSON_THROW\((.*?)::create\(([0-9]+),(\s+)"(.*?)" \+ std::to_string\((.*?)\)\)\)""",
             r"""\1JSON_THROW(\2::create(\3,\4fmt::format("\5{}", \6)))""",
                          content)
+
+        # content = re.sub(
+        #     """(.*?)::create\(([0-9]+),(\s+)"(.*?)" \+ std::to_string\((.*?)\)\)\)""",
+        #     r"""\1JSON_THROW(\2::create(\3,\4fmt::format("\5{}",)))""",
+        #     content)
+
+        content = re.sub(r'"error reading (.*) last byte: 0x" \+ last_token', r'fmt::format("error reading \1 last byte: {:#02x}", current)', content)
+        content = re.sub(r'"expected a (.*) last byte: 0x" \+ last_token', r'fmt::format("expected a \1 last byte: {:#02x}", current)', content)
+        content = re.sub(r'"byte after (.*) last byte: 0x" \+ last_token', r'fmt::format("byte after \1 last byte: {:#02x}", current)', content)
 
         content = re.sub(
             """(\s+?)JSON_THROW\((.*?)::create\(([0-9]+),(\s+)"(.*?)" \+ std::to_string\((.*)\) \+ "(.*)"\)\)""",
@@ -410,9 +477,11 @@ def copy_and_split_files(json_cpp_root, json_incl_root):
     split_files.append(r'include\nlohmann/detail/macro_unscope.hpp')
     split_files.append(r'include\nlohmann/detail/meta/cpp_future.hpp')
     split_files.append(r'include\nlohmann/detail/meta/detected.hpp')
+    split_files.append(r'include\nlohmann/detail/meta/detected.hpp')
     split_files.append(r'include\nlohmann/detail/meta/is_sax.hpp')
     split_files.append(r'include\nlohmann/detail/meta/type_traits.hpp')
     split_files.append(r'include\nlohmann/detail/meta/void_t.hpp')
+
     split_files.append(r'include\nlohmann/detail/value_t.hpp')
 
     split_files.append(r'include\nlohmann/detail/conversions/from_json.hpp')
@@ -537,7 +606,7 @@ def main():
     run_basic_json_replacement(all_files)
     
 
-JSON_VERSION = "3.2.0"
+JSON_VERSION = "3.3.0"
 
 
 JSON_LICENSE = """/*----------------------------------------------------------------------------*/

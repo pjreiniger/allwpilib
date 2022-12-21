@@ -1,18 +1,18 @@
-From 538fc4ce87209ca13447cb5113d6fb2b73ab6ca4 Mon Sep 17 00:00:00 2001
+From 07c9bbe1636b847be2151074a1438a741e9f365c Mon Sep 17 00:00:00 2001
 From: PJ Reiniger <pj.reiniger@gmail.com>
 Date: Tue, 20 Dec 2022 01:53:46 -0500
-Subject: [PATCH 09/11] Fixup includes
+Subject: [PATCH 09/12] Fixup includes
 
 ---
  include/nlohmann/detail/exceptions.hpp        |  3 ++
- .../nlohmann/detail/input/binary_reader.hpp   | 20 ++++-------
- include/nlohmann/detail/input/lexer.hpp       | 18 +++++++---
+ .../nlohmann/detail/input/binary_reader.hpp   | 13 ++++---
+ include/nlohmann/detail/input/lexer.hpp       | 15 ++++++--
  include/nlohmann/detail/input/parser.hpp      | 12 +++----
  include/nlohmann/detail/json_pointer.hpp      | 15 ++++++--
  .../nlohmann/detail/output/binary_writer.hpp  | 14 ++++----
- include/nlohmann/detail/output/serializer.hpp | 21 ++++++------
+ include/nlohmann/detail/output/serializer.hpp | 16 +++++----
  include/nlohmann/json.hpp                     | 34 ++++++++++---------
- 8 files changed, 75 insertions(+), 62 deletions(-)
+ 8 files changed, 75 insertions(+), 47 deletions(-)
 
 diff --git a/include/nlohmann/detail/exceptions.hpp b/include/nlohmann/detail/exceptions.hpp
 index efa0d741..b15324e7 100644
@@ -29,10 +29,10 @@ index efa0d741..b15324e7 100644
  namespace nlohmann
  {
 diff --git a/include/nlohmann/detail/input/binary_reader.hpp b/include/nlohmann/detail/input/binary_reader.hpp
-index ce3b52b9..b6505180 100644
+index c81e3e43..c57e2d78 100644
 --- a/include/nlohmann/detail/input/binary_reader.hpp
 +++ b/include/nlohmann/detail/input/binary_reader.hpp
-@@ -1,28 +1,20 @@
+@@ -1,9 +1,5 @@
  #pragma once
  
 -#include <algorithm> // generate_n
@@ -40,20 +40,20 @@ index ce3b52b9..b6505180 100644
 -#include <cassert> // assert
 -#include <cmath> // ldexp
  #include <cstddef> // size_t
--#include <cstdint> // uint8_t, uint16_t, uint32_t, uint64_t
--#include <cstring> // memcpy
--#include <iomanip> // setw, setfill
--#include <ios> // hex
--#include <iterator> // back_inserter
--#include <limits> // numeric_limits
--#include <sstream> // stringstream
+ #include <cstdint> // uint8_t, uint16_t, uint32_t, uint64_t
+ #include <cstdio> // snprintf
+@@ -11,18 +7,21 @@
+ #include <iterator> // back_inserter
+ #include <limits> // numeric_limits
  #include <string> // char_traits, string
 -#include <utility> // make_pair, move
  
 -#include <nlohmann/detail/input/input_adapters.hpp>
--#include <nlohmann/detail/exceptions.hpp>
 +#include <nlohmann/json.hpp>
+ #include <nlohmann/detail/input/json_sax.hpp>
+-#include <nlohmann/detail/exceptions.hpp>
  #include <nlohmann/detail/macro_scope.hpp>
+ #include <nlohmann/detail/meta/is_sax.hpp>
  #include <nlohmann/detail/value_t.hpp>
 +//-------EXPORTED_INCLUDE_START
 +#include "fmt/format.h"
@@ -68,16 +68,12 @@ index ce3b52b9..b6505180 100644
  
  namespace nlohmann
 diff --git a/include/nlohmann/detail/input/lexer.hpp b/include/nlohmann/detail/input/lexer.hpp
-index e6772c2a..6c8008dc 100644
+index f05b6396..c41d9c7f 100644
 --- a/include/nlohmann/detail/input/lexer.hpp
 +++ b/include/nlohmann/detail/input/lexer.hpp
-@@ -4,14 +4,22 @@
- #include <cstddef> // size_t
- #include <cstdlib> // strtof, strtod, strtold, strtoll, strtoull
+@@ -6,10 +6,21 @@
+ #include <cstdio> // snprintf
  #include <initializer_list> // initializer_list
--#include <ios> // hex, uppercase
--#include <iomanip> // setw, setfill
--#include <sstream> // stringstream
  #include <string> // char_traits, string
 -#include <vector> // vector
  
@@ -100,10 +96,10 @@ index e6772c2a..6c8008dc 100644
  namespace nlohmann
  {
 diff --git a/include/nlohmann/detail/input/parser.hpp b/include/nlohmann/detail/input/parser.hpp
-index e87be215..28f6c000 100644
+index e59eafa8..31a1eaa9 100644
 --- a/include/nlohmann/detail/input/parser.hpp
 +++ b/include/nlohmann/detail/input/parser.hpp
-@@ -1,21 +1,19 @@
+@@ -1,23 +1,21 @@
  #pragma once
  
 -#include <cassert> // assert
@@ -115,7 +111,9 @@ index e87be215..28f6c000 100644
  
 -#include <nlohmann/detail/exceptions.hpp>
  #include <nlohmann/detail/macro_scope.hpp>
+ #include <nlohmann/detail/meta/is_sax.hpp>
 -#include <nlohmann/detail/input/input_adapters.hpp>
+ #include <nlohmann/detail/input/json_sax.hpp>
  #include <nlohmann/detail/input/lexer.hpp>
 -#include <nlohmann/detail/value_t.hpp>
 +//-------EXPORTED_INCLUDE_START
@@ -157,7 +155,7 @@ index 870d0509..9dee4ec0 100644
  namespace nlohmann
  {
 diff --git a/include/nlohmann/detail/output/binary_writer.hpp b/include/nlohmann/detail/output/binary_writer.hpp
-index 983ff9e6..3f36f4c3 100644
+index 635de66d..e53abb87 100644
 --- a/include/nlohmann/detail/output/binary_writer.hpp
 +++ b/include/nlohmann/detail/output/binary_writer.hpp
 @@ -1,17 +1,17 @@
@@ -186,10 +184,10 @@ index 983ff9e6..3f36f4c3 100644
  
  namespace nlohmann
 diff --git a/include/nlohmann/detail/output/serializer.hpp b/include/nlohmann/detail/output/serializer.hpp
-index 73c2db6f..9d962216 100644
+index 57ab1bd6..664f8b3b 100644
 --- a/include/nlohmann/detail/output/serializer.hpp
 +++ b/include/nlohmann/detail/output/serializer.hpp
-@@ -3,25 +3,24 @@
+@@ -3,8 +3,6 @@
  #include <algorithm> // reverse, remove, fill, find, none_of
  #include <array> // array
  #include <cassert> // assert
@@ -198,18 +196,14 @@ index 73c2db6f..9d962216 100644
  #include <cmath> // labs, isfinite, isnan, signbit
  #include <cstddef> // size_t, ptrdiff_t
  #include <cstdint> // uint8_t
--#include <cstdio> // snprintf
--#include <iomanip> // setfill
--#include <iterator> // next
--#include <limits> // numeric_limits
+@@ -13,12 +11,18 @@
  #include <string> // string
--#include <sstream> // stringstream
  #include <type_traits> // is_same
  
 -#include <nlohmann/detail/exceptions.hpp>
 -#include <nlohmann/detail/conversions/to_chars.hpp>
  #include <nlohmann/detail/macro_scope.hpp>
- #include <nlohmann/detail/meta.hpp>
+ #include <nlohmann/detail/meta/cpp_future.hpp>
 -#include <nlohmann/detail/output/output_adapters.hpp>
 -#include <nlohmann/detail/value_t.hpp>
 +
@@ -226,10 +220,10 @@ index 73c2db6f..9d962216 100644
  namespace nlohmann
  {
 diff --git a/include/nlohmann/json.hpp b/include/nlohmann/json.hpp
-index 35d5da85..082bc4e0 100644
+index 9aff164e..a1087a37 100644
 --- a/include/nlohmann/json.hpp
 +++ b/include/nlohmann/json.hpp
-@@ -35,16 +35,15 @@ SOFTWARE.
+@@ -36,16 +36,15 @@ SOFTWARE.
  
  #include <algorithm> // all_of, find, for_each
  #include <cassert> // assert
@@ -248,8 +242,8 @@ index 35d5da85..082bc4e0 100644
 +
  #include <nlohmann/json_fwd.hpp>
  #include <nlohmann/detail/macro_scope.hpp>
- #include <nlohmann/detail/meta.hpp>
-@@ -52,30 +51,33 @@ SOFTWARE.
+ #include <nlohmann/detail/meta/cpp_future.hpp>
+@@ -54,30 +53,33 @@ SOFTWARE.
  #include <nlohmann/detail/value_t.hpp>
  #include <nlohmann/detail/conversions/from_json.hpp>
  #include <nlohmann/detail/conversions/to_json.hpp>

@@ -1,7 +1,7 @@
-From e61a36436f1f82802e89af2927bb5813c55fd596 Mon Sep 17 00:00:00 2001
+From 77883dc35db140ba7105a1de371c07ffe5fc8b3f Mon Sep 17 00:00:00 2001
 From: PJ Reiniger <pj.reiniger@gmail.com>
 Date: Mon, 12 Dec 2022 21:22:02 -0500
-Subject: [PATCH 04/11] Remove deprecated
+Subject: [PATCH 04/12] Remove deprecated
 
 ---
  include/nlohmann/detail/macro_scope.hpp   |  9 ---
@@ -10,10 +10,10 @@ Subject: [PATCH 04/11] Remove deprecated
  3 files changed, 109 deletions(-)
 
 diff --git a/include/nlohmann/detail/macro_scope.hpp b/include/nlohmann/detail/macro_scope.hpp
-index 21a8fac0..fc5f8377 100644
+index 0e3180a8..52d70cee 100644
 --- a/include/nlohmann/detail/macro_scope.hpp
 +++ b/include/nlohmann/detail/macro_scope.hpp
-@@ -26,15 +26,6 @@
+@@ -28,15 +28,6 @@
      #pragma GCC diagnostic ignored "-Wdocumentation"
  #endif
  
@@ -30,10 +30,10 @@ index 21a8fac0..fc5f8377 100644
  #if (defined(__cpp_exceptions) || defined(__EXCEPTIONS) || defined(_CPPUNWIND)) && !defined(JSON_NOEXCEPTION)
      #define JSON_THROW(exception) throw exception
 diff --git a/include/nlohmann/detail/macro_unscope.hpp b/include/nlohmann/detail/macro_unscope.hpp
-index 99a0abdf..509a7d9f 100644
+index 4c5aa915..817e6fa3 100644
 --- a/include/nlohmann/detail/macro_unscope.hpp
 +++ b/include/nlohmann/detail/macro_unscope.hpp
-@@ -14,7 +14,6 @@
+@@ -15,7 +15,6 @@
  #undef JSON_TRY
  #undef JSON_LIKELY
  #undef JSON_UNLIKELY
@@ -42,10 +42,10 @@ index 99a0abdf..509a7d9f 100644
  #undef JSON_HAS_CPP_17
  #undef NLOHMANN_BASIC_JSON_TPL_DECLARATION
 diff --git a/include/nlohmann/json.hpp b/include/nlohmann/json.hpp
-index b33e244b..30bb3821 100644
+index 9bed5577..204a7e9b 100644
 --- a/include/nlohmann/json.hpp
 +++ b/include/nlohmann/json.hpp
-@@ -4247,77 +4247,6 @@ class basic_json
+@@ -4272,77 +4272,6 @@ class basic_json
      }
  
    public:
@@ -123,7 +123,7 @@ index b33e244b..30bb3821 100644
  
      /*!
      @brief helper to access iterator member functions in range-based for
-@@ -6028,20 +5957,6 @@ class basic_json
+@@ -6062,20 +5991,6 @@ class basic_json
      }
  //-------EXPORTED_FUNC_CONTENTS_END
  
@@ -144,7 +144,7 @@ index b33e244b..30bb3821 100644
      /// @}
  
  
-@@ -6183,20 +6098,6 @@ class basic_json
+@@ -6283,20 +6198,6 @@ class basic_json
      }
  //-------EXPORTED_FUNC_CONTENTS_END
  

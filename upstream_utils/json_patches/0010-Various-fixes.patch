@@ -1,26 +1,25 @@
-From 9b7f7df133e3c052642b0d6b113e2adecabd618e Mon Sep 17 00:00:00 2001
+From 9a902cdd8c0c9c1524a71840289c4229bdb0f5b2 Mon Sep 17 00:00:00 2001
 From: PJ Reiniger <pj.reiniger@gmail.com>
 Date: Mon, 12 Dec 2022 23:56:06 -0500
-Subject: [PATCH 10/11] Various fixes
+Subject: [PATCH 10/12] Various fixes
 
 ---
  .../nlohmann/detail/conversions/from_json.hpp |  32 +-
  .../nlohmann/detail/conversions/to_json.hpp   |   5 +-
  include/nlohmann/detail/exceptions.hpp        |   2 +-
- include/nlohmann/detail/input/parser.hpp      |   4 +-
  include/nlohmann/detail/json_pointer.hpp      |  66 +--
  include/nlohmann/detail/macro_unscope.hpp     |   4 +
  .../nlohmann/detail/output/binary_writer.hpp  |  31 +-
  include/nlohmann/detail/output/serializer.hpp | 120 +-----
  include/nlohmann/json.hpp                     | 383 +-----------------
- 9 files changed, 84 insertions(+), 563 deletions(-)
+ 8 files changed, 82 insertions(+), 561 deletions(-)
 
 diff --git a/include/nlohmann/detail/conversions/from_json.hpp b/include/nlohmann/detail/conversions/from_json.hpp
-index 631adfef..38967576 100644
+index 1d90976b..b593c462 100644
 --- a/include/nlohmann/detail/conversions/from_json.hpp
 +++ b/include/nlohmann/detail/conversions/from_json.hpp
-@@ -107,35 +107,6 @@ void from_json(const BasicJsonType& j, typename BasicJsonType::array_t& arr)
-     arr = *j.template get_ptr<const typename BasicJsonType::array_t*>();
+@@ -127,35 +127,6 @@ void from_json(const BasicJsonType& j, EnumType& e)
+     e = static_cast<EnumType>(val);
  }
  
 -// forward_list doesn't have an insert method
@@ -52,10 +51,10 @@ index 631adfef..38967576 100644
 -    std::copy(j.m_value.array->begin(), j.m_value.array->end(), std::begin(l));
 -}
 -
- template<typename BasicJsonType, typename CompatibleArrayType>
- void from_json_array_impl(const BasicJsonType& j, CompatibleArrayType& arr, priority_tag<0> /*unused*/)
+ template<typename BasicJsonType>
+ void from_json_array_impl(const BasicJsonType& j, typename BasicJsonType::array_t& arr, priority_tag<3> /*unused*/)
  {
-@@ -190,8 +161,7 @@ void from_json(const BasicJsonType& j, CompatibleArrayType& arr)
+@@ -223,8 +194,7 @@ void())
  {
      if (JSON_UNLIKELY(not j.is_array()))
      {
@@ -64,12 +63,12 @@ index 631adfef..38967576 100644
 +        JSON_THROW(type_error::create(302, "type must be array, but is", j.type_name()));
      }
  
-     from_json_array_impl(j, arr, priority_tag<2> {});
+     from_json_array_impl(j, arr, priority_tag<3> {});
 diff --git a/include/nlohmann/detail/conversions/to_json.hpp b/include/nlohmann/detail/conversions/to_json.hpp
-index aa0bb538..5c97dc67 100644
+index 293c932d..d144d3a7 100644
 --- a/include/nlohmann/detail/conversions/to_json.hpp
 +++ b/include/nlohmann/detail/conversions/to_json.hpp
-@@ -196,8 +196,9 @@ void to_json(BasicJsonType& j, const CompatibleString& s)
+@@ -208,8 +208,9 @@ void to_json(BasicJsonType& j, const CompatibleString& s)
      external_constructor<value_t::string>::construct(j, s);
  }
  
@@ -94,21 +93,6 @@ index b15324e7..9da44b05 100644
  //-------EXPORTED_FUNC_CONTENTS_END
  
    private:
-diff --git a/include/nlohmann/detail/input/parser.hpp b/include/nlohmann/detail/input/parser.hpp
-index 28f6c000..7d60c66a 100644
---- a/include/nlohmann/detail/input/parser.hpp
-+++ b/include/nlohmann/detail/input/parser.hpp
-@@ -386,8 +386,8 @@ class parser
-                 {
-                     if (allow_exceptions)
-                     {
--                        JSON_THROW(out_of_range::create(406, "number overflow parsing '" +
--                                                        m_lexer.get_token_string() + "'"));
-+                        JSON_THROW(out_of_range::create(406,
-+                            fmt::format("number overflow parsing '{}'", m_lexer.get_token_string())));
-                     }
-                     expect(token_type::uninitialized);
-                 }
 diff --git a/include/nlohmann/detail/json_pointer.hpp b/include/nlohmann/detail/json_pointer.hpp
 index 9dee4ec0..ac3d0ab8 100644
 --- a/include/nlohmann/detail/json_pointer.hpp
@@ -327,7 +311,7 @@ index 9dee4ec0..ac3d0ab8 100644
  //-------EXPORTED_FUNC_CONTENTS_START
      {
 diff --git a/include/nlohmann/detail/macro_unscope.hpp b/include/nlohmann/detail/macro_unscope.hpp
-index 509a7d9f..a66d417f 100644
+index 817e6fa3..2876258e 100644
 --- a/include/nlohmann/detail/macro_unscope.hpp
 +++ b/include/nlohmann/detail/macro_unscope.hpp
 @@ -1,5 +1,7 @@
@@ -339,13 +323,13 @@ index 509a7d9f..a66d417f 100644
  #if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
      #pragma GCC diagnostic pop
 @@ -19,3 +21,5 @@
+ #undef JSON_HAS_CPP_17
  #undef NLOHMANN_BASIC_JSON_TPL_DECLARATION
  #undef NLOHMANN_BASIC_JSON_TPL
- #undef NLOHMANN_JSON_HAS_HELPER
 +
 +#endif  // WPI_JSON_IMPLEMENTATION
 diff --git a/include/nlohmann/detail/output/binary_writer.hpp b/include/nlohmann/detail/output/binary_writer.hpp
-index 3f36f4c3..6063baa4 100644
+index e53abb87..5ab0fd97 100644
 --- a/include/nlohmann/detail/output/binary_writer.hpp
 +++ b/include/nlohmann/detail/output/binary_writer.hpp
 @@ -57,9 +57,7 @@ class binary_writer
@@ -372,9 +356,9 @@ index 3f36f4c3..6063baa4 100644
  
 @@ -391,7 +387,7 @@ class binary_writer
  
-             case value_t::number_float: // float 64
+             case value_t::number_float:
              {
--                oa->write_character(static_cast<CharType>(0xCB));
+-                oa->write_character(get_msgpack_float_prefix(j.m_value.number_float));
 +                o << get_msgpack_float_prefix(j.m_value.number_float);
                  write_number(j.m_value.number_float);
                  break;
@@ -430,10 +414,10 @@ index 3f36f4c3..6063baa4 100644
      /// the output
      raw_ostream& o;
 diff --git a/include/nlohmann/detail/output/serializer.hpp b/include/nlohmann/detail/output/serializer.hpp
-index 9d962216..a8df2801 100644
+index 664f8b3b..fb8f3d1a 100644
 --- a/include/nlohmann/detail/output/serializer.hpp
 +++ b/include/nlohmann/detail/output/serializer.hpp
-@@ -111,12 +111,12 @@ class serializer
+@@ -113,12 +113,12 @@ class serializer
                      const auto new_indent = current_indent + indent_step;
                      if (JSON_UNLIKELY(indent_string.size() < new_indent))
                      {
@@ -448,7 +432,7 @@ index 9d962216..a8df2801 100644
                      {
                          o->write_characters(indent_string.c_str(), new_indent);
                          o->write_character('\"');
-@@ -128,7 +128,7 @@ class serializer
+@@ -130,7 +130,7 @@ class serializer
  
                      // last element
                      assert(i != sorted.end());
@@ -457,7 +441,7 @@ index 9d962216..a8df2801 100644
                      o->write_characters(indent_string.c_str(), new_indent);
                      o->write_character('\"');
                      dump_escaped(i->first, ensure_ascii);
-@@ -144,8 +144,8 @@ class serializer
+@@ -146,8 +146,8 @@ class serializer
                      o->write_character('{');
  
                      // first n-1 elements
@@ -468,7 +452,7 @@ index 9d962216..a8df2801 100644
                      {
                          o->write_character('\"');
                          dump_escaped(i->first, ensure_ascii);
-@@ -155,8 +155,8 @@ class serializer
+@@ -157,8 +157,8 @@ class serializer
                      }
  
                      // last element
@@ -479,7 +463,7 @@ index 9d962216..a8df2801 100644
                      o->write_character('\"');
                      dump_escaped(i->first, ensure_ascii);
                      o->write_characters("\":", 2);
-@@ -184,7 +184,7 @@ class serializer
+@@ -186,7 +186,7 @@ class serializer
                      const auto new_indent = current_indent + indent_step;
                      if (JSON_UNLIKELY(indent_string.size() < new_indent))
                      {
@@ -488,7 +472,7 @@ index 9d962216..a8df2801 100644
                      }
  
                      // first n-1 elements
-@@ -303,7 +303,6 @@ class serializer
+@@ -305,7 +305,6 @@ class serializer
      {
          uint32_t codepoint;
          uint8_t state = UTF8_ACCEPT;
@@ -496,7 +480,7 @@ index 9d962216..a8df2801 100644
  
          for (std::size_t i = 0; i < s.size(); ++i)
          {
-@@ -372,44 +371,30 @@ class serializer
+@@ -374,44 +373,30 @@ class serializer
                              {
                                  if (codepoint <= 0xFFFF)
                                  {
@@ -539,14 +523,14 @@ index 9d962216..a8df2801 100644
  
                  case UTF8_REJECT:  // decode found invalid UTF-8 byte
                  {
--                    std::stringstream ss;
--                    ss << std::setw(2) << std::uppercase << std::setfill('0') << std::hex << static_cast<int>(byte);
--                    JSON_THROW(type_error::create(316, "invalid UTF-8 byte at index " + std::to_string(i) + ": 0x" + ss.str()));
+-                    std::string sn(3, '\0');
+-                    snprintf(&sn[0], sn.size(), "%.2X", byte);
+-                    JSON_THROW(type_error::create(316, "invalid UTF-8 byte at index " + std::to_string(i) + ": 0x" + sn));
 +                    JSON_THROW(type_error::create(316, fmt::format("invalid UTF-8 byte at index {}: {:#02x}", i, byte)));
                  }
  
                  default:  // decode found yet incomplete multi-byte code point
-@@ -417,27 +402,17 @@ class serializer
+@@ -419,27 +404,17 @@ class serializer
                      if (not ensure_ascii)
                      {
                          // code point will not be escaped - copy byte to buffer
@@ -570,14 +554,14 @@ index 9d962216..a8df2801 100644
 +        if (JSON_UNLIKELY(state != UTF8_ACCEPT))
          {
              // we finish reading, but do not accept: string was incomplete
--            std::stringstream ss;
--            ss << std::setw(2) << std::uppercase << std::setfill('0') << std::hex << static_cast<int>(static_cast<uint8_t>(s.back()));
--            JSON_THROW(type_error::create(316, "incomplete UTF-8 string; last byte: 0x" + ss.str()));
+-            std::string sn(3, '\0');
+-            snprintf(&sn[0], sn.size(), "%.2X", static_cast<uint8_t>(s.back()));
+-            JSON_THROW(type_error::create(316, "incomplete UTF-8 string; last byte: 0x" + sn));
 +            JSON_THROW(type_error::create(316, fmt::format("incomplete UTF-8 string; last byte: {:#02x}", s.back())));
          }
      }
  //-------EXPORTED_FUNC_CONTENTS_END
-@@ -520,74 +495,13 @@ class serializer
+@@ -522,74 +497,13 @@ class serializer
              return;
          }
  
@@ -654,10 +638,10 @@ index 9d962216..a8df2801 100644
  
      /*!
 diff --git a/include/nlohmann/json.hpp b/include/nlohmann/json.hpp
-index 082bc4e0..81010567 100644
+index a1087a37..717aa434 100644
 --- a/include/nlohmann/json.hpp
 +++ b/include/nlohmann/json.hpp
-@@ -301,9 +301,9 @@ class basic_json
+@@ -309,9 +309,9 @@ class basic_json
      {
          basic_json result;
  
@@ -670,7 +654,7 @@ index 082bc4e0..81010567 100644
          result["version"]["string"] =
              std::to_string(NLOHMANN_JSON_VERSION_MAJOR) + "." +
              std::to_string(NLOHMANN_JSON_VERSION_MINOR) + "." +
-@@ -500,297 +500,7 @@ class basic_json
+@@ -508,297 +508,7 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -969,7 +953,7 @@ index 082bc4e0..81010567 100644
  
      /// @}
  
-@@ -1246,78 +956,6 @@ class basic_json
+@@ -1253,78 +963,6 @@ class basic_json
          assert_invariant();
      }
  
@@ -997,7 +981,7 @@ index 082bc4e0..81010567 100644
 -    was provided), strong guarantee holds: if an exception is thrown, there are
 -    no changes to any JSON value.
 -
--    @since version 3.1.2
+-    @since version 3.2.0
 -    */
 -    template <typename BasicJsonType,
 -              detail::enable_if_t<
@@ -1048,7 +1032,7 @@ index 082bc4e0..81010567 100644
      /*!
      @brief create a container (array or object) from an initializer list
  
-@@ -1432,8 +1070,8 @@ class basic_json
+@@ -1439,8 +1077,8 @@ class basic_json
              std::for_each(init.begin(), init.end(), [this](const detail::json_ref<basic_json>& element_ref)
              {
                  auto element = element_ref.moved_or_copied();
@@ -1059,7 +1043,7 @@ index 082bc4e0..81010567 100644
                      std::move((*element.m_value.array)[1]));
              });
          }
-@@ -1699,8 +1337,7 @@ class basic_json
+@@ -1706,8 +1344,7 @@ class basic_json
              }
  
              default:
@@ -1069,7 +1053,7 @@ index 082bc4e0..81010567 100644
          }
  
          assert_invariant();
-@@ -7322,13 +6959,13 @@ class basic_json
+@@ -7438,13 +7075,13 @@ class basic_json
                  // check if desired value is present
                  if (JSON_UNLIKELY(it == val.m_value.object->end()))
                  {
@@ -1085,7 +1069,7 @@ index 082bc4e0..81010567 100644
                  }
  
                  // no error: return value
-@@ -7426,7 +7063,7 @@ class basic_json
+@@ -7542,7 +7179,7 @@ class basic_json
                  {
                      // op must be "add", "remove", "replace", "move", "copy", or
                      // "test"

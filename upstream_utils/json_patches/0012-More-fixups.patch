@@ -1,0 +1,551 @@
+From f8d416def7a327049b20bddbc332ebea5a9befab Mon Sep 17 00:00:00 2001
+From: PJ Reiniger <pj.reiniger@gmail.com>
+Date: Wed, 21 Dec 2022 02:57:59 -0500
+Subject: [PATCH 12/12] More fixups
+
+---
+ .../nlohmann/detail/input/binary_reader.hpp   |   9 +-
+ include/nlohmann/detail/input/json_sax.hpp    |  29 ++---
+ include/nlohmann/detail/input/lexer.hpp       |  15 ++-
+ include/nlohmann/detail/input/parser.hpp      |   8 +-
+ .../nlohmann/detail/output/binary_writer.hpp  |   4 +-
+ include/nlohmann/detail/output/serializer.hpp |   5 +-
+ include/nlohmann/json.hpp                     | 105 ++++++++++++------
+ 7 files changed, 110 insertions(+), 65 deletions(-)
+
+diff --git a/include/nlohmann/detail/input/binary_reader.hpp b/include/nlohmann/detail/input/binary_reader.hpp
+index adeae5c1..9c5f3116 100644
+--- a/include/nlohmann/detail/input/binary_reader.hpp
++++ b/include/nlohmann/detail/input/binary_reader.hpp
+@@ -1,11 +1,6 @@
+ #pragma once
+ 
+ #include <cstddef> // size_t
+-#include <cstdint> // uint8_t, uint16_t, uint32_t, uint64_t
+-#include <cstdio> // snprintf
+-#include <cstring> // memcpy
+-#include <iterator> // back_inserter
+-#include <limits> // numeric_limits
+ #include <string> // char_traits, string
+ 
+ #include <nlohmann/json.hpp>
+@@ -39,7 +34,7 @@ class json::binary_reader
+     using number_unsigned_t = typename BasicJsonType::number_unsigned_t;
+     using number_float_t = typename BasicJsonType::number_float_t;
+     using string_t = typename BasicJsonType::string_t;
+-    using SAX = json_sax_dom_parser
++    using SAX = detail::json_sax_dom_parser;
+     using json_sax_t = SAX;
+ 
+   public:
+@@ -1243,11 +1238,11 @@ class json::binary_reader
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
+-//-------EXPORTED_FUNC_DEF_START json::binary_reader
+     /*!
+     @param[in] len  the length of the array
+     @return whether array creation completed
+     */
++//-------EXPORTED_FUNC_DEF_START json::binary_reader
+     bool get_msgpack_array(const std::size_t len)
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+diff --git a/include/nlohmann/detail/input/json_sax.hpp b/include/nlohmann/detail/input/json_sax.hpp
+index e05fc9a1..d257287e 100644
+--- a/include/nlohmann/detail/input/json_sax.hpp
++++ b/include/nlohmann/detail/input/json_sax.hpp
+@@ -6,6 +6,10 @@
+ 
+ #include <nlohmann/detail/input/parser.hpp>
+ #include <nlohmann/detail/exceptions.hpp>
++#include <nlohmann/json.hpp>
++//-------EXPORTED_INCLUDE_START
++#include "fmt/format.h"
++//-------EXPORTED_INCLUDE_END
+ 
+ namespace nlohmann
+ {
+@@ -62,7 +66,7 @@ struct json_sax
+     @param[in] s    raw token value
+     @return whether parsing should proceed
+     */
+-    virtual bool number_float(number_float_t val, const string_t& s) = 0;
++    virtual bool number_float(number_float_t val, std::string_view s) = 0;
+ 
+     /*!
+     @brief a string was read
+@@ -70,7 +74,7 @@ struct json_sax
+     @return whether parsing should proceed
+     @note It is safe to move the passed string.
+     */
+-    virtual bool string(string_t& val) = 0;
++    virtual bool string(std::string_view val) = 0;
+ 
+     /*!
+     @brief the beginning of an object was read
+@@ -86,7 +90,7 @@ struct json_sax
+     @return whether parsing should proceed
+     @note It is safe to move the passed string.
+     */
+-    virtual bool key(string_t& val) = 0;
++    virtual bool key(std::string_view val) = 0;
+ 
+     /*!
+     @brief the end of an object was read
+@@ -179,13 +183,13 @@ class json_sax_dom_parser
+         return true;
+     }
+ 
+-    bool number_float(number_float_t val, const string_t&)
++    bool number_float(number_float_t val, std::string_view)
+     {
+         handle_value(val);
+         return true;
+     }
+ 
+-    bool string(string_t& val)
++    bool string(std::string_view val)
+     {
+         handle_value(val);
+         return true;
+@@ -208,7 +212,7 @@ class json_sax_dom_parser
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
+-    bool key(string_t& val)
++    bool key(std::string_view val)
+     {
+         // add null at given key and store the reference for later
+         object_element = &(ref_stack.back()->m_value.object->operator[](val));
+@@ -367,13 +371,13 @@ class json_sax_dom_callback_parser
+         return true;
+     }
+ 
+-    bool number_float(number_float_t val, const string_t&)
++    bool number_float(number_float_t val, std::string_view)
+     {
+         handle_value(val);
+         return true;
+     }
+ 
+-    bool string(string_t& val)
++    bool string(std::string_view val)
+     {
+         handle_value(val);
+         return true;
+@@ -406,7 +410,7 @@ class json_sax_dom_callback_parser
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
+ //-------EXPORTED_FUNC_DEF_START json_sax_dom_callback_parser
+-    bool key(string_t& val)
++    bool key(std::string_view val)
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+     {
+@@ -661,7 +665,6 @@ class json_sax_dom_callback_parser
+     BasicJsonType discarded = BasicJsonType::value_t::discarded;
+ };
+ 
+-template<typename BasicJsonType>
+ class json_sax_acceptor
+ {
+   public:
+@@ -690,12 +693,12 @@ class json_sax_acceptor
+         return true;
+     }
+ 
+-    bool number_float(number_float_t, const string_t&)
++    bool number_float(number_float_t, std::string_view)
+     {
+         return true;
+     }
+ 
+-    bool string(string_t&)
++    bool string(std::string_view)
+     {
+         return true;
+     }
+@@ -705,7 +708,7 @@ class json_sax_acceptor
+         return true;
+     }
+ 
+-    bool key(string_t&)
++    bool key(std::string_view)
+     {
+         return true;
+     }
+diff --git a/include/nlohmann/detail/input/lexer.hpp b/include/nlohmann/detail/input/lexer.hpp
+index eb95cc87..0fbd3f16 100644
+--- a/include/nlohmann/detail/input/lexer.hpp
++++ b/include/nlohmann/detail/input/lexer.hpp
+@@ -3,7 +3,6 @@
+ #include <clocale> // localeconv
+ #include <cstddef> // size_t
+ #include <cstdlib> // strtof, strtod, strtold, strtoll, strtoull
+-#include <cstdio> // snprintf
+ #include <initializer_list> // initializer_list
+ #include <string> // char_traits, string
+ 
+@@ -113,7 +112,7 @@ class json::lexer
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
+ //-------EXPORTED_FUNC_DEF_START json::lexer
+-    explicit lexer(raw_istream& adapter)
++    explicit lexer(raw_istream& s)
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+         : is(s), decimal_point_char(get_decimal_point())
+@@ -1188,7 +1187,6 @@ scan_number_done:
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+     {
+-        next_unget = true;
+         --chars_read;
+         if (JSON_LIKELY(current != std::char_traits<char>::eof()))
+         {
+@@ -1203,6 +1201,17 @@ scan_number_done:
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
++    /// put back character (returned on next get)
++//-------EXPORTED_FUNC_DEF_START json::lexer
++    void putback(std::char_traits<char>::int_type c)
++//-------EXPORTED_FUNC_DEF_END
++//-------EXPORTED_FUNC_CONTENTS_START
++    {
++        --chars_read;
++        unget_chars.emplace_back(c);
++    }
++//-------EXPORTED_FUNC_CONTENTS_END
++
+     /// add a character to token_buffer
+     void add(int c)
+     {
+diff --git a/include/nlohmann/detail/input/parser.hpp b/include/nlohmann/detail/input/parser.hpp
+index 3a4cbf1f..2c9f8d49 100644
+--- a/include/nlohmann/detail/input/parser.hpp
++++ b/include/nlohmann/detail/input/parser.hpp
+@@ -66,7 +66,7 @@ class json::parser
+     {
+         if (callback)
+         {
+-            json_sax_dom_callback_parser<BasicJsonType> sdp(result, callback, allow_exceptions);
++            detail::json_sax_dom_callback_parser sdp(result, callback, allow_exceptions);
+             sax_parse_internal(&sdp);
+             result.assert_invariant();
+ 
+@@ -94,7 +94,7 @@ class json::parser
+         }
+         else
+         {
+-            json_sax_dom_parser<BasicJsonType> sdp(result, allow_exceptions);
++            detail::json_sax_dom_parser sdp(result, allow_exceptions);
+             sax_parse_internal(&sdp);
+             result.assert_invariant();
+ 
+@@ -127,9 +127,10 @@ class json::parser
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+     {
+-        json_sax_acceptor<BasicJsonType> sax_acceptor;
++        detail::json_sax_acceptor sax_acceptor;
+         return sax_parse(&sax_acceptor, strict);
+     }
++//-------EXPORTED_FUNC_CONTENTS_END
+ 
+     template <typename SAX>
+     bool sax_parse(SAX* sax, const bool strict = true)
+@@ -147,7 +148,6 @@ class json::parser
+ 
+         return result;
+     }
+-//-------EXPORTED_FUNC_CONTENTS_END
+ 
+   private:
+ //-------EXPORTED_FUNC_DEF_START json::parser
+diff --git a/include/nlohmann/detail/output/binary_writer.hpp b/include/nlohmann/detail/output/binary_writer.hpp
+index 2e9edcda..bfbbd691 100644
+--- a/include/nlohmann/detail/output/binary_writer.hpp
++++ b/include/nlohmann/detail/output/binary_writer.hpp
+@@ -621,7 +621,7 @@ class json::binary_writer
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
+   private:
+-//-------EXPORTED_FUNC_DEF_START binary_writer
++//-------EXPORTED_FUNC_DEF_START json::binary_writer
+     void write_cbor_string(std::string_view str)
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+@@ -660,7 +660,7 @@ class json::binary_writer
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
+-//-------EXPORTED_FUNC_DEF_START binary_writer
++//-------EXPORTED_FUNC_DEF_START json::binary_writer
+     void write_msgpack_string(std::string_view str)
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+diff --git a/include/nlohmann/detail/output/serializer.hpp b/include/nlohmann/detail/output/serializer.hpp
+index 92b90752..4ba623bf 100644
+--- a/include/nlohmann/detail/output/serializer.hpp
++++ b/include/nlohmann/detail/output/serializer.hpp
+@@ -6,8 +6,6 @@
+ #include <cmath> // labs, isfinite, isnan, signbit
+ #include <cstddef> // size_t, ptrdiff_t
+ #include <cstdint> // uint8_t
+-#include <cstdio> // snprintf
+-#include <limits> // numeric_limits
+ #include <string> // string
+ #include <type_traits> // is_same
+ 
+@@ -281,7 +279,6 @@ class json::serializer
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
+-  private:
+     /*!
+     @brief dump escaped string
+ 
+@@ -498,7 +495,7 @@ class json::serializer
+         // use the Grisu2 algorithm to produce short numbers which are
+         // guaranteed to round-trip, using strtof and strtod, resp.
+         char* begin = number_buffer.data();
+-        char* end = to_chars(begin, begin + number_buffer.size(), x);
++        char* end = detail::to_chars(begin, begin + number_buffer.size(), x);
+ 
+         o->write_characters(begin, static_cast<size_t>(end - begin));
+     }
+diff --git a/include/nlohmann/json.hpp b/include/nlohmann/json.hpp
+index 717aa434..a1ee74f6 100644
+--- a/include/nlohmann/json.hpp
++++ b/include/nlohmann/json.hpp
+@@ -79,7 +79,17 @@ namespace nlohmann
+ class raw_istream;
+ class raw_ostream;
+ 
++struct json_sax;
+ class JsonTest;
++
++namespace detail
++{
++class json_sax_dom_parser;
++class json_sax_dom_callback_parser;
++
++/// the supported input formats
++enum class input_format_t { json, cbor, msgpack, ubjson };
++}
+ }
+ 
+ /*!
+@@ -157,12 +167,10 @@ class basic_json
+   private:
+     template<detail::value_t> friend struct detail::external_constructor;
+     friend ::nlohmann::json_pointer;
+-    friend ::nlohmann::detail::parser;
+-    friend ::nlohmann::detail::serializer;
+     template<typename BasicJsonType>
+     friend class ::nlohmann::detail::iter_impl;
+-    friend class ::nlohmann::detail::binary_writer;
+-    friend class ::nlohmann::detail::binary_reader;
++    class binary_writer;
++    class binary_reader;
+     friend class ::nlohmann::detail::json_sax_dom_parser;
+     friend class ::nlohmann::detail::json_sax_dom_callback_parser;
+ 
+@@ -172,8 +180,8 @@ class basic_json
+     using basic_json_t = json;
+ 
+     // convenience aliases for types residing in namespace detail;
+-    using lexer = ::nlohmann::detail::lexer;
+-    using parser = ::nlohmann::detail::parser;
++    class lexer;
++    class parser;
+ 
+     using primitive_iterator_t = ::nlohmann::detail::primitive_iterator_t;
+     template<typename BasicJsonType>
+@@ -184,12 +192,9 @@ class basic_json
+     using iteration_proxy = ::nlohmann::detail::iteration_proxy<Iterator>;
+     template<typename Base> using json_reverse_iterator = ::nlohmann::detail::json_reverse_iterator<Base>;
+ 
+-    using binary_reader = ::nlohmann::detail::binary_reader;
+-    using binary_writer = ::nlohmann::detail::binary_writer;
+-
+-    using serializer = ::nlohmann::detail::serializer;
+-
+   public:
++    class serializer;
++
+     using value_t = detail::value_t;
+     /// JSON Pointer, see @ref nlohmann::json_pointer
+     using json_pointer = ::nlohmann::json_pointer;
+@@ -200,7 +205,7 @@ class basic_json
+ 
+     using input_format_t = detail::input_format_t;
+     /// SAX interface type, see @ref nlohmann::json_sax
+-    using json_sax_t = json_sax<basic_json>;
++    using json_sax_t = json_sax;
+ 
+     ////////////////
+     // exceptions //
+@@ -773,7 +778,21 @@ class basic_json
+ 
+     @sa @ref parser_callback_t for more information and examples
+     */
+-    using parse_event_t = typename parser::parse_event_t;
++    enum class parse_event_t : uint8_t
++    {
++        /// the parser read `{` and started to process a JSON object
++        object_start,
++        /// the parser read `}` and finished processing a JSON object
++        object_end,
++        /// the parser read `[` and started to process a JSON array
++        array_start,
++        /// the parser read `]` and finished processing a JSON array
++        array_end,
++        /// the parser read a key of a value in an object
++        key,
++        /// the parser finished reading a JSON value
++        value
++    };
+ 
+     /*!
+     @brief per-element parser callback type
+@@ -824,7 +843,9 @@ class basic_json
+ 
+     @since version 1.0.0
+     */
+-    using parser_callback_t = typename parser::parser_callback_t;
++    using parser_callback_t =
++        std::function<bool(int depth, parse_event_t event, json& parsed)>;
++
+ 
+     //////////////////
+     // constructors //
+@@ -5820,7 +5841,7 @@ class basic_json
+     */
+ //-------EXPORTED_FUNC_DEF_START json
+     template <typename SAX>
+-    static bool sax_parse(detail::input_adapter&& i, SAX* sax,
++    static bool sax_parse(raw_istream& is, SAX* sax,
+                           input_format_t format = input_format_t::json,
+                           const bool strict = true)
+ //-------EXPORTED_FUNC_DEF_END
+@@ -5830,9 +5851,9 @@ class basic_json
+         switch (format)
+         {
+             case input_format_t::json:
+-                return parser(std::move(i)).sax_parse(sax, strict);
++                return parser(is).sax_parse(sax, strict);
+             default:
+-                return detail::binary_reader<basic_json, SAX>(std::move(i)).sax_parse(format, sax, strict);
++                return binary_reader(is).sax_parse(format, sax, strict);
+         }
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+@@ -6435,15 +6456,15 @@ class basic_json
+            since 3.2.0
+     */
+ //-------EXPORTED_FUNC_DEF_START json
+-    static basic_json from_cbor(raw_istream& i,
++    static basic_json from_cbor(raw_istream& is,
+                                 const bool strict = true,
+                                 const bool allow_exceptions = true)
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+     {
+         basic_json result;
+-        detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);
+-        const bool res = binary_reader(detail::input_adapter(i)).sax_parse(input_format_t::cbor, &sdp, strict);
++        detail::json_sax_dom_parser sdp(result, allow_exceptions);
++        const bool res = binary_reader(is).sax_parse(input_format_t::cbor, &sdp, strict);
+         return res ? result : basic_json(value_t::discarded);
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+@@ -6452,14 +6473,14 @@ class basic_json
+     @copydoc from_cbor(raw_istream, const bool, const bool)
+     */
+ //-------EXPORTED_FUNC_DEF_START json
+-    static json from_cbor(std::span<const uint8_t> arr, const bool strict = true)
++    static json from_cbor(std::span<const uint8_t> arr,
++                            const bool strict = true,
++                            const bool allow_exceptions = true)
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+     {
+-        basic_json result;
+-        detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);
+-        const bool res = binary_reader(detail::input_adapter(std::forward<A1>(a1), std::forward<A2>(a2))).sax_parse(input_format_t::cbor, &sdp, strict);
+-        return res ? result : basic_json(value_t::discarded);
++        raw_mem_istream is(arr);
++        return from_cbor(is, strict, allow_exceptions);
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
+@@ -6542,19 +6563,34 @@ class basic_json
+            since 3.2.0
+     */
+ //-------EXPORTED_FUNC_DEF_START json
+-    static basic_json from_msgpack(raw_istream&& is,
++    static basic_json from_msgpack(raw_istream& is,
+                                    const bool strict = true,
+                                    const bool allow_exceptions = true)
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+     {
+         basic_json result;
+-        detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);
+-        const bool res = binary_reader(detail::input_adapter(i)).sax_parse(input_format_t::msgpack, &sdp, strict);
++        detail::json_sax_dom_parser sdp(result, allow_exceptions);
++        const bool res = binary_reader(is).sax_parse(input_format_t::msgpack, &sdp, strict);
+         return res ? result : basic_json(value_t::discarded);
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
++    /*!
++    @copydoc from_msgpack(raw_istream&, const bool)
++    */
++//-------EXPORTED_FUNC_DEF_START json
++    static basic_json from_msgpack(std::span<const uint8_t> arr,
++                                   const bool strict = true,
++                                   const bool allow_exceptions = true)
++//-------EXPORTED_FUNC_DEF_END
++//-------EXPORTED_FUNC_CONTENTS_START
++    {
++        raw_mem_istream is(arr);
++        return from_msgpack(is, strict, allow_exceptions);
++    }
++//-------EXPORTED_FUNC_CONTENTS_END
++
+     /*!
+     @brief create a JSON value from an input in UBJSON format
+ 
+@@ -6620,19 +6656,24 @@ class basic_json
+ //-------EXPORTED_FUNC_CONTENTS_START
+     {
+         basic_json result;
+-        detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);
+-        const bool res = binary_reader(detail::input_adapter(i)).sax_parse(input_format_t::ubjson, &sdp, strict);
++        detail::json_sax_dom_parser sdp(result, allow_exceptions);
++        const bool res = binary_reader(is).sax_parse(input_format_t::ubjson, &sdp, strict);
+         return res ? result : basic_json(value_t::discarded);
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
++    /*!
++    @copydoc from_ubjson(detail::input_adapter, const bool, const bool)
++    */
+ //-------EXPORTED_FUNC_DEF_START json
+-    static json from_ubjson(std::span<const uint8_t> arr, const bool strict = true)
++    static json from_ubjson(std::span<const uint8_t> arr,
++                                  const bool strict = true,
++                                  const bool allow_exceptions = true)
+ //-------EXPORTED_FUNC_DEF_END
+ //-------EXPORTED_FUNC_CONTENTS_START
+     {
+         raw_mem_istream is(arr);
+-        return from_ubjson(is, strict);
++        return from_ubjson(is, strict, allow_exceptions);
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 

@@ -1,7 +1,7 @@
-From 03ec9b34129e8edc668282219dfbdd7f0e549301 Mon Sep 17 00:00:00 2001
+From 7c08b66698a51c5656f4e959750b7bd735b15dc4 Mon Sep 17 00:00:00 2001
 From: PJ Reiniger <pj.reiniger@gmail.com>
 Date: Mon, 12 Dec 2022 22:47:03 -0500
-Subject: [PATCH 08/11] Update exceptions
+Subject: [PATCH 08/12] Update exceptions
 
 ---
  include/nlohmann/detail/exceptions.hpp | 43 +++++++++++++++-----------

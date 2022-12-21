@@ -1,29 +1,30 @@
-From fa90520d261bdf83cdb8223cb010c8abc04c8ca4 Mon Sep 17 00:00:00 2001
+From cdece10cea07a113eed7f004e87a967587df41f3 Mon Sep 17 00:00:00 2001
 From: PJ Reiniger <pj.reiniger@gmail.com>
 Date: Mon, 19 Dec 2022 03:20:28 -0500
-Subject: [PATCH 02/11] De-templatize classes
+Subject: [PATCH 02/12] De-templatize classes
 
 ---
  .../nlohmann/detail/conversions/from_json.hpp |  18 +-
- .../nlohmann/detail/input/binary_reader.hpp   |   6 +-
+ .../nlohmann/detail/input/binary_reader.hpp   |   7 +-
+ include/nlohmann/detail/input/json_sax.hpp    |   3 -
  include/nlohmann/detail/input/lexer.hpp       |   1 -
  include/nlohmann/detail/input/parser.hpp      |   8 +-
  .../nlohmann/detail/iterators/iter_impl.hpp   |   6 +
  include/nlohmann/detail/json_pointer.hpp      |   3 +-
  include/nlohmann/detail/macro_scope.hpp       |  16 --
- include/nlohmann/detail/meta.hpp              |   3 +-
- .../nlohmann/detail/output/binary_writer.hpp  |  22 ++-
+ include/nlohmann/detail/meta/type_traits.hpp  |   3 +-
+ .../nlohmann/detail/output/binary_writer.hpp  |  12 +-
  include/nlohmann/detail/output/serializer.hpp |   1 -
- include/nlohmann/json.hpp                     | 164 +++---------------
+ include/nlohmann/json.hpp                     | 175 +++---------------
  include/nlohmann/json_fwd.hpp                 |  15 +-
- 12 files changed, 79 insertions(+), 184 deletions(-)
+ 13 files changed, 75 insertions(+), 193 deletions(-)
 
 diff --git a/include/nlohmann/detail/conversions/from_json.hpp b/include/nlohmann/detail/conversions/from_json.hpp
-index eccc04f1..0a6d5c92 100644
+index 2375d066..46aa41d8 100644
 --- a/include/nlohmann/detail/conversions/from_json.hpp
 +++ b/include/nlohmann/detail/conversions/from_json.hpp
-@@ -197,8 +197,24 @@ void from_json(const BasicJsonType& j, CompatibleArrayType& arr)
-     from_json_array_impl(j, arr, priority_tag<2> {});
+@@ -230,8 +230,24 @@ void())
+     from_json_array_impl(j, arr, priority_tag<3> {});
  }
  
 +template<typename BasicJsonType>
@@ -49,11 +50,11 @@ index eccc04f1..0a6d5c92 100644
  {
      if (JSON_UNLIKELY(not j.is_object()))
 diff --git a/include/nlohmann/detail/input/binary_reader.hpp b/include/nlohmann/detail/input/binary_reader.hpp
-index 7d096053..5fe33d57 100644
+index df6bb3b0..e1242a44 100644
 --- a/include/nlohmann/detail/input/binary_reader.hpp
 +++ b/include/nlohmann/detail/input/binary_reader.hpp
 @@ -20,6 +20,11 @@
- #include <nlohmann/detail/macro_scope.hpp>
+ #include <nlohmann/detail/meta/is_sax.hpp>
  #include <nlohmann/detail/value_t.hpp>
  
 +namespace nlohmann
@@ -64,19 +65,54 @@ index 7d096053..5fe33d57 100644
  namespace nlohmann
  {
  namespace detail
-@@ -31,7 +36,6 @@ namespace detail
+@@ -31,13 +36,13 @@ namespace detail
  /*!
- @brief deserialization of CBOR and MessagePack values
+ @brief deserialization of CBOR, MessagePack, and UBJSON values
  */
--template<typename BasicJsonType>
+-template<typename BasicJsonType, typename SAX = json_sax_dom_parser<BasicJsonType>>
  class binary_reader
  {
      using number_integer_t = typename BasicJsonType::number_integer_t;
+     using number_unsigned_t = typename BasicJsonType::number_unsigned_t;
+     using number_float_t = typename BasicJsonType::number_float_t;
+     using string_t = typename BasicJsonType::string_t;
++    using SAX = json_sax_dom_parser
+     using json_sax_t = SAX;
+ 
+   public:
+diff --git a/include/nlohmann/detail/input/json_sax.hpp b/include/nlohmann/detail/input/json_sax.hpp
+index 5278b8bd..e05fc9a1 100644
+--- a/include/nlohmann/detail/input/json_sax.hpp
++++ b/include/nlohmann/detail/input/json_sax.hpp
+@@ -18,7 +18,6 @@ Each function is called in different situations while the input is parsed. The
+ boolean return value informs the parser whether to continue processing the
+ input.
+ */
+-template<typename BasicJsonType>
+ struct json_sax
+ {
+     /// type for (signed) integers
+@@ -139,7 +138,6 @@ constructor contains the parsed value.
+ 
+ @tparam BasicJsonType  the JSON type
+ */
+-template<typename BasicJsonType>
+ class json_sax_dom_parser
+ {
+   public:
+@@ -327,7 +325,6 @@ class json_sax_dom_parser
+     const bool allow_exceptions = true;
+ };
+ 
+-template<typename BasicJsonType>
+ class json_sax_dom_callback_parser
+ {
+   public:
 diff --git a/include/nlohmann/detail/input/lexer.hpp b/include/nlohmann/detail/input/lexer.hpp
-index 2210048d..087559f1 100644
+index 0cc9a8c1..5571bd61 100644
 --- a/include/nlohmann/detail/input/lexer.hpp
 +++ b/include/nlohmann/detail/input/lexer.hpp
-@@ -26,7 +26,6 @@ namespace detail
+@@ -24,7 +24,6 @@ namespace detail
  
  This class organizes the lexical analysis during JSON deserialization.
  */
@@ -85,10 +121,10 @@ index 2210048d..087559f1 100644
  {
      using number_integer_t = typename BasicJsonType::number_integer_t;
 diff --git a/include/nlohmann/detail/input/parser.hpp b/include/nlohmann/detail/input/parser.hpp
-index 43a1e0af..f90bee7f 100644
+index 6177a1e0..dca89f5c 100644
 --- a/include/nlohmann/detail/input/parser.hpp
 +++ b/include/nlohmann/detail/input/parser.hpp
-@@ -13,6 +13,11 @@
+@@ -15,6 +15,11 @@
  #include <nlohmann/detail/input/lexer.hpp>
  #include <nlohmann/detail/value_t.hpp>
  
@@ -100,7 +136,7 @@ index 43a1e0af..f90bee7f 100644
  namespace nlohmann
  {
  namespace detail
-@@ -26,14 +31,13 @@ namespace detail
+@@ -28,14 +33,13 @@ namespace detail
  
  This class implements a recursive decent parser.
  */
@@ -117,11 +153,11 @@ index 43a1e0af..f90bee7f 100644
  
    public:
 diff --git a/include/nlohmann/detail/iterators/iter_impl.hpp b/include/nlohmann/detail/iterators/iter_impl.hpp
-index 52ede17b..6d62c2dc 100644
+index adcd8a37..45fa6972 100644
 --- a/include/nlohmann/detail/iterators/iter_impl.hpp
 +++ b/include/nlohmann/detail/iterators/iter_impl.hpp
 @@ -11,6 +11,11 @@
- #include <nlohmann/detail/meta.hpp>
+ #include <nlohmann/detail/meta/cpp_future.hpp>
  #include <nlohmann/detail/value_t.hpp>
  
 +namespace wpi
@@ -159,13 +195,14 @@ index ea99b602..995d223c 100644
    public:
      /*!
 diff --git a/include/nlohmann/detail/macro_scope.hpp b/include/nlohmann/detail/macro_scope.hpp
-index e6752218..21a8fac0 100644
+index 06805b1a..0e3180a8 100644
 --- a/include/nlohmann/detail/macro_scope.hpp
 +++ b/include/nlohmann/detail/macro_scope.hpp
-@@ -77,22 +77,6 @@
+@@ -86,19 +86,3 @@
+ #elif (defined(__cplusplus) && __cplusplus >= 201402L) || (defined(_HAS_CXX14) && _HAS_CXX14 == 1)
      #define JSON_HAS_CPP_14
  #endif
- 
+-
 -// Ugly macros to avoid uglier copy-paste when specializing basic_json. They
 -// may be removed in the future once the class is split.
 -
@@ -181,15 +218,11 @@ index e6752218..21a8fac0 100644
 -    basic_json<ObjectType, ArrayType, StringType, BooleanType,             \
 -    NumberIntegerType, NumberUnsignedType, NumberFloatType,                \
 -    AllocatorType, JSONSerializer>
--
- /*!
- @brief Helper to determine whether there's a key_type for T.
- 
-diff --git a/include/nlohmann/detail/meta.hpp b/include/nlohmann/detail/meta.hpp
-index b251afb6..ca80089a 100644
---- a/include/nlohmann/detail/meta.hpp
-+++ b/include/nlohmann/detail/meta.hpp
-@@ -27,8 +27,7 @@ namespace detail
+diff --git a/include/nlohmann/detail/meta/type_traits.hpp b/include/nlohmann/detail/meta/type_traits.hpp
+index bb932ef6..b4b630c2 100644
+--- a/include/nlohmann/detail/meta/type_traits.hpp
++++ b/include/nlohmann/detail/meta/type_traits.hpp
+@@ -28,8 +28,7 @@ namespace detail
  
  template<typename> struct is_basic_json : std::false_type {};
  
@@ -197,10 +230,10 @@ index b251afb6..ca80089a 100644
 -struct is_basic_json<NLOHMANN_BASIC_JSON_TPL> : std::true_type {};
 +template<> struct is_basic_json<json> : std::true_type {};
  
- // alias templates to reduce boilerplate
- template<bool B, typename T = void>
+ //////////////////////////
+ // aliases for detected //
 diff --git a/include/nlohmann/detail/output/binary_writer.hpp b/include/nlohmann/detail/output/binary_writer.hpp
-index 9743e03e..6e0d03ac 100644
+index 5c2aa9ce..3fbb0a2e 100644
 --- a/include/nlohmann/detail/output/binary_writer.hpp
 +++ b/include/nlohmann/detail/output/binary_writer.hpp
 @@ -9,6 +9,11 @@
@@ -227,42 +260,6 @@ index 9743e03e..6e0d03ac 100644
    public:
      /*!
      @brief create a binary writer
-@@ -599,7 +605,7 @@ class binary_writer
-                 if (use_type and not j.m_value.array->empty())
-                 {
-                     assert(use_count);
--                    const char first_prefix = ubjson_prefix(j.front());
-+                    const CharType first_prefix = ubjson_prefix(j.front());
-                     const bool same_prefix = std::all_of(j.begin() + 1, j.end(),
-                                                          [this, first_prefix](const BasicJsonType & v)
-                     {
-@@ -610,7 +616,7 @@ class binary_writer
-                     {
-                         prefix_required = false;
-                         oa->write_character(static_cast<CharType>('$'));
--                        oa->write_character(static_cast<CharType>(first_prefix));
-+                        oa->write_character(first_prefix);
-                     }
-                 }
- 
-@@ -644,7 +650,7 @@ class binary_writer
-                 if (use_type and not j.m_value.object->empty())
-                 {
-                     assert(use_count);
--                    const char first_prefix = ubjson_prefix(j.front());
-+                    const CharType first_prefix = ubjson_prefix(j.front());
-                     const bool same_prefix = std::all_of(j.begin(), j.end(),
-                                                          [this, first_prefix](const BasicJsonType & v)
-                     {
-@@ -655,7 +661,7 @@ class binary_writer
-                     {
-                         prefix_required = false;
-                         oa->write_character(static_cast<CharType>('$'));
--                        oa->write_character(static_cast<CharType>(first_prefix));
-+                        oa->write_character(first_prefix);
-                     }
-                 }
- 
 @@ -706,7 +712,7 @@ class binary_writer
  //-------EXPORTED_FUNC_CONTENTS_START
      {
@@ -272,16 +269,7 @@ index 9743e03e..6e0d03ac 100644
          std::memcpy(vec.data(), &n, sizeof(NumberType));
  
          // step 2: write array to output (with possible reordering)
-@@ -862,7 +868,7 @@ class binary_writer
-           value that does not fit the previous limits.
-     */
- //-------EXPORTED_FUNC_DEF_START json::binary_writer
--    char ubjson_prefix(const BasicJsonType& j) const noexcept
-+    CharType ubjson_prefix(const BasicJsonType& j) const noexcept
- //-------EXPORTED_FUNC_DEF_END
- //-------EXPORTED_FUNC_CONTENTS_START
-     {
-@@ -942,7 +948,7 @@ class binary_writer
+@@ -972,7 +978,7 @@ class binary_writer
  
    private:
      /// whether we can assume little endianess
@@ -291,10 +279,10 @@ index 9743e03e..6e0d03ac 100644
      /// the output
      output_adapter_t<CharType> oa = nullptr;
 diff --git a/include/nlohmann/detail/output/serializer.hpp b/include/nlohmann/detail/output/serializer.hpp
-index 7db60fdf..fca55a88 100644
+index be1545b6..50436031 100644
 --- a/include/nlohmann/detail/output/serializer.hpp
 +++ b/include/nlohmann/detail/output/serializer.hpp
-@@ -31,7 +31,6 @@ namespace detail
+@@ -28,7 +28,6 @@ namespace detail
  // serialization //
  ///////////////////
  
@@ -303,10 +291,10 @@ index 7db60fdf..fca55a88 100644
  {
      using string_t = typename BasicJsonType::string_t;
 diff --git a/include/nlohmann/json.hpp b/include/nlohmann/json.hpp
-index 35ca3976..5e6cb21d 100644
+index 2f240704..70ea6e43 100644
 --- a/include/nlohmann/json.hpp
 +++ b/include/nlohmann/json.hpp
-@@ -68,6 +68,16 @@ SOFTWARE.
+@@ -70,6 +70,16 @@ SOFTWARE.
  #include <nlohmann/detail/json_pointer.hpp>
  #include <nlohmann/adl_serializer.hpp>
  
@@ -323,7 +311,7 @@ index 35ca3976..5e6cb21d 100644
  /*!
  @brief namespace for Niels Lohmann
  @see https://github.com/nlohmann
-@@ -79,25 +89,6 @@ namespace nlohmann
+@@ -81,25 +91,6 @@ namespace nlohmann
  /*!
  @brief a class to store JSON values
  
@@ -348,8 +336,8 @@ index 35ca3976..5e6cb21d 100644
 -
  @requirement The class satisfies the following concept requirements:
  - Basic
-  - [DefaultConstructible](http://en.cppreference.com/w/cpp/concept/DefaultConstructible):
-@@ -157,27 +148,26 @@ Format](http://rfc7159.net/rfc7159)
+  - [DefaultConstructible](https://en.cppreference.com/w/cpp/named_req/DefaultConstructible):
+@@ -159,31 +150,28 @@ Format](http://rfc7159.net/rfc7159)
  
  @nosubgrouping
  */
@@ -368,8 +356,12 @@ index 35ca3976..5e6cb21d 100644
      friend class ::nlohmann::detail::iter_impl;
 -    template<typename BasicJsonType, typename CharType>
      friend class ::nlohmann::detail::binary_writer;
--    template<typename BasicJsonType>
+-    template<typename BasicJsonType, typename SAX>
      friend class ::nlohmann::detail::binary_reader;
+-    template<typename BasicJsonType>
+     friend class ::nlohmann::detail::json_sax_dom_parser;
+-    template<typename BasicJsonType>
+     friend class ::nlohmann::detail::json_sax_dom_callback_parser;
  
 +    friend class JsonTest;
 +
@@ -385,7 +377,7 @@ index 35ca3976..5e6cb21d 100644
  
      using primitive_iterator_t = ::nlohmann::detail::primitive_iterator_t;
      template<typename BasicJsonType>
-@@ -188,22 +178,19 @@ class basic_json
+@@ -194,22 +182,19 @@ class basic_json
      using iteration_proxy = ::nlohmann::detail::iteration_proxy<Iterator>;
      template<typename Base> using json_reverse_iterator = ::nlohmann::detail::json_reverse_iterator<Base>;
  
@@ -402,7 +394,7 @@ index 35ca3976..5e6cb21d 100644
  
    public:
      using value_t = detail::value_t;
-     /// @copydoc nlohmann::json_pointer
+     /// JSON Pointer, see @ref nlohmann::json_pointer
 -    using json_pointer = ::nlohmann::json_pointer<basic_json>;
 +    using json_pointer = ::nlohmann::json_pointer;
      template<typename T, typename SFINAE>
@@ -411,9 +403,9 @@ index 35ca3976..5e6cb21d 100644
 -    using initializer_list_t = std::initializer_list<detail::json_ref<basic_json>>;
 +    using initializer_list_t = std::initializer_list<detail::json_ref<json>>;
  
-     ////////////////
-     // exceptions //
-@@ -255,9 +242,9 @@ class basic_json
+     using input_format_t = detail::input_format_t;
+     /// SAX interface type, see @ref nlohmann::json_sax
+@@ -265,9 +250,9 @@ class basic_json
      using allocator_type = AllocatorType<basic_json>;
  
      /// the type of an element pointer
@@ -425,7 +417,7 @@ index 35ca3976..5e6cb21d 100644
  
      /// an iterator for a basic_json container
      using iterator = iter_impl<basic_json>;
-@@ -2527,29 +2514,6 @@ class basic_json
+@@ -2536,29 +2521,6 @@ class basic_json
          return *this;
      }
  
@@ -442,7 +434,7 @@ index 35ca3976..5e6cb21d 100644
 -    @complexity Depending on the implementation of the called `from_json()`
 -                method.
 -
--    @since version 3.1.2
+-    @since version 3.2.0
 -    */
 -    template<typename BasicJsonType, detail::enable_if_t<
 -                 not std::is_same<BasicJsonType, basic_json>::value and
@@ -455,7 +447,7 @@ index 35ca3976..5e6cb21d 100644
      /*!
      @brief get a value (explicit)
  
-@@ -3941,8 +3905,7 @@ class basic_json
+@@ -3968,8 +3930,7 @@ class basic_json
      @since version 1.0.0
      */
  //-------EXPORTED_FUNC_DEF_START json
@@ -465,7 +457,7 @@ index 35ca3976..5e6cb21d 100644
  //-------EXPORTED_FUNC_DEF_END
  //-------EXPORTED_FUNC_CONTENTS_START
      {
-@@ -3962,8 +3925,7 @@ class basic_json
+@@ -3989,8 +3950,7 @@ class basic_json
      @copydoc find(KeyT&&)
      */
  //-------EXPORTED_FUNC_DEF_START json
@@ -475,7 +467,7 @@ index 35ca3976..5e6cb21d 100644
  //-------EXPORTED_FUNC_DEF_END
  //-------EXPORTED_FUNC_CONTENTS_START
      {
-@@ -4000,8 +3962,7 @@ class basic_json
+@@ -4027,8 +3987,7 @@ class basic_json
      @since version 1.0.0
      */
  //-------EXPORTED_FUNC_DEF_START json
@@ -485,7 +477,7 @@ index 35ca3976..5e6cb21d 100644
  //-------EXPORTED_FUNC_DEF_END
  //-------EXPORTED_FUNC_CONTENTS_START
      {
-@@ -6213,75 +6174,6 @@ class basic_json
+@@ -6299,84 +6258,6 @@ class basic_json
      }
  //-------EXPORTED_FUNC_CONTENTS_END
  
@@ -558,15 +550,24 @@ index 35ca3976..5e6cb21d 100644
 -        return parser(detail::input_adapter(first, last)).accept(true);
 -    }
 -
+-    template<class IteratorType, class SAX, typename std::enable_if<
+-                 std::is_base_of<
+-                     std::random_access_iterator_tag,
+-                     typename std::iterator_traits<IteratorType>::iterator_category>::value, int>::type = 0>
+-    static bool sax_parse(IteratorType first, IteratorType last, SAX* sax)
+-    {
+-        return parser(detail::input_adapter(first, last)).sax_parse(sax);
+-    }
+-
      /*!
      @brief deserialize from stream
      @deprecated This stream operator is deprecated and will be removed in
 diff --git a/include/nlohmann/json_fwd.hpp b/include/nlohmann/json_fwd.hpp
-index 750adb64..2b6c5196 100644
+index 5ff0d753..79629fa0 100644
 --- a/include/nlohmann/json_fwd.hpp
 +++ b/include/nlohmann/json_fwd.hpp
 @@ -24,18 +24,6 @@ for serialization.
- template<typename = void, typename = void>
+ template<typename T = void, typename SFINAE = void>
  struct adl_serializer;
  
 -template<template<typename U, typename V, typename... Args> class ObjectType =

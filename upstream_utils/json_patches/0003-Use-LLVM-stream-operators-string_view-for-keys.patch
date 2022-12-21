@@ -1,28 +1,28 @@
-From 31b5c171cffbd14dec20cbfea107ff3717de9e95 Mon Sep 17 00:00:00 2001
+From 49ffbcca6388421fbc0a2f484c994178d80b28a0 Mon Sep 17 00:00:00 2001
 From: PJ Reiniger <pj.reiniger@gmail.com>
 Date: Mon, 12 Dec 2022 16:23:09 -0500
-Subject: [PATCH 03/11] Use LLVM stream operators, string_view for keys
+Subject: [PATCH 03/12] Use LLVM stream operators, string_view for keys
 
 ---
  .../nlohmann/detail/conversions/from_json.hpp |  21 +-
  .../nlohmann/detail/conversions/to_json.hpp   |  48 ++-
- .../nlohmann/detail/input/binary_reader.hpp   |  53 ++-
- include/nlohmann/detail/input/lexer.hpp       |  89 +++--
- include/nlohmann/detail/input/parser.hpp      |  12 +-
+ .../nlohmann/detail/input/binary_reader.hpp   |  18 +-
+ include/nlohmann/detail/input/lexer.hpp       |  87 +++--
+ include/nlohmann/detail/input/parser.hpp      |   4 +-
  .../nlohmann/detail/iterators/iter_impl.hpp   |   4 +-
  .../detail/iterators/iteration_proxy.hpp      |   2 +-
  include/nlohmann/detail/json_pointer.hpp      |  49 ++-
- include/nlohmann/detail/meta.hpp              |   4 +-
- .../nlohmann/detail/output/binary_writer.hpp  | 151 +++++----
+ include/nlohmann/detail/meta/type_traits.hpp  |   2 +-
+ .../nlohmann/detail/output/binary_writer.hpp  | 151 ++++----
  include/nlohmann/detail/output/serializer.hpp |  25 +-
- include/nlohmann/json.hpp                     | 314 +++++++++++-------
- 12 files changed, 463 insertions(+), 309 deletions(-)
+ include/nlohmann/json.hpp                     | 321 ++++++++++--------
+ 12 files changed, 437 insertions(+), 295 deletions(-)
 
 diff --git a/include/nlohmann/detail/conversions/from_json.hpp b/include/nlohmann/detail/conversions/from_json.hpp
-index 0a6d5c92..4fb0b8a9 100644
+index 46aa41d8..d411cdea 100644
 --- a/include/nlohmann/detail/conversions/from_json.hpp
 +++ b/include/nlohmann/detail/conversions/from_json.hpp
-@@ -223,14 +223,23 @@ void from_json(const BasicJsonType& j, CompatibleObjectType& obj)
+@@ -256,14 +256,23 @@ void from_json(const BasicJsonType& j, CompatibleObjectType& obj)
      }
  
      auto inner_object = j.template get_ptr<const typename BasicJsonType::object_t*>();
@@ -53,10 +53,10 @@ index 0a6d5c92..4fb0b8a9 100644
  
  // overload for arithmetic types, not chosen for basic_json template arguments
 diff --git a/include/nlohmann/detail/conversions/to_json.hpp b/include/nlohmann/detail/conversions/to_json.hpp
-index ce2bc0aa..bf631d3f 100644
+index 0a802369..a382cf60 100644
 --- a/include/nlohmann/detail/conversions/to_json.hpp
 +++ b/include/nlohmann/detail/conversions/to_json.hpp
-@@ -37,15 +37,16 @@ template<>
+@@ -39,15 +39,16 @@ template<>
  struct external_constructor<value_t::string>
  {
      template<typename BasicJsonType>
@@ -76,7 +76,7 @@ index ce2bc0aa..bf631d3f 100644
      {
          j.m_type = value_t::string;
          j.m_value = std::move(s);
-@@ -108,6 +109,16 @@ struct external_constructor<value_t::array>
+@@ -120,6 +121,16 @@ struct external_constructor<value_t::array>
          j.assert_invariant();
      }
  
@@ -93,7 +93,7 @@ index ce2bc0aa..bf631d3f 100644
      template<typename BasicJsonType, typename CompatibleArrayType,
               enable_if_t<not std::is_same<CompatibleArrayType, typename BasicJsonType::array_t>::value,
                           int> = 0>
-@@ -132,17 +143,6 @@ struct external_constructor<value_t::array>
+@@ -144,17 +155,6 @@ struct external_constructor<value_t::array>
          }
          j.assert_invariant();
      }
@@ -111,7 +111,7 @@ index ce2bc0aa..bf631d3f 100644
  };
  
  template<>
-@@ -168,11 +168,12 @@ struct external_constructor<value_t::object>
+@@ -180,11 +180,12 @@ struct external_constructor<value_t::object>
               enable_if_t<not std::is_same<CompatibleObjectType, typename BasicJsonType::object_t>::value, int> = 0>
      static void construct(BasicJsonType& j, const CompatibleObjectType& obj)
      {
@@ -128,7 +128,7 @@ index ce2bc0aa..bf631d3f 100644
          j.assert_invariant();
      }
  };
-@@ -189,7 +190,7 @@ void to_json(BasicJsonType& j, T b) noexcept
+@@ -201,7 +202,7 @@ void to_json(BasicJsonType& j, T b) noexcept
  }
  
  template<typename BasicJsonType, typename CompatibleString,
@@ -137,13 +137,13 @@ index ce2bc0aa..bf631d3f 100644
  void to_json(BasicJsonType& j, const CompatibleString& s)
  {
      external_constructor<value_t::string>::construct(j, s);
-@@ -245,13 +246,6 @@ void to_json(BasicJsonType& j, const CompatibleArrayType& arr)
+@@ -261,13 +262,6 @@ void to_json(BasicJsonType& j, const CompatibleArrayType& arr)
      external_constructor<value_t::array>::construct(j, arr);
  }
  
 -template<typename BasicJsonType, typename T,
 -         enable_if_t<std::is_convertible<T, BasicJsonType>::value, int> = 0>
--void to_json(BasicJsonType& j, std::valarray<T> arr)
+-void to_json(BasicJsonType& j, const std::valarray<T>& arr)
 -{
 -    external_constructor<value_t::array>::construct(j, std::move(arr));
 -}
@@ -151,31 +151,32 @@ index ce2bc0aa..bf631d3f 100644
  template<typename BasicJsonType>
  void to_json(BasicJsonType& j, typename BasicJsonType::array_t&& arr)
  {
-@@ -272,7 +266,7 @@ void to_json(BasicJsonType& j, typename BasicJsonType::object_t&& obj)
- }
+@@ -289,7 +283,7 @@ void to_json(BasicJsonType& j, typename BasicJsonType::object_t&& obj)
  
- template<typename BasicJsonType, typename T, std::size_t N,
--         enable_if_t<not std::is_constructible<typename BasicJsonType::string_t, T (&)[N]>::value, int> = 0>
-+         enable_if_t<not std::is_constructible<std::string_view, T (&)[N]>::value, int> = 0>
- void to_json(BasicJsonType& j, T (&arr)[N])
- {
-     external_constructor<value_t::array>::construct(j, arr);
+ template <
+     typename BasicJsonType, typename T, std::size_t N,
+-    enable_if_t<not std::is_constructible<typename BasicJsonType::string_t,
++    enable_if_t<not std::is_constructible<std::string_view,
+                 const T (&)[N]>::value,
+                 int> = 0 >
+ void to_json(BasicJsonType& j, const T (&arr)[N])
 diff --git a/include/nlohmann/detail/input/binary_reader.hpp b/include/nlohmann/detail/input/binary_reader.hpp
-index 5fe33d57..b6a8a1f7 100644
+index e1242a44..ed3ceab4 100644
 --- a/include/nlohmann/detail/input/binary_reader.hpp
 +++ b/include/nlohmann/detail/input/binary_reader.hpp
-@@ -48,9 +48,8 @@ class binary_reader
+@@ -51,10 +51,8 @@ class binary_reader
  
      @param[in] adapter  input adapter to read from
      */
 -    explicit binary_reader(input_adapter_t adapter) : ia(std::move(adapter))
 +    explicit binary_reader(raw_istream& s) : is(s)
      {
+-        (void)detail::is_sax_static_asserts<SAX, BasicJsonType> {};
 -        assert(ia);
      }
  
      /*!
-@@ -821,7 +820,17 @@ class binary_reader
+@@ -861,7 +859,17 @@ class binary_reader
  //-------EXPORTED_FUNC_CONTENTS_START
      {
          ++chars_read;
@@ -194,77 +195,7 @@ index 5fe33d57..b6a8a1f7 100644
      }
  //-------EXPORTED_FUNC_CONTENTS_END
  
-@@ -1028,15 +1037,12 @@ class binary_reader
- //-------EXPORTED_FUNC_CONTENTS_START
-     {
-         BasicJsonType result = value_t::object;
--        std::generate_n(std::inserter(*result.m_value.object,
--                                      result.m_value.object->end()),
--                        len, [this]()
-+        for (NumberType i = 0; i < len; ++i)
-         {
-             get();
-             auto key = get_cbor_string();
--            auto val = parse_cbor_internal();
--            return std::make_pair(std::move(key), std::move(val));
--        });
-+            (*result.m_value.object)[key] = parse_cbor_internal();
-+        }
-         return result;
-     }
- //-------EXPORTED_FUNC_CONTENTS_END
-@@ -1146,15 +1152,12 @@ class binary_reader
- //-------EXPORTED_FUNC_CONTENTS_START
-     {
-         BasicJsonType result = value_t::object;
--        std::generate_n(std::inserter(*result.m_value.object,
--                                      result.m_value.object->end()),
--                        len, [this]()
-+        for (NumberType i = 0; i < len; ++i)
-         {
-             get();
-             auto key = get_msgpack_string();
--            auto val = parse_msgpack_internal();
--            return std::make_pair(std::move(key), std::move(val));
--        });
-+            (*result.m_value.object)[key] = parse_msgpack_internal();
-+        }
-         return result;
-     }
- //-------EXPORTED_FUNC_CONTENTS_END
-@@ -1382,25 +1385,19 @@ class binary_reader
- 
-             if (size_and_type.second != 0)
-             {
--                std::generate_n(std::inserter(*result.m_value.object,
--                                              result.m_value.object->end()),
--                                size_and_type.first, [this, size_and_type]()
-+                for (size_t i = 0; i < size_and_type.first; ++i)
-                 {
-                     auto key = get_ubjson_string();
--                    auto val = get_ubjson_value(size_and_type.second);
--                    return std::make_pair(std::move(key), std::move(val));
--                });
-+                    (*result.m_value.object)[key] = get_ubjson_value(size_and_type.second);
-+                }
-             }
-             else
-             {
--                std::generate_n(std::inserter(*result.m_value.object,
--                                              result.m_value.object->end()),
--                                size_and_type.first, [this]()
-+                for (size_t i = 0; i < size_and_type.first; ++i)
-                 {
-                     auto key = get_ubjson_string();
--                    auto val = parse_ubjson_internal();
--                    return std::make_pair(std::move(key), std::move(val));
--                });
-+                    (*result.m_value.object)[key] = parse_ubjson_internal();
-+                }
-             }
-         }
-         else
-@@ -1451,7 +1448,7 @@ class binary_reader
+@@ -1768,7 +1776,7 @@ class binary_reader
  
    private:
      /// input adapter
@@ -274,15 +205,15 @@ index 5fe33d57..b6a8a1f7 100644
      /// the current character
      int current = std::char_traits<char>::eof();
 diff --git a/include/nlohmann/detail/input/lexer.hpp b/include/nlohmann/detail/input/lexer.hpp
-index 087559f1..e6772c2a 100644
+index 5571bd61..f05b6396 100644
 --- a/include/nlohmann/detail/input/lexer.hpp
 +++ b/include/nlohmann/detail/input/lexer.hpp
 @@ -103,10 +103,36 @@ class lexer
  //-------EXPORTED_FUNC_CONTENTS_END
  
  //-------EXPORTED_FUNC_DEF_START json::lexer
--    explicit lexer(detail::input_adapter_t adapter)
-+    explicit lexer(raw_istream& s)
+-    explicit lexer(detail::input_adapter_t&& adapter)
++    explicit lexer(raw_istream& adapter)
  //-------EXPORTED_FUNC_DEF_END
  //-------EXPORTED_FUNC_CONTENTS_START
 -        : ia(std::move(adapter)), decimal_point_char(get_decimal_point()) {}
@@ -316,7 +247,7 @@ index 087559f1..e6772c2a 100644
  //-------EXPORTED_FUNC_CONTENTS_END
  
      // delete because of pointer members
-@@ -1017,7 +1043,7 @@ scan_number_done:
+@@ -1019,7 +1045,7 @@ scan_number_done:
          // try to parse integers first and fall back to floats
          if (number_type == token_type::value_unsigned)
          {
@@ -325,7 +256,7 @@ index 087559f1..e6772c2a 100644
  
              // we checked the number format before
              assert(endptr == token_buffer.data() + token_buffer.size());
-@@ -1033,7 +1059,7 @@ scan_number_done:
+@@ -1035,7 +1061,7 @@ scan_number_done:
          }
          else if (number_type == token_type::value_integer)
          {
@@ -334,7 +265,7 @@ index 087559f1..e6772c2a 100644
  
              // we checked the number format before
              assert(endptr == token_buffer.data() + token_buffer.size());
-@@ -1050,7 +1076,7 @@ scan_number_done:
+@@ -1052,7 +1078,7 @@ scan_number_done:
  
          // this code is reached if we parse a floating-point number or if an
          // integer conversion above failed
@@ -343,38 +274,42 @@ index 087559f1..e6772c2a 100644
  
          // we checked the number format before
          assert(endptr == token_buffer.data() + token_buffer.size());
-@@ -1115,10 +1141,23 @@ scan_number_done:
+@@ -1117,19 +1143,23 @@ scan_number_done:
  //-------EXPORTED_FUNC_CONTENTS_START
      {
          ++chars_read;
--        current = ia->get_character();
--        if (JSON_LIKELY(current != std::char_traits<char>::eof()))
+-        if (next_unget)
 +        if (JSON_UNLIKELY(!unget_chars.empty()))
-+        {
+         {
+-            // just reset the next_unget variable and work with current
+-            next_unget = false;
 +            current = unget_chars.back();
 +            unget_chars.pop_back();
 +            token_string.push_back(current);
 +            return current;
-+        }
+         }
+-        else
 +        char c;
 +        is.read(c);
 +        if (JSON_UNLIKELY(is.has_error()))
          {
--            token_string.push_back(std::char_traits<char>::to_char_type(current));
+-            current = ia->get_character();
 +            current = std::char_traits<char>::eof();
-+        }
+         }
+-
+-        if (JSON_LIKELY(current != std::char_traits<char>::eof()))
 +        else
-+        {
+         {
+-            token_string.push_back(std::char_traits<char>::to_char_type(current));
 +            current = std::char_traits<char>::to_int_type(c);
 +            token_string.push_back(c);
          }
          return current;
      }
-@@ -1133,9 +1172,13 @@ scan_number_done:
+@@ -1152,8 +1182,13 @@ scan_number_done:
          --chars_read;
          if (JSON_LIKELY(current != std::char_traits<char>::eof()))
          {
--            ia->unget_character();
 +            unget_chars.emplace_back(current);
              assert(token_string.size() != 0);
              token_string.pop_back();
@@ -385,21 +320,18 @@ index 087559f1..e6772c2a 100644
          }
      }
  //-------EXPORTED_FUNC_CONTENTS_END
-@@ -1169,10 +1212,10 @@ scan_number_done:
+@@ -1187,8 +1222,8 @@ scan_number_done:
          return value_float;
      }
  
 -    /// return current string value (implicitly resets the token; useful only once)
--    string_t&& move_string()
+-    string_t& get_string()
 +    /// return current string value
 +    std::string_view get_string()
      {
--        return std::move(token_buffer);
-+        return token_buffer;
+         return token_buffer;
      }
- 
-     /////////////////////
-@@ -1195,23 +1238,22 @@ scan_number_done:
+@@ -1213,22 +1248,22 @@ scan_number_done:
      {
          // escape control characters
          std::string result;
@@ -411,10 +343,9 @@ index 087559f1..e6772c2a 100644
 +            if (c <= '\x1F')
              {
                  // escape control characters
--                std::stringstream ss;
--                ss << "<U+" << std::setw(4) << std::uppercase << std::setfill('0')
--                   << std::hex << static_cast<int>(c) << ">";
--                result += ss.str();
+-                char cs[9];
+-                snprintf(cs, 9, "<U+%.4X>", static_cast<unsigned char>(c));
+-                result += cs;
 +                ss << fmt::format("<U+{:04X}>", c);
              }
              else
@@ -429,7 +360,7 @@ index 087559f1..e6772c2a 100644
          return result;
      }
  //-------EXPORTED_FUNC_CONTENTS_END
-@@ -1296,19 +1338,22 @@ scan_number_done:
+@@ -1352,22 +1387,22 @@ scan_number_done:
  
    private:
      /// input adapter
@@ -439,9 +370,11 @@ index 087559f1..e6772c2a 100644
      /// the current character
      std::char_traits<char>::int_type current = std::char_traits<char>::eof();
  
+-    /// whether the next get() call should just return current
+-    bool next_unget = false;
 +    /// unget characters
 +    SmallVector<std::char_traits<char>::int_type, 4> unget_chars;
-+
+ 
      /// the number of characters read
      std::size_t chars_read = 0;
  
@@ -456,67 +389,31 @@ index 087559f1..e6772c2a 100644
      /// a description of occurred lexer errors
      const char* error_message = "";
 diff --git a/include/nlohmann/detail/input/parser.hpp b/include/nlohmann/detail/input/parser.hpp
-index f90bee7f..e87be215 100644
+index dca89f5c..e59eafa8 100644
 --- a/include/nlohmann/detail/input/parser.hpp
 +++ b/include/nlohmann/detail/input/parser.hpp
-@@ -61,10 +61,10 @@ class parser
+@@ -63,10 +63,10 @@ class parser
          std::function<bool(int depth, parse_event_t event, BasicJsonType& parsed)>;
  
      /// a parser reading from an input adapter
--    explicit parser(detail::input_adapter_t adapter,
+-    explicit parser(detail::input_adapter_t&& adapter,
 +    explicit parser(raw_istream& s,
                      const parser_callback_t cb = nullptr,
                      const bool allow_exceptions_ = true)
--        : callback(cb), m_lexer(adapter), allow_exceptions(allow_exceptions_)
+-        : callback(cb), m_lexer(std::move(adapter)), allow_exceptions(allow_exceptions_)
 +        : callback(cb), m_lexer(s), allow_exceptions(allow_exceptions_)
-     {}
- 
-     /*!
-@@ -191,7 +191,7 @@ class parser
-                 }
- 
-                 // parse values
--                string_t key;
-+                SmallString<128> key;
-                 BasicJsonType value;
-                 while (true)
-                 {
-@@ -200,7 +200,7 @@ class parser
-                     {
-                         return;
-                     }
--                    key = m_lexer.move_string();
-+                    key = m_lexer.get_string();
- 
-                     bool keep_tag = false;
-                     if (keep)
-@@ -236,7 +236,7 @@ class parser
- 
-                     if (keep and keep_tag and not value.is_discarded())
-                     {
--                        result.m_value.object->emplace(std::move(key), std::move(value));
-+                        result.m_value.object->try_emplace(std::string_view(key.data(), key.size()), std::move(value));
-                     }
- 
-                     // comma -> next value
-@@ -346,7 +346,7 @@ class parser
-             case token_type::value_string:
-             {
-                 result.m_type = value_t::string;
--                result.m_value = m_lexer.move_string();
-+                result.m_value = m_lexer.get_string();
-                 break;
-             }
- 
+     {
+         // read first token
+         get_token();
 diff --git a/include/nlohmann/detail/iterators/iter_impl.hpp b/include/nlohmann/detail/iterators/iter_impl.hpp
-index 6d62c2dc..6dadcf68 100644
+index 45fa6972..33975d13 100644
 --- a/include/nlohmann/detail/iterators/iter_impl.hpp
 +++ b/include/nlohmann/detail/iterators/iter_impl.hpp
 @@ -589,13 +589,13 @@ class iter_impl
      @brief  return the key of an object iterator
      @pre The iterator is initialized; i.e. `m_object != nullptr`.
      */
--    typename object_t::key_type key() const
+-    const typename object_t::key_type& key() const
 +    std::string_view key() const
      {
          assert(m_object != nullptr);
@@ -529,10 +426,10 @@ index 6d62c2dc..6dadcf68 100644
  
          JSON_THROW(invalid_iterator::create(207, "cannot use key() for non-object iterators"));
 diff --git a/include/nlohmann/detail/iterators/iteration_proxy.hpp b/include/nlohmann/detail/iterators/iteration_proxy.hpp
-index 7547d038..48cef527 100644
+index f5dbb2c7..a26440f2 100644
 --- a/include/nlohmann/detail/iterators/iteration_proxy.hpp
 +++ b/include/nlohmann/detail/iterators/iteration_proxy.hpp
-@@ -59,7 +59,7 @@ template<typename IteratorType> class iteration_proxy
+@@ -89,7 +89,7 @@ template<typename IteratorType> class iteration_proxy
  
                  // use key from the object
                  case value_t::object:
@@ -641,30 +538,21 @@ index 995d223c..870d0509 100644
          }
  
          return result;
-diff --git a/include/nlohmann/detail/meta.hpp b/include/nlohmann/detail/meta.hpp
-index ca80089a..9cc6b420 100644
---- a/include/nlohmann/detail/meta.hpp
-+++ b/include/nlohmann/detail/meta.hpp
-@@ -115,7 +115,7 @@ template<class RealType, class CompatibleObjectType>
- struct is_compatible_object_type_impl<true, RealType, CompatibleObjectType>
- {
-     static constexpr auto value =
--        std::is_constructible<typename RealType::key_type, typename CompatibleObjectType::key_type>::value and
-+        std::is_constructible<std::string_view, typename CompatibleObjectType::key_type>::value and
-         std::is_constructible<typename RealType::mapped_type, typename CompatibleObjectType::mapped_type>::value;
- };
+diff --git a/include/nlohmann/detail/meta/type_traits.hpp b/include/nlohmann/detail/meta/type_traits.hpp
+index b4b630c2..0b68e831 100644
+--- a/include/nlohmann/detail/meta/type_traits.hpp
++++ b/include/nlohmann/detail/meta/type_traits.hpp
+@@ -112,7 +112,7 @@ struct is_compatible_object_type_impl <
  
-@@ -145,7 +145,7 @@ struct is_compatible_array_type
-         conjunction<negation<std::is_same<void, CompatibleArrayType>>,
-         negation<is_compatible_object_type<
-         BasicJsonType, CompatibleArrayType>>,
--        negation<std::is_constructible<typename BasicJsonType::string_t,
-+        negation<std::is_constructible<std::string_view,
-         CompatibleArrayType>>,
-         negation<is_basic_json_nested_type<BasicJsonType, CompatibleArrayType>>,
-         has_value_type<CompatibleArrayType>,
+     // macOS's is_constructible does not play well with nonesuch...
+     static constexpr bool value =
+-        std::is_constructible<typename object_t::key_type,
++        std::is_constructible<std::string_view,
+         typename CompatibleObjectType::key_type>::value and
+         std::is_constructible<typename object_t::mapped_type,
+         typename CompatibleObjectType::mapped_type>::value;
 diff --git a/include/nlohmann/detail/output/binary_writer.hpp b/include/nlohmann/detail/output/binary_writer.hpp
-index 6e0d03ac..bea169de 100644
+index 3fbb0a2e..7758effa 100644
 --- a/include/nlohmann/detail/output/binary_writer.hpp
 +++ b/include/nlohmann/detail/output/binary_writer.hpp
 @@ -35,9 +35,8 @@ class binary_writer
@@ -866,7 +754,7 @@ index 6e0d03ac..bea169de 100644
      }
  //-------EXPORTED_FUNC_CONTENTS_END
  
-@@ -951,7 +964,7 @@ class binary_writer
+@@ -981,7 +994,7 @@ class binary_writer
      const bool is_little_endian = json::binary_reader::little_endianess();
  
      /// the output
@@ -876,10 +764,10 @@ index 6e0d03ac..bea169de 100644
  }
  }
 diff --git a/include/nlohmann/detail/output/serializer.hpp b/include/nlohmann/detail/output/serializer.hpp
-index fca55a88..4a1ae022 100644
+index 50436031..c4fa0169 100644
 --- a/include/nlohmann/detail/output/serializer.hpp
 +++ b/include/nlohmann/detail/output/serializer.hpp
-@@ -45,8 +45,8 @@ class serializer
+@@ -42,8 +42,8 @@ class serializer
      @param[in] s  output stream to serialize to
      @param[in] ichar  indentation character to use
      */
@@ -890,7 +778,7 @@ index fca55a88..4a1ae022 100644
            thousands_sep(loc->thousands_sep == nullptr ? '\0' : * (loc->thousands_sep)),
            decimal_point(loc->decimal_point == nullptr ? '\0' : * (loc->decimal_point)),
            indent_char(ichar), indent_string(512, indent_char)
-@@ -91,6 +91,19 @@ class serializer
+@@ -88,6 +88,19 @@ class serializer
                      return;
                  }
  
@@ -910,7 +798,7 @@ index fca55a88..4a1ae022 100644
                  if (pretty_print)
                  {
                      o->write_characters("{\n", 2);
-@@ -103,7 +116,7 @@ class serializer
+@@ -100,7 +113,7 @@ class serializer
                      }
  
                      // first n-1 elements
@@ -919,7 +807,7 @@ index fca55a88..4a1ae022 100644
                      for (std::size_t cnt = 0; cnt < val.m_value.object->size() - 1; ++cnt, ++i)
                      {
                          o->write_characters(indent_string.c_str(), new_indent);
-@@ -115,7 +128,7 @@ class serializer
+@@ -112,7 +125,7 @@ class serializer
                      }
  
                      // last element
@@ -928,7 +816,7 @@ index fca55a88..4a1ae022 100644
                      assert(std::next(i) == val.m_value.object->cend());
                      o->write_characters(indent_string.c_str(), new_indent);
                      o->write_character('\"');
-@@ -285,7 +298,7 @@ class serializer
+@@ -282,7 +295,7 @@ class serializer
      @complexity Linear in the length of string @a s.
      */
  //-------EXPORTED_FUNC_DEF_START json::serializer
@@ -937,7 +825,7 @@ index fca55a88..4a1ae022 100644
  //-------EXPORTED_FUNC_DEF_END
  //-------EXPORTED_FUNC_CONTENTS_START
      {
-@@ -625,7 +638,7 @@ class serializer
+@@ -622,7 +635,7 @@ class serializer
  
    private:
      /// the output of the serializer
@@ -947,10 +835,10 @@ index fca55a88..4a1ae022 100644
      /// a (hopefully) large enough character buffer
      std::array<char, 64> number_buffer{{}};
 diff --git a/include/nlohmann/json.hpp b/include/nlohmann/json.hpp
-index 5e6cb21d..b33e244b 100644
+index 70ea6e43..9bed5577 100644
 --- a/include/nlohmann/json.hpp
 +++ b/include/nlohmann/json.hpp
-@@ -452,11 +452,7 @@ class basic_json
+@@ -460,11 +460,7 @@ class basic_json
      7159](http://rfc7159.net/rfc7159), because any order implements the
      specified "unordered" nature of JSON objects.
      */
@@ -963,7 +851,7 @@ index 5e6cb21d..b33e244b 100644
  
      /*!
      @brief a type for an array
-@@ -939,6 +935,12 @@ class basic_json
+@@ -947,6 +943,12 @@ class basic_json
          }
  //-------EXPORTED_FUNC_CONTENTS_END
  
@@ -976,7 +864,7 @@ index 5e6cb21d..b33e244b 100644
          /// constructor for strings
          json_value(const string_t& value)
          {
-@@ -1687,13 +1689,6 @@ class basic_json
+@@ -1694,13 +1696,6 @@ class basic_json
                  break;
              }
  
@@ -990,7 +878,7 @@ index 5e6cb21d..b33e244b 100644
              case value_t::array:
              {
                  m_value.array = create<array_t>(first.m_it.array_iterator,
-@@ -1968,8 +1963,20 @@ class basic_json
+@@ -1975,8 +1970,20 @@ class basic_json
  //-------EXPORTED_FUNC_DEF_END
  //-------EXPORTED_FUNC_CONTENTS_START
      {
@@ -1013,7 +901,7 @@ index 5e6cb21d..b33e244b 100644
  
          if (indent >= 0)
          {
-@@ -1980,7 +1987,7 @@ class basic_json
+@@ -1987,7 +1994,7 @@ class basic_json
              s.dump(*this, false, ensure_ascii, 0);
          }
  
@@ -1022,7 +910,7 @@ index 5e6cb21d..b33e244b 100644
      }
  //-------EXPORTED_FUNC_CONTENTS_END
  
-@@ -2987,15 +2994,13 @@ class basic_json
+@@ -3012,15 +3019,13 @@ class basic_json
          // at only works for objects
          if (JSON_LIKELY(is_object()))
          {
@@ -1041,7 +929,7 @@ index 5e6cb21d..b33e244b 100644
          }
          else
          {
-@@ -3042,15 +3047,13 @@ class basic_json
+@@ -3067,15 +3072,13 @@ class basic_json
          // at only works for objects
          if (JSON_LIKELY(is_object()))
          {
@@ -1060,7 +948,7 @@ index 5e6cb21d..b33e244b 100644
          }
          else
          {
-@@ -3619,7 +3622,7 @@ class basic_json
+@@ -3644,7 +3647,7 @@ class basic_json
                   std::is_same<IteratorType, typename basic_json_t::iterator>::value or
                   std::is_same<IteratorType, typename basic_json_t::const_iterator>::value, int>::type
               = 0>
@@ -1069,7 +957,7 @@ index 5e6cb21d..b33e244b 100644
      {
          // make sure iterator fits the current value
          if (JSON_UNLIKELY(this != pos.m_object))
-@@ -3627,8 +3630,6 @@ class basic_json
+@@ -3652,8 +3655,6 @@ class basic_json
              JSON_THROW(invalid_iterator::create(202, "iterator does not fit current value"));
          }
  
@@ -1078,7 +966,7 @@ index 5e6cb21d..b33e244b 100644
          switch (m_type)
          {
              case value_t::boolean:
-@@ -3657,21 +3658,19 @@ class basic_json
+@@ -3682,21 +3683,19 @@ class basic_json
  
              case value_t::object:
              {
@@ -1102,7 +990,7 @@ index 5e6cb21d..b33e244b 100644
      }
  
      /*!
-@@ -3761,13 +3760,6 @@ class basic_json
+@@ -3786,13 +3785,6 @@ class basic_json
                  break;
              }
  
@@ -1116,7 +1004,7 @@ index 5e6cb21d..b33e244b 100644
              case value_t::array:
              {
                  result.m_it.array_iterator = m_value.array->erase(first.m_it.array_iterator,
-@@ -3913,7 +3905,7 @@ class basic_json
+@@ -3938,7 +3930,7 @@ class basic_json
  
          if (is_object())
          {
@@ -1125,7 +1013,7 @@ index 5e6cb21d..b33e244b 100644
          }
  
          return result;
-@@ -3933,7 +3925,7 @@ class basic_json
+@@ -3958,7 +3950,7 @@ class basic_json
  
          if (is_object())
          {
@@ -1134,7 +1022,7 @@ index 5e6cb21d..b33e244b 100644
          }
  
          return result;
-@@ -3967,7 +3959,7 @@ class basic_json
+@@ -3992,7 +3984,7 @@ class basic_json
  //-------EXPORTED_FUNC_CONTENTS_START
      {
          // return 0 for all nonobject types
@@ -1143,7 +1031,7 @@ index 5e6cb21d..b33e244b 100644
      }
  //-------EXPORTED_FUNC_CONTENTS_END
  
-@@ -4608,8 +4600,8 @@ class basic_json
+@@ -4633,8 +4625,8 @@ class basic_json
  
              case value_t::object:
              {
@@ -1154,7 +1042,7 @@ index 5e6cb21d..b33e244b 100644
              }
  
              default:
-@@ -4836,12 +4828,13 @@ class basic_json
+@@ -4861,12 +4853,13 @@ class basic_json
  
      @since version 1.0.0
      */
@@ -1170,7 +1058,7 @@ index 5e6cb21d..b33e244b 100644
          }
  
          // transform null object into an object
-@@ -4853,14 +4846,15 @@ class basic_json
+@@ -4878,14 +4871,15 @@ class basic_json
          }
  
          // add element to array
@@ -1188,7 +1076,7 @@ index 5e6cb21d..b33e244b 100644
      {
          push_back(val);
          return *this;
-@@ -4898,9 +4892,8 @@ class basic_json
+@@ -4923,9 +4917,8 @@ class basic_json
      {
          if (is_object() and init.size() == 2 and (*init.begin())->is_string())
          {
@@ -1200,7 +1088,7 @@ index 5e6cb21d..b33e244b 100644
          }
          else
          {
-@@ -4989,7 +4982,7 @@ class basic_json
+@@ -5014,7 +5007,7 @@ class basic_json
      @since version 2.0.8
      */
      template<class... Args>
@@ -1209,7 +1097,7 @@ index 5e6cb21d..b33e244b 100644
      {
          // emplace only works for null objects or arrays
          if (JSON_UNLIKELY(not(is_null() or is_object())))
-@@ -5006,7 +4999,7 @@ class basic_json
+@@ -5031,7 +5024,7 @@ class basic_json
          }
  
          // add element to array (perfect forwarding)
@@ -1218,7 +1106,7 @@ index 5e6cb21d..b33e244b 100644
          // create result iterator and set iterator to the result of emplace
          auto it = begin();
          it.m_it.object_iterator = res.first;
-@@ -5280,7 +5273,10 @@ class basic_json
+@@ -5314,7 +5307,10 @@ class basic_json
              JSON_THROW(invalid_iterator::create(202, "iterators first and last must point to objects"));
          }
  
@@ -1230,7 +1118,7 @@ index 5e6cb21d..b33e244b 100644
      }
  //-------EXPORTED_FUNC_CONTENTS_END
  
-@@ -6023,20 +6019,11 @@ class basic_json
+@@ -6057,20 +6053,11 @@ class basic_json
      @since version 1.0.0; indentation character added in version 3.0.0
      */
  //-------EXPORTED_FUNC_DEF_START json
@@ -1253,11 +1141,11 @@ index 5e6cb21d..b33e244b 100644
          return o;
      }
  //-------EXPORTED_FUNC_CONTENTS_END
-@@ -6128,45 +6115,67 @@ class basic_json
+@@ -6162,24 +6149,62 @@ class basic_json
      @since version 2.0.3 (contiguous containers)
      */
  //-------EXPORTED_FUNC_DEF_START json
--    static basic_json parse(detail::input_adapter i,
+-    static basic_json parse(detail::input_adapter&& i,
 +    static basic_json parse(std::string_view s,
                              const parser_callback_t cb = nullptr,
                              const bool allow_exceptions = true)
@@ -1265,8 +1153,6 @@ index 5e6cb21d..b33e244b 100644
  //-------EXPORTED_FUNC_CONTENTS_START
      {
 -        basic_json result;
--        parser(i, cb, allow_exceptions).parse(true, result);
--        return result;
 +        raw_mem_istream is(std::span<const char>(s.data(), s.size()));
 +        return parse(is, cb, allow_exceptions);
 +    }
@@ -1281,22 +1167,19 @@ index 5e6cb21d..b33e244b 100644
 +    {
 +        raw_mem_istream is(arr);
 +        return parse(is, cb, allow_exceptions);
-     }
- //-------EXPORTED_FUNC_CONTENTS_END
- 
-     /*!
--    @copydoc basic_json parse(detail::input_adapter, const parser_callback_t)
++    }
++//-------EXPORTED_FUNC_CONTENTS_END
++
++    /*!
 +    @copydoc basic_json parse(raw_istream&, const parser_callback_t)
-     */
- //-------EXPORTED_FUNC_DEF_START json
--    static basic_json parse(detail::input_adapter& i,
++    */
++//-------EXPORTED_FUNC_DEF_START json
 +    static json parse(raw_istream& i,
-                             const parser_callback_t cb = nullptr,
-                             const bool allow_exceptions = true)
- //-------EXPORTED_FUNC_DEF_END
- //-------EXPORTED_FUNC_CONTENTS_START
-     {
--        basic_json result;
++                            const parser_callback_t cb = nullptr,
++                            const bool allow_exceptions = true)
++//-------EXPORTED_FUNC_DEF_END
++//-------EXPORTED_FUNC_CONTENTS_START
++    {
 +        json result;
          parser(i, cb, allow_exceptions).parse(true, result);
          return result;
@@ -1304,7 +1187,7 @@ index 5e6cb21d..b33e244b 100644
  //-------EXPORTED_FUNC_CONTENTS_END
  
  //-------EXPORTED_FUNC_DEF_START json
--    static bool accept(detail::input_adapter i)
+-    static bool accept(detail::input_adapter&& i)
 +    static bool accept(std::string_view s)
  //-------EXPORTED_FUNC_DEF_END
  //-------EXPORTED_FUNC_CONTENTS_START
@@ -1312,26 +1195,20 @@ index 5e6cb21d..b33e244b 100644
 -        return parser(i).accept(true);
 +        raw_mem_istream is(std::span<const char>(s.data(), s.size()));
 +        return parser(is).accept(true);
-     }
- //-------EXPORTED_FUNC_CONTENTS_END
- 
- //-------EXPORTED_FUNC_DEF_START json
--    static bool accept(detail::input_adapter& i)
++    }
++//-------EXPORTED_FUNC_CONTENTS_END
++
++//-------EXPORTED_FUNC_DEF_START json
 +    static bool accept(std::span<const uint8_t> arr)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
 +    {
 +        raw_mem_istream is(arr);
 +        return parser(is).accept(true);
-+    }
-+//-------EXPORTED_FUNC_CONTENTS_END
-+
-+//-------EXPORTED_FUNC_DEF_START json
-+    static bool accept(raw_istream& i)
- //-------EXPORTED_FUNC_DEF_END
- //-------EXPORTED_FUNC_CONTENTS_START
-     {
-@@ -6214,10 +6223,11 @@ class basic_json
+     }
+ //-------EXPORTED_FUNC_CONTENTS_END
+ 
+@@ -6298,10 +6323,11 @@ class basic_json
      @since version 1.0.0
      */
  //-------EXPORTED_FUNC_DEF_START
@@ -1344,7 +1221,7 @@ index 5e6cb21d..b33e244b 100644
          return i;
      }
  //-------EXPORTED_FUNC_CONTENTS_END
-@@ -6385,7 +6395,7 @@ class basic_json
+@@ -6469,7 +6495,7 @@ class basic_json
      vector in CBOR format.,to_cbor}
  
      @sa http://cbor.io
@@ -1353,7 +1230,7 @@ index 5e6cb21d..b33e244b 100644
          analogous deserialization
      @sa @ref to_msgpack(const basic_json&) for the related MessagePack format
      @sa @ref to_ubjson(const basic_json&, const bool, const bool) for the
-@@ -6399,24 +6409,40 @@ class basic_json
+@@ -6483,24 +6509,40 @@ class basic_json
  //-------EXPORTED_FUNC_CONTENTS_START
      {
          std::vector<uint8_t> result;
@@ -1399,7 +1276,7 @@ index 5e6cb21d..b33e244b 100644
      }
  //-------EXPORTED_FUNC_CONTENTS_END
  
-@@ -6506,24 +6532,40 @@ class basic_json
+@@ -6590,24 +6632,40 @@ class basic_json
  //-------EXPORTED_FUNC_CONTENTS_START
      {
          std::vector<uint8_t> result;
@@ -1445,7 +1322,7 @@ index 5e6cb21d..b33e244b 100644
      }
  //-------EXPORTED_FUNC_CONTENTS_END
  
-@@ -6600,7 +6642,7 @@ class basic_json
+@@ -6684,7 +6742,7 @@ class basic_json
      vector in UBJSON format.,to_ubjson}
  
      @sa http://ubjson.org
@@ -1454,7 +1331,7 @@ index 5e6cb21d..b33e244b 100644
          analogous deserialization
      @sa @ref to_cbor(const basic_json& for the related CBOR format
      @sa @ref to_msgpack(const basic_json&) for the related MessagePack format
-@@ -6615,26 +6657,43 @@ class basic_json
+@@ -6699,26 +6757,43 @@ class basic_json
  //-------EXPORTED_FUNC_CONTENTS_START
      {
          std::vector<uint8_t> result;
@@ -1503,134 +1380,136 @@ index 5e6cb21d..b33e244b 100644
      }
  //-------EXPORTED_FUNC_CONTENTS_END
  
-@@ -6722,9 +6781,9 @@ class basic_json
+@@ -6809,9 +6884,9 @@ class basic_json
  
      @sa http://cbor.io
      @sa @ref to_cbor(const basic_json&) for the analogous serialization
--    @sa @ref from_msgpack(detail::input_adapter, const bool) for the
-+    @sa @ref from_msgpack(raw_istream&, const bool) for the
+-    @sa @ref from_msgpack(detail::input_adapter, const bool, const bool) for the
++    @sa @ref from_msgpack(raw_istream&, const bool, const bool) for the
          related MessagePack format
--    @sa @ref from_ubjson(detail::input_adapter, const bool) for the related
-+    @sa @ref from_ubjson(raw_istream&, const bool) for the related
-         UBJSON format
+-    @sa @ref from_ubjson(detail::input_adapter, const bool, const bool) for the
++    @sa @ref from_ubjson(raw_istream&, const bool, const bool) for the
+         related UBJSON format
  
      @since version 2.0.9; parameter @a start_index since 2.1.1; changed to
-@@ -6732,24 +6791,27 @@ class basic_json
-            @a strict parameter since 3.0.0
+@@ -6820,7 +6895,7 @@ class basic_json
+            since 3.2.0
      */
  //-------EXPORTED_FUNC_DEF_START json
--    static basic_json from_cbor(detail::input_adapter i,
-+    static basic_json from_cbor(raw_istream& is,
-                                 const bool strict = true)
+-    static basic_json from_cbor(detail::input_adapter&& i,
++    static basic_json from_cbor(raw_istream& i,
+                                 const bool strict = true,
+                                 const bool allow_exceptions = true)
  //-------EXPORTED_FUNC_DEF_END
- //-------EXPORTED_FUNC_CONTENTS_START
-     {
--        return binary_reader(i).parse_cbor(strict);
-+        return binary_reader(is).parse_cbor(strict);
-     }
+@@ -6834,19 +6909,19 @@ class basic_json
  //-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
--    @copydoc from_cbor(detail::input_adapter, const bool)
-+    @copydoc from_cbor(raw_istream&, const bool)
+-    @copydoc from_cbor(detail::input_adapter, const bool, const bool)
++    @copydoc from_cbor(raw_istream, const bool, const bool)
      */
 -    template<typename A1, typename A2,
 -             detail::enable_if_t<std::is_constructible<detail::input_adapter, A1, A2>::value, int> = 0>
--    static basic_json from_cbor(A1 && a1, A2 && a2, const bool strict = true)
+-    static basic_json from_cbor(A1 && a1, A2 && a2,
+-                                const bool strict = true,
+-                                const bool allow_exceptions = true)
 +//-------EXPORTED_FUNC_DEF_START json
 +    static json from_cbor(std::span<const uint8_t> arr, const bool strict = true)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
--        return binary_reader(detail::input_adapter(std::forward<A1>(a1), std::forward<A2>(a2))).parse_cbor(strict);
-+        raw_mem_istream is(arr);
-+        return from_cbor(is, strict);
+         basic_json result;
+         detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);
+         const bool res = binary_reader(detail::input_adapter(std::forward<A1>(a1), std::forward<A2>(a2))).sax_parse(input_format_t::cbor, &sdp, strict);
+         return res ? result : basic_json(value_t::discarded);
      }
 +//-------EXPORTED_FUNC_CONTENTS_END
  
      /*!
      @brief create a JSON value from an input in MessagePack format
-@@ -6815,9 +6877,9 @@ class basic_json
+@@ -6916,9 +6991,9 @@ class basic_json
  
      @sa http://msgpack.org
      @sa @ref to_msgpack(const basic_json&) for the analogous serialization
--    @sa @ref from_cbor(detail::input_adapter, const bool) for the related CBOR
-+    @sa @ref from_cbor(raw_istream&, const bool) for the related CBOR
-         format
--    @sa @ref from_ubjson(detail::input_adapter, const bool) for the related
-+    @sa @ref from_ubjson(raw_istream&, const bool) for the related
-         UBJSON format
+-    @sa @ref from_cbor(detail::input_adapter, const bool, const bool) for the
++    @sa @ref from_cbor(raw_istream&, const bool, const bool) for the
+         related CBOR format
+-    @sa @ref from_ubjson(detail::input_adapter, const bool, const bool) for
++    @sa @ref from_ubjson(raw_istream&, const bool, const bool) for
+         the related UBJSON format
  
      @since version 2.0.9; parameter @a start_index since 2.1.1; changed to
-@@ -6825,24 +6887,27 @@ class basic_json
-            @a strict parameter since 3.0.0
+@@ -6927,7 +7002,7 @@ class basic_json
+            since 3.2.0
      */
  //-------EXPORTED_FUNC_DEF_START json
--    static basic_json from_msgpack(detail::input_adapter i,
-+    static basic_json from_msgpack(raw_istream& is,
-                                    const bool strict = true)
+-    static basic_json from_msgpack(detail::input_adapter&& i,
++    static basic_json from_msgpack(raw_istream&& is,
+                                    const bool strict = true,
+                                    const bool allow_exceptions = true)
  //-------EXPORTED_FUNC_DEF_END
- //-------EXPORTED_FUNC_CONTENTS_START
-     {
--        return binary_reader(i).parse_msgpack(strict);
-+        return binary_reader(is).parse_msgpack(strict);
+@@ -6940,21 +7015,6 @@ class basic_json
      }
  //-------EXPORTED_FUNC_CONTENTS_END
  
-     /*!
--    @copydoc from_msgpack(detail::input_adapter, const bool)
-+    @copydoc from_msgpack(raw_istream&, const bool)
-     */
+-    /*!
+-    @copydoc from_msgpack(detail::input_adapter, const bool, const bool)
+-    */
 -    template<typename A1, typename A2,
 -             detail::enable_if_t<std::is_constructible<detail::input_adapter, A1, A2>::value, int> = 0>
--    static basic_json from_msgpack(A1 && a1, A2 && a2, const bool strict = true)
-+//-------EXPORTED_FUNC_DEF_START json
-+    static json from_msgpack(std::span<const uint8_t> arr, const bool strict = true)
-+//-------EXPORTED_FUNC_DEF_END
-+//-------EXPORTED_FUNC_CONTENTS_START
-     {
--        return binary_reader(detail::input_adapter(std::forward<A1>(a1), std::forward<A2>(a2))).parse_msgpack(strict);
-+        raw_mem_istream is(arr);
-+        return from_msgpack(is, strict);
-     }
-+//-------EXPORTED_FUNC_CONTENTS_END
- 
+-    static basic_json from_msgpack(A1 && a1, A2 && a2,
+-                                   const bool strict = true,
+-                                   const bool allow_exceptions = true)
+-    {
+-        basic_json result;
+-        detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);
+-        const bool res = binary_reader(detail::input_adapter(std::forward<A1>(a1), std::forward<A2>(a2))).sax_parse(input_format_t::msgpack, &sdp, strict);
+-        return res ? result : basic_json(value_t::discarded);
+-    }
+-
      /*!
      @brief create a JSON value from an input in UBJSON format
-@@ -6890,29 +6955,32 @@ class basic_json
+ 
+@@ -7005,15 +7065,15 @@ class basic_json
      @sa http://ubjson.org
      @sa @ref to_ubjson(const basic_json&, const bool, const bool) for the
               analogous serialization
--    @sa @ref from_cbor(detail::input_adapter, const bool) for the related CBOR
-+    @sa @ref from_cbor(raw_istream&, const bool) for the related CBOR
-         format
--    @sa @ref from_msgpack(detail::input_adapter, const bool) for the related
-+    @sa @ref from_msgpack(raw_istream&, const bool) for the related
-         MessagePack format
+-    @sa @ref from_cbor(detail::input_adapter, const bool, const bool) for the
++    @sa @ref from_cbor(raw_istream&, const bool, const bool) for the
+         related CBOR format
+-    @sa @ref from_msgpack(detail::input_adapter, const bool, const bool) for
++    @sa @ref from_msgpack(raw_istream&, const bool, const bool) for
+         the related MessagePack format
  
-     @since version 3.1.0
+     @since version 3.1.0; added @allow_exceptions parameter since 3.2.0
      */
  //-------EXPORTED_FUNC_DEF_START json
--    static basic_json from_ubjson(detail::input_adapter i,
+-    static basic_json from_ubjson(detail::input_adapter&& i,
 +    static basic_json from_ubjson(raw_istream& is,
-                                   const bool strict = true)
+                                   const bool strict = true,
+                                   const bool allow_exceptions = true)
  //-------EXPORTED_FUNC_DEF_END
- //-------EXPORTED_FUNC_CONTENTS_START
-     {
--        return binary_reader(i).parse_ubjson(strict);
-+        return binary_reader(is).parse_ubjson(strict);
+@@ -7026,20 +7086,15 @@ class basic_json
      }
  //-------EXPORTED_FUNC_CONTENTS_END
  
+-    /*!
+-    @copydoc from_ubjson(detail::input_adapter, const bool, const bool)
+-    */
 -    template<typename A1, typename A2,
 -             detail::enable_if_t<std::is_constructible<detail::input_adapter, A1, A2>::value, int> = 0>
--    static basic_json from_ubjson(A1 && a1, A2 && a2, const bool strict = true)
+-    static basic_json from_ubjson(A1 && a1, A2 && a2,
+-                                  const bool strict = true,
+-                                  const bool allow_exceptions = true)
 +//-------EXPORTED_FUNC_DEF_START json
 +    static json from_ubjson(std::span<const uint8_t> arr, const bool strict = true)
 +//-------EXPORTED_FUNC_DEF_END
 +//-------EXPORTED_FUNC_CONTENTS_START
      {
--        return binary_reader(detail::input_adapter(std::forward<A1>(a1), std::forward<A2>(a2))).parse_ubjson(strict);
+-        basic_json result;
+-        detail::json_sax_dom_parser<basic_json> sdp(result, allow_exceptions);
+-        const bool res = binary_reader(detail::input_adapter(std::forward<A1>(a1), std::forward<A2>(a2))).sax_parse(input_format_t::ubjson, &sdp, strict);
+-        return res ? result : basic_json(value_t::discarded);
 +        raw_mem_istream is(arr);
 +        return from_ubjson(is, strict);
      }
@@ -1638,7 +1517,7 @@ index 5e6cb21d..b33e244b 100644
  
      /// @}
  
-@@ -7574,7 +7642,7 @@ class basic_json
+@@ -7703,7 +7758,7 @@ class basic_json
                      for (auto it = source.cbegin(); it != source.cend(); ++it)
                      {
                          // escape the key name to be used in a JSON patch
@@ -1647,7 +1526,7 @@ index 5e6cb21d..b33e244b 100644
  
                          if (target.find(it.key()) != target.end())
                          {
-@@ -7598,7 +7666,7 @@ class basic_json
+@@ -7727,7 +7782,7 @@ class basic_json
                          if (source.find(it.key()) == source.end())
                          {
                              // found a key that is not in this -> add it
@@ -1656,7 +1535,7 @@ index 5e6cb21d..b33e244b 100644
                              result.push_back(
                              {
                                  {"op", "add"}, {"path", path + "/" + key},
-@@ -7784,7 +7852,7 @@ if no parse error occurred.
+@@ -7913,7 +7968,7 @@ if no parse error occurred.
  */
  inline nlohmann::json operator "" _json(const char* s, std::size_t n)
  {
@@ -1665,7 +1544,7 @@ index 5e6cb21d..b33e244b 100644
  }
  
  /*!
-@@ -7802,7 +7870,7 @@ object if no parse error occurred.
+@@ -7931,7 +7986,7 @@ object if no parse error occurred.
  */
  inline nlohmann::json::json_pointer operator "" _json_pointer(const char* s, std::size_t n)
  {
