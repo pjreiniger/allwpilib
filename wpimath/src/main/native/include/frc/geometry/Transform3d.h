@@ -6,14 +6,14 @@
 
 #include <wpi/SymbolExports.h>
 
-#include "Translation3d.h"
+#include "frc/geometry/Translation3d.h"
 
 namespace frc {
 
 class WPILIB_DLLEXPORT Pose3d;
 
 /**
- * Represents a transformation for a Pose3d.
+ * Represents a transformation for a Pose3d in the pose's frame.
  */
 class WPILIB_DLLEXPORT Transform3d {
  public:
