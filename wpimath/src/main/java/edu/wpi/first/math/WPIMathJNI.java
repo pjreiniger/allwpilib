@@ -43,6 +43,8 @@ public final class WPIMathJNI {
     libraryLoaded = true;
   }
 
+  // DARE wrappers
+
   /**
    * Computes the unique stabilizing solution X to the discrete-time algebraic Riccati equation.
    *
@@ -109,7 +111,7 @@ public final class WPIMathJNI {
    * <ul>
    *   <li>Q − NR⁻¹Nᵀ isn't symmetric positive semidefinite
    *   <li>R isn't symmetric positive definite
-   *   <li>The (A, B) pair isn't stabilizable
+   *   <li>The (A − BR⁻¹Nᵀ, B) pair isn't stabilizable
    *   <li>The (A, C) pair where Q = CᵀC isn't detectable
    * </ul>
    *
@@ -195,7 +197,7 @@ public final class WPIMathJNI {
    * @param S Array storage for DARE solution.
    * @throws IllegalArgumentException if Q − NR⁻¹Nᵀ isn't symmetric positive semidefinite.
    * @throws IllegalArgumentException if R isn't symmetric positive definite.
-   * @throws IllegalArgumentException if the (A, B) pair isn't stabilizable.
+   * @throws IllegalArgumentException if the (A − BR⁻¹Nᵀ, B) pair isn't stabilizable.
    * @throws IllegalArgumentException if the (A, C) pair where Q = CᵀC isn't detectable.
    */
   public static native void dareABQRN(
@@ -207,6 +209,8 @@ public final class WPIMathJNI {
       int states,
       int inputs,
       double[] S);
+
+  // Eigen wrappers
 
   /**
    * Computes the matrix exp.
@@ -226,6 +230,35 @@ public final class WPIMathJNI {
    * @param dst Array where the result will be stored.
    */
   public static native void pow(double[] src, int rows, double exponent, double[] dst);
+
+  /**
+   * Performs an inplace rank one update (or downdate) of an upper triangular Cholesky decomposition
+   * matrix.
+   *
+   * @param mat Array of elements of the matrix to be updated.
+   * @param lowerTriangular Whether mat is lower triangular.
+   * @param rows How many rows there are.
+   * @param vec Vector to use for the rank update.
+   * @param sigma Sigma value to use for the rank update.
+   */
+  public static native void rankUpdate(
+      double[] mat, int rows, double[] vec, double sigma, boolean lowerTriangular);
+
+  /**
+   * Solves the least-squares problem Ax=B using a QR decomposition with full pivoting.
+   *
+   * @param A Array of elements of the A matrix.
+   * @param Arows Number of rows of the A matrix.
+   * @param Acols Number of rows of the A matrix.
+   * @param B Array of elements of the B matrix.
+   * @param Brows Number of rows of the B matrix.
+   * @param Bcols Number of rows of the B matrix.
+   * @param dst Array to store solution in. If A is m-n and B is m-p, dst is n-p.
+   */
+  public static native void solveFullPivHouseholderQr(
+      double[] A, int Arows, int Acols, double[] B, int Brows, int Bcols, double[] dst);
+
+  // Pose3d wrappers
 
   /**
    * Obtain a Pose3d from a (constant curvature) velocity.
@@ -299,6 +332,8 @@ public final class WPIMathJNI {
       double endQy,
       double endQz);
 
+  // StateSpaceUtil wrappers
+
   /**
    * Returns true if (A, B) is a stabilizable pair.
    *
@@ -313,6 +348,8 @@ public final class WPIMathJNI {
    * @return If the system is stabilizable.
    */
   public static native boolean isStabilizable(int states, int inputs, double[] A, double[] B);
+
+  // Trajectory wrappers
 
   /**
    * Loads a Pathweaver JSON.
@@ -348,19 +385,6 @@ public final class WPIMathJNI {
    */
   public static native String serializeTrajectory(double[] elements);
 
-  /**
-   * Performs an inplace rank one update (or downdate) of an upper triangular Cholesky decomposition
-   * matrix.
-   *
-   * @param mat Array of elements of the matrix to be updated.
-   * @param lowerTriangular Whether mat is lower triangular.
-   * @param rows How many rows there are.
-   * @param vec Vector to use for the rank update.
-   * @param sigma Sigma value to use for the rank update.
-   */
-  public static native void rankUpdate(
-      double[] mat, int rows, double[] vec, double sigma, boolean lowerTriangular);
-
   public static class Helper {
     private static AtomicBoolean extractOnStaticLoad = new AtomicBoolean(true);
 
@@ -372,18 +396,4 @@ public final class WPIMathJNI {
       extractOnStaticLoad.set(load);
     }
   }
-
-  /**
-   * Solves the least-squares problem Ax=B using a QR decomposition with full pivoting.
-   *
-   * @param A Array of elements of the A matrix.
-   * @param Arows Number of rows of the A matrix.
-   * @param Acols Number of rows of the A matrix.
-   * @param B Array of elements of the B matrix.
-   * @param Brows Number of rows of the B matrix.
-   * @param Bcols Number of rows of the B matrix.
-   * @param dst Array to store solution in. If A is m-n and B is m-p, dst is n-p.
-   */
-  public static native void solveFullPivHouseholderQr(
-      double[] A, int Arows, int Acols, double[] B, int Brows, int Bcols, double[] dst);
 }
