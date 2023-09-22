@@ -1,69 +1,66 @@
-/*----------------------------------------------------------------------------*/
-/* Modifications Copyright (c) FIRST 2017. All Rights Reserved.               */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
-/*
-    __ _____ _____ _____
- __|  |   __|     |   | |  JSON for Modern C++ (test suite)
-|  |  |__   |  |  | | | |  version 2.1.1
-|_____|_____|_____|_|___|  https://github.com/nlohmann/json
+//     __ _____ _____ _____
+//  __|  |   __|     |   | |  JSON for Modern C++ (supporting code)
+// |  |  |__   |  |  | | | |  version 3.11.2
+// |_____|_____|_____|_|___|  https://github.com/nlohmann/json
+//
+// SPDX-FileCopyrightText: 2013-2022 Niels Lohmann <https://nlohmann.me>
+// SPDX-License-Identifier: MIT
 
-Licensed under the MIT License <http://opensource.org/licenses/MIT>.
-Copyright (c) 2013-2017 Niels Lohmann <http://nlohmann.me>.
-
-Permission is hereby  granted, free of charge, to any  person obtaining a copy
-of this software and associated  documentation files (the "Software"), to deal
-in the Software  without restriction, including without  limitation the rights
-to  use, copy,  modify, merge,  publish, distribute,  sublicense, and/or  sell
-copies  of  the Software,  and  to  permit persons  to  whom  the Software  is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE  IS PROVIDED "AS  IS", WITHOUT WARRANTY  OF ANY KIND,  EXPRESS OR
-IMPLIED,  INCLUDING BUT  NOT  LIMITED TO  THE  WARRANTIES OF  MERCHANTABILITY,
-FITNESS FOR  A PARTICULAR PURPOSE AND  NONINFRINGEMENT. IN NO EVENT  SHALL THE
-AUTHORS  OR COPYRIGHT  HOLDERS  BE  LIABLE FOR  ANY  CLAIM,  DAMAGES OR  OTHER
-LIABILITY, WHETHER IN AN ACTION OF  CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+#include "gtest/gtest.h"
 
 #include "unit-json.h"
-
-#include <gtest/gtest.h>
-
 using wpi::json;
 
-// reference access to object_t
-TEST(JsonReferenceTest, ObjectT)
+class ReferenceAccessTest : public ::testing::Test {
+ protected:
+    // create a JSON value with different types
+    json json_types =
+    {
+        {"boolean", true},
+        {
+            "number", {
+                {"integer", 42},
+                {"floating-point", 17.23}
+            }
+        },
+        {"string", "Hello, world!"},
+        {"array", {1, 2, 3, 4, 5}},
+        {"null", nullptr}
+    };
+};
+
+
+TEST_F(ReferenceAccessTest, ReferenceAccessToObjectT)
 {
     using test_type = json::object_t;
     json value = {{"one", 1}, {"two", 2}};
 
     // check if references are returned correctly
-    test_type& p1 = value.get_ref<test_type&>();
-    EXPECT_EQ(&p1, value.get_ptr<test_type*>());
-    EXPECT_EQ(p1, value.get<test_type>());
+    auto& p1 = value.get_ref<test_type&>();
+    CHECK(&p1 == value.get_ptr<test_type*>());
+    CHECK(p1 == value.get<test_type>());
 
-    const test_type& p2 = value.get_ref<const test_type&>();
-    EXPECT_EQ(&p2, value.get_ptr<const test_type*>());
-    EXPECT_EQ(p2, value.get<test_type>());
+    const auto& p2 = value.get_ref<const test_type&>();
+    CHECK(&p2 == value.get_ptr<const test_type*>());
+    CHECK(p2 == value.get<test_type>());
 
     // check if mismatching references throw correctly
-    EXPECT_NO_THROW(value.get_ref<json::object_t&>());
-    EXPECT_ANY_THROW(value.get_ref<json::array_t&>());
-    EXPECT_ANY_THROW(value.get_ref<std::string&>());
-    EXPECT_ANY_THROW(value.get_ref<bool&>());
-    EXPECT_ANY_THROW(value.get_ref<int64_t&>());
-    EXPECT_ANY_THROW(value.get_ref<double&>());
+    CHECK_NOTHROW(value.get_ref<json::object_t&>());
+    CHECK_THROWS_WITH_AS(value.get_ref<json::array_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is object", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::string_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is object", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::boolean_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is object", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::number_integer_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is object", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::number_unsigned_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is object", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::number_float_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is object", json::type_error&);
 }
 
-// const reference access to const object_t
-TEST(JsonReferenceTest, ConstObjectT)
+TEST_F(ReferenceAccessTest, ConstReferenceAccessToConstObjectT)
 {
     using test_type = json::object_t;
     const json value = {{"one", 1}, {"two", 2}};
@@ -72,127 +69,181 @@ TEST(JsonReferenceTest, ConstObjectT)
     // test_type& p1 = value.get_ref<test_type&>();
 
     // check if references are returned correctly
-    const test_type& p2 = value.get_ref<const test_type&>();
-    EXPECT_EQ(&p2, value.get_ptr<const test_type*>());
-    EXPECT_EQ(p2, value.get<test_type>());
+    const auto& p2 = value.get_ref<const test_type&>();
+    CHECK(&p2 == value.get_ptr<const test_type*>());
+    CHECK(p2 == value.get<test_type>());
 }
 
-// reference access to array_t
-TEST(JsonReferenceTest, ArrayT)
+TEST_F(ReferenceAccessTest, ReferenceAccessToArray)
 {
     using test_type = json::array_t;
     json value = {1, 2, 3, 4};
 
     // check if references are returned correctly
-    test_type& p1 = value.get_ref<test_type&>();
-    EXPECT_EQ(&p1, value.get_ptr<test_type*>());
-    EXPECT_EQ(p1, value.get<test_type>());
+    auto& p1 = value.get_ref<test_type&>();
+    CHECK(&p1 == value.get_ptr<test_type*>());
+    CHECK(p1 == value.get<test_type>());
 
-    const test_type& p2 = value.get_ref<const test_type&>();
-    EXPECT_EQ(&p2, value.get_ptr<const test_type*>());
-    EXPECT_EQ(p2, value.get<test_type>());
+    const auto& p2 = value.get_ref<const test_type&>();
+    CHECK(&p2 == value.get_ptr<const test_type*>());
+    CHECK(p2 == value.get<test_type>());
 
     // check if mismatching references throw correctly
-    EXPECT_ANY_THROW(value.get_ref<json::object_t&>());
-    EXPECT_NO_THROW(value.get_ref<json::array_t&>());
-    EXPECT_ANY_THROW(value.get_ref<std::string&>());
-    EXPECT_ANY_THROW(value.get_ref<bool&>());
-    EXPECT_ANY_THROW(value.get_ref<int64_t&>());
-    EXPECT_ANY_THROW(value.get_ref<double&>());
+    CHECK_THROWS_WITH_AS(value.get_ref<json::object_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is array", json::type_error&);
+    CHECK_NOTHROW(value.get_ref<json::array_t&>());
+    CHECK_THROWS_WITH_AS(value.get_ref<json::string_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is array", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::boolean_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is array", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::number_integer_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is array", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::number_unsigned_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is array", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::number_float_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is array", json::type_error&);
 }
 
-// reference access to string_t
-TEST(JsonReferenceTest, StringT)
+TEST_F(ReferenceAccessTest, ReferenceAccessToStringT)
 {
-    using test_type = std::string;
+    using test_type = json::string_t;
     json value = "hello";
 
     // check if references are returned correctly
-    test_type& p1 = value.get_ref<test_type&>();
-    EXPECT_EQ(&p1, value.get_ptr<test_type*>());
-    EXPECT_EQ(p1, value.get<test_type>());
+    auto& p1 = value.get_ref<test_type&>();
+    CHECK(&p1 == value.get_ptr<test_type*>());
+    CHECK(p1 == value.get<test_type>());
 
-    const test_type& p2 = value.get_ref<const test_type&>();
-    EXPECT_EQ(&p2, value.get_ptr<const test_type*>());
-    EXPECT_EQ(p2, value.get<test_type>());
+    const auto& p2 = value.get_ref<const test_type&>();
+    CHECK(&p2 == value.get_ptr<const test_type*>());
+    CHECK(p2 == value.get<test_type>());
 
     // check if mismatching references throw correctly
-    EXPECT_ANY_THROW(value.get_ref<json::object_t&>());
-    EXPECT_ANY_THROW(value.get_ref<json::array_t&>());
-    EXPECT_NO_THROW(value.get_ref<std::string&>());
-    EXPECT_ANY_THROW(value.get_ref<bool&>());
-    EXPECT_ANY_THROW(value.get_ref<int64_t&>());
-    EXPECT_ANY_THROW(value.get_ref<double&>());
+    CHECK_THROWS_WITH_AS(value.get_ref<json::object_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is string", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::array_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is string", json::type_error&);
+    CHECK_NOTHROW(value.get_ref<json::string_t&>());
+    CHECK_THROWS_WITH_AS(value.get_ref<json::boolean_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is string", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::number_integer_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is string", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::number_unsigned_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is string", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::number_float_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is string", json::type_error&);
 }
 
-// reference access to boolean_t
-TEST(JsonReferenceTest, BooleanT)
+TEST_F(ReferenceAccessTest, ReferenceAccessToBooleanT)
 {
-    using test_type = bool;
+    using test_type = json::boolean_t;
     json value = false;
 
     // check if references are returned correctly
-    test_type& p1 = value.get_ref<test_type&>();
-    EXPECT_EQ(&p1, value.get_ptr<test_type*>());
-    EXPECT_EQ(p1, value.get<test_type>());
+    auto& p1 = value.get_ref<test_type&>();
+    CHECK(&p1 == value.get_ptr<test_type*>());
+    CHECK(p1 == value.get<test_type>());
 
-    const test_type& p2 = value.get_ref<const test_type&>();
-    EXPECT_EQ(&p2, value.get_ptr<const test_type*>());
-    EXPECT_EQ(p2, value.get<test_type>());
+    const auto& p2 = value.get_ref<const test_type&>();
+    CHECK(&p2 == value.get_ptr<const test_type*>());
+    CHECK(p2 == value.get<test_type>());
 
     // check if mismatching references throw correctly
-    EXPECT_ANY_THROW(value.get_ref<json::object_t&>());
-    EXPECT_ANY_THROW(value.get_ref<json::array_t&>());
-    EXPECT_ANY_THROW(value.get_ref<std::string&>());
-    EXPECT_NO_THROW(value.get_ref<bool&>());
-    EXPECT_ANY_THROW(value.get_ref<int64_t&>());
-    EXPECT_ANY_THROW(value.get_ref<double&>());
+    CHECK_THROWS_WITH_AS(value.get_ref<json::object_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is boolean", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::array_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is boolean", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::string_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is boolean", json::type_error&);
+    CHECK_NOTHROW(value.get_ref<json::boolean_t&>());
+    CHECK_THROWS_WITH_AS(value.get_ref<json::number_integer_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is boolean", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::number_unsigned_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is boolean", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::number_float_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is boolean", json::type_error&);
 }
 
-// reference access to number_integer_t
-TEST(JsonReferenceTest, IntegerT)
+TEST_F(ReferenceAccessTest, ReferenceAccessToNumberIntegerT)
 {
-    using test_type = int64_t;
-    json value = 23;
+    using test_type = json::number_integer_t;
+    json value = -23;
 
     // check if references are returned correctly
-    test_type& p1 = value.get_ref<test_type&>();
-    EXPECT_EQ(&p1, value.get_ptr<test_type*>());
-    EXPECT_EQ(p1, value.get<test_type>());
+    auto& p1 = value.get_ref<test_type&>();
+    CHECK(&p1 == value.get_ptr<test_type*>());
+    CHECK(p1 == value.get<test_type>());
 
-    const test_type& p2 = value.get_ref<const test_type&>();
-    EXPECT_EQ(&p2, value.get_ptr<const test_type*>());
-    EXPECT_EQ(p2, value.get<test_type>());
+    const auto& p2 = value.get_ref<const test_type&>();
+    CHECK(&p2 == value.get_ptr<const test_type*>());
+    CHECK(p2 == value.get<test_type>());
 
     // check if mismatching references throw correctly
-    EXPECT_ANY_THROW(value.get_ref<json::object_t&>());
-    EXPECT_ANY_THROW(value.get_ref<json::array_t&>());
-    EXPECT_ANY_THROW(value.get_ref<std::string&>());
-    EXPECT_ANY_THROW(value.get_ref<bool&>());
-    EXPECT_NO_THROW(value.get_ref<int64_t&>());
-    EXPECT_ANY_THROW(value.get_ref<double&>());
+    CHECK_THROWS_WITH_AS(value.get_ref<json::object_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is number", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::array_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is number", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::string_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is number", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::boolean_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is number", json::type_error&);
+    CHECK_NOTHROW(value.get_ref<json::number_integer_t&>());
+    CHECK_THROWS_WITH_AS(value.get_ref<json::number_unsigned_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is number", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::number_float_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is number", json::type_error&);
 }
 
-// reference access to number_float_t
-TEST(JsonReferenceTest, FloatT)
+TEST_F(ReferenceAccessTest, ReferenceAccessToNumberUnsignedT)
 {
-    using test_type = double;
+    using test_type = json::number_unsigned_t;
+    json value = 23u;
+
+    // check if references are returned correctly
+    auto& p1 = value.get_ref<test_type&>();
+    CHECK(&p1 == value.get_ptr<test_type*>());
+    CHECK(p1 == value.get<test_type>());
+
+    const auto& p2 = value.get_ref<const test_type&>();
+    CHECK(&p2 == value.get_ptr<const test_type*>());
+    CHECK(p2 == value.get<test_type>());
+
+    // check if mismatching references throw correctly
+    CHECK_THROWS_WITH_AS(value.get_ref<json::object_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is number", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::array_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is number", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::string_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is number", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::boolean_t&>(),
+                         "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is number", json::type_error&);
+    //CHECK_THROWS_WITH_AS(value.get_ref<json::number_integer_t&>(),
+    //    "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is number", json::type_error&);
+    CHECK_NOTHROW(value.get_ref<json::number_unsigned_t&>());
+    CHECK_THROWS_WITH_AS(value.get_ref<json::number_float_t&>(), "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is number", json::type_error&);
+}
+
+TEST_F(ReferenceAccessTest, ReferenceAccessToNumberFloatT)
+{
+    using test_type = json::number_float_t;
     json value = 42.23;
 
     // check if references are returned correctly
-    test_type& p1 = value.get_ref<test_type&>();
-    EXPECT_EQ(&p1, value.get_ptr<test_type*>());
-    EXPECT_EQ(p1, value.get<test_type>());
+    auto& p1 = value.get_ref<test_type&>();
+    CHECK(&p1 == value.get_ptr<test_type*>());
+    CHECK(p1 == value.get<test_type>());
 
-    const test_type& p2 = value.get_ref<const test_type&>();
-    EXPECT_EQ(&p2, value.get_ptr<const test_type*>());
-    EXPECT_EQ(p2, value.get<test_type>());
+    const auto& p2 = value.get_ref<const test_type&>();
+    CHECK(&p2 == value.get_ptr<const test_type*>());
+    CHECK(p2 == value.get<test_type>());
 
     // check if mismatching references throw correctly
-    EXPECT_ANY_THROW(value.get_ref<json::object_t&>());
-    EXPECT_ANY_THROW(value.get_ref<json::array_t&>());
-    EXPECT_ANY_THROW(value.get_ref<std::string&>());
-    EXPECT_ANY_THROW(value.get_ref<bool&>());
-    EXPECT_ANY_THROW(value.get_ref<int64_t&>());
-    EXPECT_NO_THROW(value.get_ref<double&>());
+    CHECK_THROWS_WITH_AS(value.get_ref<json::object_t&>(), "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is number", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::array_t&>(), "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is number", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::string_t&>(), "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is number", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::boolean_t&>(), "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is number", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::number_integer_t&>(), "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is number", json::type_error&);
+    CHECK_THROWS_WITH_AS(value.get_ref<json::number_unsigned_t&>(), "[json.exception.type_error.303] incompatible ReferenceType for get_ref, actual type is number", json::type_error&);
+    CHECK_NOTHROW(value.get_ref<json::number_float_t&>());
 }
+
