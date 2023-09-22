@@ -1,0 +1,16 @@
+
+
+[cc_test(
+    name = filename[:-4],
+    srcs = [filename, "unit-json.h", "fifo_map.hpp"],
+    deps = [
+        "@gtest//:gtest_main",
+        "//wpiutil/src/main/native:wpiutil.static",
+        # "//wpiutil/src/main/native/thirdparty/json",
+    ],
+    data = glob([
+        "test/data/json_nlohmann_tests/**",
+        "test/data/nst_json_testsuite2/**",
+        
+    ]),
+) for filename in glob(["*.cpp"])]

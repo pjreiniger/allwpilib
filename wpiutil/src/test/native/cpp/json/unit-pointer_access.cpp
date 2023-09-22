@@ -1,466 +1,480 @@
-/*----------------------------------------------------------------------------*/
-/* Modifications Copyright (c) FIRST 2017. All Rights Reserved.               */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
-/*
-    __ _____ _____ _____
- __|  |   __|     |   | |  JSON for Modern C++ (test suite)
-|  |  |__   |  |  | | | |  version 2.1.1
-|_____|_____|_____|_|___|  https://github.com/nlohmann/json
+//     __ _____ _____ _____
+//  __|  |   __|     |   | |  JSON for Modern C++ (supporting code)
+// |  |  |__   |  |  | | | |  version 3.11.2
+// |_____|_____|_____|_|___|  https://github.com/nlohmann/json
+//
+// SPDX-FileCopyrightText: 2013-2022 Niels Lohmann <https://nlohmann.me>
+// SPDX-License-Identifier: MIT
 
-Licensed under the MIT License <http://opensource.org/licenses/MIT>.
-Copyright (c) 2013-2017 Niels Lohmann <http://nlohmann.me>.
-
-Permission is hereby  granted, free of charge, to any  person obtaining a copy
-of this software and associated  documentation files (the "Software"), to deal
-in the Software  without restriction, including without  limitation the rights
-to  use, copy,  modify, merge,  publish, distribute,  sublicense, and/or  sell
-copies  of  the Software,  and  to  permit persons  to  whom  the Software  is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE  IS PROVIDED "AS  IS", WITHOUT WARRANTY  OF ANY KIND,  EXPRESS OR
-IMPLIED,  INCLUDING BUT  NOT  LIMITED TO  THE  WARRANTIES OF  MERCHANTABILITY,
-FITNESS FOR  A PARTICULAR PURPOSE AND  NONINFRINGEMENT. IN NO EVENT  SHALL THE
-AUTHORS  OR COPYRIGHT  HOLDERS  BE  LIABLE FOR  ANY  CLAIM,  DAMAGES OR  OTHER
-LIABILITY, WHETHER IN AN ACTION OF  CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+#include "gtest/gtest.h"
 
 #include "unit-json.h"
-
-#include <cmath>
-
-#include <gtest/gtest.h>
-
 using wpi::json;
 
-TEST(JsonPointerTest, TypesCreate)
-{
-    // create a JSON value with different types
-    json json_types =
-    {
-        {"boolean", true},
-        {
-            "number", {
-                {"integer", 42},
-                {"unsigned", 42u},
-                {"floating-point", 17.23}
-            }
-        },
-        {"string", "Hello, world!"},
-        {"array", {1, 2, 3, 4, 5}},
-        {"null", nullptr}
-    };
-}
 
-// pointer access to object_t
-TEST(JsonPointerTest, ObjectT)
+
+
+TEST(PointerAccessTest, PointerAccessToObjectT)
 {
     using test_type = json::object_t;
     json value = {{"one", 1}, {"two", 2}};
 
     // check if pointers are returned correctly
     test_type* p1 = value.get_ptr<test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<test_type*>());
-    EXPECT_EQ(*p1, value.get<test_type>());
+    CHECK(p1 == value.get_ptr<test_type*>());
+    CHECK(*p1 == value.get<test_type>());
 
     const test_type* p2 = value.get_ptr<const test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type*>());
-    EXPECT_EQ(*p2, value.get<test_type>());
+    CHECK(p2 == value.get_ptr<const test_type*>());
+    CHECK(*p2 == value.get<test_type>());
 
     const test_type* const p3 = value.get_ptr<const test_type* const>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type* const>());
-    EXPECT_EQ(*p3, value.get<test_type>());
+    CHECK(p3 == value.get_ptr<const test_type* const>());
+    CHECK(*p3 == value.get<test_type>());
 
     // check if null pointers are returned correctly
-    EXPECT_NE(value.get_ptr<json::object_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<json::array_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<std::string*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<bool*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<int64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<uint64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<double*>(), nullptr);
+    CHECK(value.get_ptr<json::object_t*>() != nullptr);
+    CHECK(value.get_ptr<json::array_t*>() == nullptr);
+    CHECK(value.get_ptr<json::string_t*>() == nullptr);
+    CHECK(value.get_ptr<json::boolean_t*>() == nullptr);
+    CHECK(value.get_ptr<json::number_integer_t*>() == nullptr);
+    CHECK(value.get_ptr<json::number_unsigned_t*>() == nullptr);
+    CHECK(value.get_ptr<json::number_float_t*>() == nullptr);
+    CHECK(value.get_ptr<json::binary_t*>() == nullptr);
 }
 
-// pointer access to const object_t
-TEST(JsonPointerTest, ConstObjectT)
+TEST(PointerAccessTest, PointerAccessToConstObjectT)
 {
     using test_type = const json::object_t;
     const json value = {{"one", 1}, {"two", 2}};
 
     // check if pointers are returned correctly
     test_type* p1 = value.get_ptr<test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<test_type*>());
-    EXPECT_EQ(*p1, value.get<test_type>());
+    CHECK(p1 == value.get_ptr<test_type*>());
+    CHECK(*p1 == value.get<test_type>());
 
     const test_type* p2 = value.get_ptr<const test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type*>());
-    EXPECT_EQ(*p2, value.get<test_type>());
+    CHECK(p2 == value.get_ptr<const test_type*>());
+    CHECK(*p2 == value.get<test_type>());
 
     const test_type* const p3 = value.get_ptr<const test_type* const>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type* const>());
-    EXPECT_EQ(*p3, value.get<test_type>());
+    CHECK(p3 == value.get_ptr<const test_type* const>());
+    CHECK(*p3 == value.get<test_type>());
 
     // check if null pointers are returned correctly
-    EXPECT_NE(value.get_ptr<const json::object_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const json::array_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const std::string*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const bool*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const int64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const uint64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const double*>(), nullptr);
+    CHECK(value.get_ptr<const json::object_t*>() != nullptr);
+    CHECK(value.get_ptr<const json::array_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::string_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::boolean_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_integer_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_unsigned_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_float_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::binary_t*>() == nullptr);
 }
 
-// pointer access to array_t
-TEST(JsonPointerTest, ArrayT)
+TEST(PointerAccessTest, PointerAccessToArray)
 {
     using test_type = json::array_t;
     json value = {1, 2, 3, 4};
 
     // check if pointers are returned correctly
     test_type* p1 = value.get_ptr<test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<test_type*>());
-    EXPECT_EQ(*p1, value.get<test_type>());
+    CHECK(p1 == value.get_ptr<test_type*>());
+    CHECK(*p1 == value.get<test_type>());
 
     const test_type* p2 = value.get_ptr<const test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type*>());
-    EXPECT_EQ(*p2, value.get<test_type>());
+    CHECK(p2 == value.get_ptr<const test_type*>());
+    CHECK(*p2 == value.get<test_type>());
 
     const test_type* const p3 = value.get_ptr<const test_type* const>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type* const>());
-    EXPECT_EQ(*p3, value.get<test_type>());
+    CHECK(p3 == value.get_ptr<const test_type* const>());
+    CHECK(*p3 == value.get<test_type>());
 
     // check if null pointers are returned correctly
-    EXPECT_EQ(value.get_ptr<json::object_t*>(), nullptr);
-    EXPECT_NE(value.get_ptr<json::array_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<std::string*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<bool*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<int64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<uint64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<double*>(), nullptr);
+    CHECK(value.get_ptr<json::object_t*>() == nullptr);
+    CHECK(value.get_ptr<json::array_t*>() != nullptr);
+    CHECK(value.get_ptr<json::string_t*>() == nullptr);
+    CHECK(value.get_ptr<json::boolean_t*>() == nullptr);
+    CHECK(value.get_ptr<json::number_integer_t*>() == nullptr);
+    CHECK(value.get_ptr<json::number_unsigned_t*>() == nullptr);
+    CHECK(value.get_ptr<json::number_float_t*>() == nullptr);
+    CHECK(value.get_ptr<json::binary_t*>() == nullptr);
 }
 
-// pointer access to const array_t
-TEST(JsonPointerTest, ConstArrayT)
+TEST(PointerAccessTest, PointerAccessToConstArray)
 {
     using test_type = const json::array_t;
     const json value = {1, 2, 3, 4};
 
     // check if pointers are returned correctly
     test_type* p1 = value.get_ptr<test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<test_type*>());
-    EXPECT_EQ(*p1, value.get<test_type>());
+    CHECK(p1 == value.get_ptr<test_type*>());
+    CHECK(*p1 == value.get<test_type>());
 
     const test_type* p2 = value.get_ptr<const test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type*>());
-    EXPECT_EQ(*p2, value.get<test_type>());
+    CHECK(p2 == value.get_ptr<const test_type*>());
+    CHECK(*p2 == value.get<test_type>());
 
     const test_type* const p3 = value.get_ptr<const test_type* const>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type* const>());
-    EXPECT_EQ(*p3, value.get<test_type>());
+    CHECK(p3 == value.get_ptr<const test_type* const>());
+    CHECK(*p3 == value.get<test_type>());
 
     // check if null pointers are returned correctly
-    EXPECT_EQ(value.get_ptr<const json::object_t*>(), nullptr);
-    EXPECT_NE(value.get_ptr<const json::array_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const std::string*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const bool*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const int64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const uint64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const double*>(), nullptr);
+    CHECK(value.get_ptr<const json::object_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::array_t*>() != nullptr);
+    CHECK(value.get_ptr<const json::string_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::boolean_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_integer_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_unsigned_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_float_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::binary_t*>() == nullptr);
 }
 
-// pointer access to string_t
-TEST(JsonPointerTest, StringT)
+TEST(PointerAccessTest, PointerAccessToStringT)
 {
-    using test_type = std::string;
+    using test_type = json::string_t;
     json value = "hello";
 
     // check if pointers are returned correctly
     test_type* p1 = value.get_ptr<test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<test_type*>());
-    EXPECT_EQ(*p1, value.get<test_type>());
+    CHECK(p1 == value.get_ptr<test_type*>());
+    CHECK(*p1 == value.get<test_type>());
 
     const test_type* p2 = value.get_ptr<const test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type*>());
-    EXPECT_EQ(*p2, value.get<test_type>());
+    CHECK(p2 == value.get_ptr<const test_type*>());
+    CHECK(*p2 == value.get<test_type>());
 
     const test_type* const p3 = value.get_ptr<const test_type* const>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type* const>());
-    EXPECT_EQ(*p3, value.get<test_type>());
+    CHECK(p3 == value.get_ptr<const test_type* const>());
+    CHECK(*p3 == value.get<test_type>());
 
     // check if null pointers are returned correctly
-    EXPECT_EQ(value.get_ptr<json::object_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<json::array_t*>(), nullptr);
-    EXPECT_NE(value.get_ptr<std::string*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<bool*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<int64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<uint64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<double*>(), nullptr);
+    CHECK(value.get_ptr<json::object_t*>() == nullptr);
+    CHECK(value.get_ptr<json::array_t*>() == nullptr);
+    CHECK(value.get_ptr<json::string_t*>() != nullptr);
+    CHECK(value.get_ptr<json::boolean_t*>() == nullptr);
+    CHECK(value.get_ptr<json::number_integer_t*>() == nullptr);
+    CHECK(value.get_ptr<json::number_unsigned_t*>() == nullptr);
+    CHECK(value.get_ptr<json::number_float_t*>() == nullptr);
+    CHECK(value.get_ptr<json::binary_t*>() == nullptr);
 }
 
-// pointer access to const string_t
-TEST(JsonPointerTest, ConstStringT)
+TEST(PointerAccessTest, PointerAccessToConstStringT)
 {
-    using test_type = const std::string;
+    using test_type = const json::string_t;
     const json value = "hello";
 
     // check if pointers are returned correctly
     test_type* p1 = value.get_ptr<test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<test_type*>());
-    EXPECT_EQ(*p1, value.get<test_type>());
+    CHECK(p1 == value.get_ptr<test_type*>());
+    CHECK(*p1 == value.get<test_type>());
 
     const test_type* p2 = value.get_ptr<const test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type*>());
-    EXPECT_EQ(*p2, value.get<test_type>());
+    CHECK(p2 == value.get_ptr<const test_type*>());
+    CHECK(*p2 == value.get<test_type>());
 
     const test_type* const p3 = value.get_ptr<const test_type* const>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type* const>());
-    EXPECT_EQ(*p3, value.get<test_type>());
+    CHECK(p3 == value.get_ptr<const test_type* const>());
+    CHECK(*p3 == value.get<test_type>());
 
     // check if null pointers are returned correctly
-    EXPECT_EQ(value.get_ptr<const json::object_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const json::array_t*>(), nullptr);
-    EXPECT_NE(value.get_ptr<const std::string*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const bool*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const int64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const uint64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const double*>(), nullptr);
+    CHECK(value.get_ptr<const json::object_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::array_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::string_t*>() != nullptr);
+    CHECK(value.get_ptr<const json::boolean_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_integer_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_unsigned_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_float_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::binary_t*>() == nullptr);
 }
 
-// pointer access to boolean_t
-TEST(JsonPointerTest, BooleanT)
+TEST(PointerAccessTest, PointerAccessToBooleanT)
 {
-    using test_type = bool;
+    using test_type = json::boolean_t;
     json value = false;
 
     // check if pointers are returned correctly
     test_type* p1 = value.get_ptr<test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<test_type*>());
-    EXPECT_EQ(*p1, value.get<test_type>());
+    CHECK(p1 == value.get_ptr<test_type*>());
+    CHECK(*p1 == value.get<test_type>());
 
     const test_type* p2 = value.get_ptr<const test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type*>());
-    EXPECT_EQ(*p2, value.get<test_type>());
+    CHECK(p2 == value.get_ptr<const test_type*>());
+    CHECK(*p2 == value.get<test_type>());
 
     const test_type* const p3 = value.get_ptr<const test_type* const>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type* const>());
-    EXPECT_EQ(*p3, value.get<test_type>());
+    CHECK(p3 == value.get_ptr<const test_type* const>());
+    CHECK(*p3 == value.get<test_type>());
 
     // check if null pointers are returned correctly
-    EXPECT_EQ(value.get_ptr<json::object_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<json::array_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<std::string*>(), nullptr);
-    EXPECT_NE(value.get_ptr<bool*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<int64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<uint64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<double*>(), nullptr);
+    CHECK(value.get_ptr<json::object_t*>() == nullptr);
+    CHECK(value.get_ptr<json::array_t*>() == nullptr);
+    CHECK(value.get_ptr<json::string_t*>() == nullptr);
+    CHECK(value.get_ptr<json::boolean_t*>() != nullptr);
+    CHECK(value.get_ptr<json::number_integer_t*>() == nullptr);
+    CHECK(value.get_ptr<json::number_unsigned_t*>() == nullptr);
+    CHECK(value.get_ptr<json::number_float_t*>() == nullptr);
+    CHECK(value.get_ptr<json::binary_t*>() == nullptr);
 }
 
-// pointer access to const boolean_t
-TEST(JsonPointerTest, ConstBooleanT)
+TEST(PointerAccessTest, PointerAccessToConstBooleanT)
 {
-    using test_type = const bool;
+    using test_type = const json::boolean_t;
     const json value = false;
 
     // check if pointers are returned correctly
     test_type* p1 = value.get_ptr<test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<test_type*>());
-    //EXPECT_EQ(*p1, value.get<test_type>());
+    CHECK(p1 == value.get_ptr<test_type*>());
+    //CHECK(*p1 == value.get<test_type>());
 
-    //const test_type* p2 = value.get_ptr<const test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type*>());
-    //EXPECT_EQ(*p2, value.get<test_type>());
+    const test_type* p2 = value.get_ptr<const test_type*>();
+    CHECK(p2 == value.get_ptr<const test_type*>());
+    CHECK(*p2 == value.get<test_type>());
 
-    //const test_type* const p3 = value.get_ptr<const test_type* const>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type* const>());
-    //EXPECT_EQ(*p3, value.get<test_type>());
+    const test_type* const p3 = value.get_ptr<const test_type* const>();
+    CHECK(p3 == value.get_ptr<const test_type* const>());
+    CHECK(*p3 == value.get<test_type>());
 
     // check if null pointers are returned correctly
-    EXPECT_EQ(value.get_ptr<const json::object_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const json::array_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const std::string*>(), nullptr);
-    EXPECT_NE(value.get_ptr<const bool*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const int64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const uint64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const double*>(), nullptr);
+    CHECK(value.get_ptr<const json::object_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::array_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::string_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::boolean_t*>() != nullptr);
+    CHECK(value.get_ptr<const json::number_integer_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_unsigned_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_float_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::binary_t*>() == nullptr);
 }
 
-// pointer access to number_integer_t
-TEST(JsonPointerTest, IntegerT)
+TEST(PointerAccessTest, PointerAccessToNumberIntegerT)
 {
-    using test_type = int64_t;
+    using test_type = json::number_integer_t;
     json value = 23;
 
     // check if pointers are returned correctly
     test_type* p1 = value.get_ptr<test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<test_type*>());
-    EXPECT_EQ(*p1, value.get<test_type>());
+    CHECK(p1 == value.get_ptr<test_type*>());
+    CHECK(*p1 == value.get<test_type>());
 
     const test_type* p2 = value.get_ptr<const test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type*>());
-    EXPECT_EQ(*p2, value.get<test_type>());
+    CHECK(p2 == value.get_ptr<const test_type*>());
+    CHECK(*p2 == value.get<test_type>());
 
     const test_type* const p3 = value.get_ptr<const test_type* const>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type* const>());
-    EXPECT_EQ(*p3, value.get<test_type>());
+    CHECK(p3 == value.get_ptr<const test_type* const>());
+    CHECK(*p3 == value.get<test_type>());
 
     // check if null pointers are returned correctly
-    EXPECT_EQ(value.get_ptr<json::object_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<json::array_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<std::string*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<bool*>(), nullptr);
-    EXPECT_NE(value.get_ptr<int64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<uint64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<double*>(), nullptr);
+    CHECK(value.get_ptr<json::object_t*>() == nullptr);
+    CHECK(value.get_ptr<json::array_t*>() == nullptr);
+    CHECK(value.get_ptr<json::string_t*>() == nullptr);
+    CHECK(value.get_ptr<json::boolean_t*>() == nullptr);
+    CHECK(value.get_ptr<json::number_integer_t*>() != nullptr);
+    CHECK(value.get_ptr<json::number_unsigned_t*>() == nullptr);
+    CHECK(value.get_ptr<json::number_float_t*>() == nullptr);
+    CHECK(value.get_ptr<json::binary_t*>() == nullptr);
 }
 
-// pointer access to const number_integer_t
-TEST(JsonPointerTest, ConstIntegerT)
+TEST(PointerAccessTest, PointerAccessToConstNumberIntegerT)
 {
-    using test_type = const int64_t;
+    using test_type = const json::number_integer_t;
     const json value = 23;
 
     // check if pointers are returned correctly
     test_type* p1 = value.get_ptr<test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<test_type*>());
-    EXPECT_EQ(*p1, value.get<test_type>());
+    CHECK(p1 == value.get_ptr<test_type*>());
+    CHECK(*p1 == value.get<test_type>());
 
     const test_type* p2 = value.get_ptr<const test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type*>());
-    EXPECT_EQ(*p2, value.get<test_type>());
+    CHECK(p2 == value.get_ptr<const test_type*>());
+    CHECK(*p2 == value.get<test_type>());
 
     const test_type* const p3 = value.get_ptr<const test_type* const>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type* const>());
-    EXPECT_EQ(*p3, value.get<test_type>());
+    CHECK(p3 == value.get_ptr<const test_type* const>());
+    CHECK(*p3 == value.get<test_type>());
 
     // check if null pointers are returned correctly
-    EXPECT_EQ(value.get_ptr<const json::object_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const json::array_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const std::string*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const bool*>(), nullptr);
-    EXPECT_NE(value.get_ptr<const int64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const uint64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const double*>(), nullptr);
+    CHECK(value.get_ptr<const json::object_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::array_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::string_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::boolean_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_integer_t*>() != nullptr);
+    CHECK(value.get_ptr<const json::number_unsigned_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_float_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::binary_t*>() == nullptr);
 }
 
-// pointer access to number_unsigned_t
-TEST(JsonPointerTest, UnsignedT)
+TEST(PointerAccessTest, PointerAccessToNumberUnsignedT)
 {
-    using test_type = uint64_t;
+    using test_type = json::number_unsigned_t;
     json value = 23u;
 
     // check if pointers are returned correctly
     test_type* p1 = value.get_ptr<test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<test_type*>());
-    EXPECT_EQ(*p1, value.get<test_type>());
+    CHECK(p1 == value.get_ptr<test_type*>());
+    CHECK(*p1 == value.get<test_type>());
 
     const test_type* p2 = value.get_ptr<const test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type*>());
-    EXPECT_EQ(*p2, value.get<test_type>());
+    CHECK(p2 == value.get_ptr<const test_type*>());
+    CHECK(*p2 == value.get<test_type>());
 
     const test_type* const p3 = value.get_ptr<const test_type* const>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type* const>());
-    EXPECT_EQ(*p3, value.get<test_type>());
+    CHECK(p3 == value.get_ptr<const test_type* const>());
+    CHECK(*p3 == value.get<test_type>());
 
     // check if null pointers are returned correctly
-    EXPECT_EQ(value.get_ptr<json::object_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<json::array_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<std::string*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<bool*>(), nullptr);
-    EXPECT_NE(value.get_ptr<int64_t*>(), nullptr);
-    EXPECT_NE(value.get_ptr<uint64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<double*>(), nullptr);
+    CHECK(value.get_ptr<json::object_t*>() == nullptr);
+    CHECK(value.get_ptr<json::array_t*>() == nullptr);
+    CHECK(value.get_ptr<json::string_t*>() == nullptr);
+    CHECK(value.get_ptr<json::boolean_t*>() == nullptr);
+    CHECK(value.get_ptr<json::number_integer_t*>() != nullptr);
+    CHECK(value.get_ptr<json::number_unsigned_t*>() != nullptr);
+    CHECK(value.get_ptr<json::number_float_t*>() == nullptr);
+    CHECK(value.get_ptr<json::binary_t*>() == nullptr);
 }
 
-// pointer access to const number_unsigned_t
-TEST(JsonPointerTest, ConstUnsignedT)
+TEST(PointerAccessTest, PointerAccessToConstNumberUnsignedT)
 {
-    using test_type = const uint64_t;
+    using test_type = const json::number_unsigned_t;
     const json value = 23u;
 
     // check if pointers are returned correctly
     test_type* p1 = value.get_ptr<test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<test_type*>());
-    EXPECT_EQ(*p1, value.get<test_type>());
+    CHECK(p1 == value.get_ptr<test_type*>());
+    CHECK(*p1 == value.get<test_type>());
 
     const test_type* p2 = value.get_ptr<const test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type*>());
-    EXPECT_EQ(*p2, value.get<test_type>());
+    CHECK(p2 == value.get_ptr<const test_type*>());
+    CHECK(*p2 == value.get<test_type>());
 
     const test_type* const p3 = value.get_ptr<const test_type* const>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type* const>());
-    EXPECT_EQ(*p3, value.get<test_type>());
+    CHECK(p3 == value.get_ptr<const test_type* const>());
+    CHECK(*p3 == value.get<test_type>());
 
     // check if null pointers are returned correctly
-    EXPECT_EQ(value.get_ptr<const json::object_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const json::array_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const std::string*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const bool*>(), nullptr);
-    EXPECT_NE(value.get_ptr<const int64_t*>(), nullptr);
-    EXPECT_NE(value.get_ptr<const uint64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const double*>(), nullptr);
+    CHECK(value.get_ptr<const json::object_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::array_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::string_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::boolean_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_integer_t*>() != nullptr);
+    CHECK(value.get_ptr<const json::number_unsigned_t*>() != nullptr);
+    CHECK(value.get_ptr<const json::number_float_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::binary_t*>() == nullptr);
 }
 
-// pointer access to number_float_t
-TEST(JsonPointerTest, FloatT)
+TEST(PointerAccessTest, PointerAccessToNumberFloatT)
 {
-    using test_type = double;
+    using test_type = json::number_float_t;
     json value = 42.23;
 
     // check if pointers are returned correctly
     test_type* p1 = value.get_ptr<test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<test_type*>());
-    EXPECT_LT(std::fabs(*p1 - value.get<test_type>()), 0.001);
+    CHECK(p1 == value.get_ptr<test_type*>());
+    EXPECT_NEAR(*p1, value.get<test_type>(), 0.001);
 
     const test_type* p2 = value.get_ptr<const test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type*>());
-    EXPECT_LT(std::fabs(*p2 - value.get<test_type>()), 0.001);
+    CHECK(p2 == value.get_ptr<const test_type*>());
+    EXPECT_NEAR(*p2, value.get<test_type>(), 0.001);
 
     const test_type* const p3 = value.get_ptr<const test_type* const>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type* const>());
-    EXPECT_LT(std::fabs(*p3 - value.get<test_type>()), 0.001);
+    CHECK(p3 == value.get_ptr<const test_type* const>());
+    EXPECT_NEAR(*p3, value.get<test_type>(), 0.001);
 
     // check if null pointers are returned correctly
-    EXPECT_EQ(value.get_ptr<json::object_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<json::array_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<std::string*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<bool*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<int64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<uint64_t*>(), nullptr);
-    EXPECT_NE(value.get_ptr<double*>(), nullptr);
+    CHECK(value.get_ptr<json::object_t*>() == nullptr);
+    CHECK(value.get_ptr<json::array_t*>() == nullptr);
+    CHECK(value.get_ptr<json::string_t*>() == nullptr);
+    CHECK(value.get_ptr<json::boolean_t*>() == nullptr);
+    CHECK(value.get_ptr<json::number_integer_t*>() == nullptr);
+    CHECK(value.get_ptr<json::number_unsigned_t*>() == nullptr);
+    CHECK(value.get_ptr<json::number_float_t*>() != nullptr);
+    CHECK(value.get_ptr<json::binary_t*>() == nullptr);
 }
 
-// pointer access to const number_float_t
-TEST(JsonPointerTest, ConstFloatT)
+TEST(PointerAccessTest, PointerAccessToConstNumberFloatT)
 {
-    using test_type = const double;
+    using test_type = const json::number_float_t;
     const json value = 42.23;
 
     // check if pointers are returned correctly
     test_type* p1 = value.get_ptr<test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<test_type*>());
-    EXPECT_LT(std::fabs(*p1 - value.get<test_type>()), 0.001);
+    CHECK(p1 == value.get_ptr<test_type*>());
+    EXPECT_NEAR(*p1, value.get<test_type>(), 0.001);
 
     const test_type* p2 = value.get_ptr<const test_type*>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type*>());
-    EXPECT_LT(std::fabs(*p2 - value.get<test_type>()), 0.001);
+    CHECK(p2 == value.get_ptr<const test_type*>());
+    EXPECT_NEAR(*p2, value.get<test_type>(), 0.001);
 
     const test_type* const p3 = value.get_ptr<const test_type* const>();
-    EXPECT_EQ(p1, value.get_ptr<const test_type* const>());
-    EXPECT_LT(std::fabs(*p3 - value.get<test_type>()), 0.001);
+    CHECK(p3 == value.get_ptr<const test_type* const>());
+    EXPECT_NEAR(*p3, value.get<test_type>(), 0.001);
 
     // check if null pointers are returned correctly
-    EXPECT_EQ(value.get_ptr<const json::object_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const json::array_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const std::string*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const bool*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const int64_t*>(), nullptr);
-    EXPECT_EQ(value.get_ptr<const uint64_t*>(), nullptr);
-    EXPECT_NE(value.get_ptr<const double*>(), nullptr);
+    CHECK(value.get_ptr<const json::object_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::array_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::string_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::boolean_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_integer_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_unsigned_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_float_t*>() != nullptr);
+    CHECK(value.get_ptr<const json::binary_t*>() == nullptr);
 }
+
+TEST(PointerAccessTest, PointerAccessToConstBinaryT)
+{
+    using test_type = const json::binary_t;
+    const json value = json::binary({1, 2, 3});
+
+    // check if pointers are returned correctly
+    test_type* p1 = value.get_ptr<test_type*>();
+    CHECK(p1 == value.get_ptr<test_type*>());
+    CHECK(*p1 == value.get<test_type>());
+
+    const test_type* p2 = value.get_ptr<const test_type*>();
+    CHECK(p2 == value.get_ptr<const test_type*>());
+    CHECK(*p2 == value.get<test_type>());
+
+    const test_type* const p3 = value.get_ptr<const test_type* const>();
+    CHECK(p3 == value.get_ptr<const test_type* const>());
+    CHECK(*p3 == value.get<test_type>());
+
+    // check if null pointers are returned correctly
+    CHECK(value.get_ptr<const json::object_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::array_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::string_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::boolean_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_integer_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_unsigned_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_float_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::binary_t*>() != nullptr);
+}
+
+TEST(PointerAccessTest, PointerAccessToConstBinaryT2)
+{
+    using test_type = const json::binary_t;
+    const json value = json::binary({});
+
+    // check if pointers are returned correctly
+    test_type* p1 = value.get_ptr<test_type*>();
+    CHECK(p1 == value.get_ptr<test_type*>());
+    CHECK(*p1 == value.get<test_type>());
+
+    const test_type* p2 = value.get_ptr<const test_type*>();
+    CHECK(p2 == value.get_ptr<const test_type*>());
+    CHECK(*p2 == value.get<test_type>());
+
+    const test_type* const p3 = value.get_ptr<const test_type* const>();
+    CHECK(p3 == value.get_ptr<const test_type* const>());
+    CHECK(*p3 == value.get<test_type>());
+
+    // check if null pointers are returned correctly
+    CHECK(value.get_ptr<const json::object_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::array_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::string_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::boolean_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_integer_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_unsigned_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::number_float_t*>() == nullptr);
+    CHECK(value.get_ptr<const json::binary_t*>() != nullptr);
+}
+

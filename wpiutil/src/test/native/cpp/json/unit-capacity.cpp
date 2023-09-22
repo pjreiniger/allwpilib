@@ -1,529 +1,614 @@
-/*----------------------------------------------------------------------------*/
-/* Modifications Copyright (c) FIRST 2017. All Rights Reserved.               */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
-/*
-    __ _____ _____ _____
- __|  |   __|     |   | |  JSON for Modern C++ (test suite)
-|  |  |__   |  |  | | | |  version 2.1.1
-|_____|_____|_____|_|___|  https://github.com/nlohmann/json
+//     __ _____ _____ _____
+//  __|  |   __|     |   | |  JSON for Modern C++ (supporting code)
+// |  |  |__   |  |  | | | |  version 3.11.2
+// |_____|_____|_____|_|___|  https://github.com/nlohmann/json
+//
+// Copyright (c) 2013-2022 Niels Lohmann <http://nlohmann.me>.
+// SPDX-FileCopyrightText: 2013-2022 Niels Lohmann <https://nlohmann.me>
+// SPDX-License-Identifier: MIT
 
-Licensed under the MIT License <http://opensource.org/licenses/MIT>.
-Copyright (c) 2013-2017 Niels Lohmann <http://nlohmann.me>.
-
-Permission is hereby  granted, free of charge, to any  person obtaining a copy
-of this software and associated  documentation files (the "Software"), to deal
-in the Software  without restriction, including without  limitation the rights
-to  use, copy,  modify, merge,  publish, distribute,  sublicense, and/or  sell
-copies  of  the Software,  and  to  permit persons  to  whom  the Software  is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE  IS PROVIDED "AS  IS", WITHOUT WARRANTY  OF ANY KIND,  EXPRESS OR
-IMPLIED,  INCLUDING BUT  NOT  LIMITED TO  THE  WARRANTIES OF  MERCHANTABILITY,
-FITNESS FOR  A PARTICULAR PURPOSE AND  NONINFRINGEMENT. IN NO EVENT  SHALL THE
-AUTHORS  OR COPYRIGHT  HOLDERS  BE  LIABLE FOR  ANY  CLAIM,  DAMAGES OR  OTHER
-LIABILITY, WHETHER IN AN ACTION OF  CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+#include "gtest/gtest.h"
 
 #include "unit-json.h"
-
-#include <gtest/gtest.h>
-
 using wpi::json;
 
-TEST(JsonEmptyTest, Boolean)
+
+
+
+
+
+
+class CapacityEmptyBooleanTest : public ::testing::Test {
+ protected:
+    CapacityEmptyBooleanTest() : j(true), j_const(j) {}
+
+    json j;
+    const json j_const;
+};
+
+
+TEST_F(CapacityEmptyBooleanTest, ResultOfEmpty)
 {
+    CHECK(j.empty() == false);
+    CHECK(j_const.empty() == false);
+}
+
+TEST_F(CapacityEmptyBooleanTest, DefinitionOfEmpty)
+{
+    CHECK(j.empty() == (j.begin() == j.end()));
+    CHECK(j_const.empty() == (j_const.begin() == j_const.end()));
+}
+
+class CapacityEmptyStringTest : public ::testing::Test {
+ protected:
+    CapacityEmptyStringTest() : j("hello world"), j_const(j) {}
+
+    json j;
+    const json j_const;
+};
+
+
+TEST_F(CapacityEmptyStringTest, ResultOfEmpty)
+{
+    CHECK(j.empty() == false);
+    CHECK(j_const.empty() == false);
+}
+
+TEST_F(CapacityEmptyStringTest, DefinitionOfEmpty)
+{
+    CHECK(j.empty() == (j.begin() == j.end()));
+    CHECK(j_const.empty() == (j_const.begin() == j_const.end()));
+}
+
+
+
+
+class CapacityEmptyArrayEmptyArrayTest : public ::testing::Test {
+ protected:
+    CapacityEmptyArrayEmptyArrayTest() : j(json::array()), j_const(j) {}
+
+    json j;
+    const json j_const;
+};
+
+
+TEST_F(CapacityEmptyArrayEmptyArrayTest, ResultOfEmpty)
+{
+    CHECK(j.empty() == true);
+    CHECK(j_const.empty() == true);
+}
+
+TEST_F(CapacityEmptyArrayEmptyArrayTest, DefinitionOfEmpty)
+{
+    CHECK(j.empty() == (j.begin() == j.end()));
+    CHECK(j_const.empty() == (j_const.begin() == j_const.end()));
+}
+
+class CapacityEmptyArrayFilledArrayTest : public ::testing::Test {
+ protected:
+    CapacityEmptyArrayFilledArrayTest() : j({1, 2, 3}), j_const(j) {}
+
+    json j;
+    const json j_const;
+};
+
+
+TEST_F(CapacityEmptyArrayFilledArrayTest, ResultOfEmpty)
+{
+    CHECK(j.empty() == false);
+    CHECK(j_const.empty() == false);
+}
+
+TEST_F(CapacityEmptyArrayFilledArrayTest, DefinitionOfEmpty)
+{
+    CHECK(j.empty() == (j.begin() == j.end()));
+    CHECK(j_const.empty() == (j_const.begin() == j_const.end()));
+}
+
+
+
+
+class CapacityEmptyObjectEmptyObjectTest : public ::testing::Test {
+ protected:
+    CapacityEmptyObjectEmptyObjectTest() : j(json::object()), j_const(j) {}
+
+    json j;
+    const json j_const;
+};
+
+
+TEST_F(CapacityEmptyObjectEmptyObjectTest, ResultOfEmpty)
+{
+    CHECK(j.empty() == true);
+    CHECK(j_const.empty() == true);
+}
+
+TEST_F(CapacityEmptyObjectEmptyObjectTest, DefinitionOfEmpty)
+{
+    CHECK(j.empty() == (j.begin() == j.end()));
+    CHECK(j_const.empty() == (j_const.begin() == j_const.end()));
+}
+
+class CapacityEmptyObjectFilledObjectTest : public ::testing::Test {
+ protected:
+    CapacityEmptyObjectFilledObjectTest() : j({{"one", 1}, {"two", 2}, {"three", 3}}), j_const(j) {}
+
+    json j;
+    const json j_const;
+};
+
+
+TEST_F(CapacityEmptyObjectFilledObjectTest, ResultOfEmpty)
+{
+    CHECK(j.empty() == false);
+    CHECK(j_const.empty() == false);
+}
+
+TEST_F(CapacityEmptyObjectFilledObjectTest, DefinitionOfEmpty)
+{
+    CHECK(j.empty() == (j.begin() == j.end()));
+    CHECK(j_const.empty() == (j_const.begin() == j_const.end()));
+}
+
+class CapacityEmptyNumberIntegerTest : public ::testing::Test {
+ protected:
+    CapacityEmptyNumberIntegerTest() : j(-23), j_const(j) {}
+
+    json j;
+    const json j_const;
+};
+
+
+TEST_F(CapacityEmptyNumberIntegerTest, ResultOfEmpty)
+{
+    CHECK(j.empty() == false);
+    CHECK(j_const.empty() == false);
+}
+
+TEST_F(CapacityEmptyNumberIntegerTest, DefinitionOfEmpty)
+{
+    CHECK(j.empty() == (j.begin() == j.end()));
+    CHECK(j_const.empty() == (j_const.begin() == j_const.end()));
+}
+
+class CapacityEmptyNumberUnsignedTest : public ::testing::Test {
+ protected:
+    CapacityEmptyNumberUnsignedTest() : j(23u), j_const(j) {}
+
+    json j;
+    const json j_const;
+};
+
+
+TEST_F(CapacityEmptyNumberUnsignedTest, ResultOfEmpty)
+{
+    CHECK(j.empty() == false);
+    CHECK(j_const.empty() == false);
+}
+
+TEST_F(CapacityEmptyNumberUnsignedTest, DefinitionOfEmpty)
+{
+    CHECK(j.empty() == (j.begin() == j.end()));
+    CHECK(j_const.empty() == (j_const.begin() == j_const.end()));
+}
+
+class CapacityEmptyNumberFloatTest : public ::testing::Test {
+ protected:
+    CapacityEmptyNumberFloatTest() : j(23.42), j_const(j) {}
+
+    json j;
+    const json j_const;
+};
+
+
+TEST_F(CapacityEmptyNumberFloatTest, ResultOfEmpty)
+{
+    CHECK(j.empty() == false);
+    CHECK(j_const.empty() == false);
+}
+
+TEST_F(CapacityEmptyNumberFloatTest, DefinitionOfEmpty)
+{
+    CHECK(j.empty() == (j.begin() == j.end()));
+    CHECK(j_const.empty() == (j_const.begin() == j_const.end()));
+}
+
+class CapacityEmptyNullTest : public ::testing::Test {
+ protected:
+    CapacityEmptyNullTest() : j(nullptr), j_const(j) {}
+
+    json j;
+    const json j_const;
+};
+
+
+TEST_F(CapacityEmptyNullTest, ResultOfEmpty)
+{
+    CHECK(j.empty() == true);
+    CHECK(j_const.empty() == true);
+}
+
+TEST_F(CapacityEmptyNullTest, DefinitionOfEmpty)
+{
+    CHECK(j.empty() == (j.begin() == j.end()));
+    CHECK(j_const.empty() == (j_const.begin() == j_const.end()));
+}
+
+
+
+
+class CapacitySizeBooleanTest : public ::testing::Test {
+ protected:
+    CapacitySizeBooleanTest() : j(true), j_const(j) {}
+
+    json j;
+    const json j_const;
+};
+
+
+TEST_F(CapacitySizeBooleanTest, ResultOfSize)
+{
+    CHECK(j.size() == 1);
+    CHECK(j_const.size() == 1);
+}
+
+TEST_F(CapacitySizeBooleanTest, DefinitionOfSize)
+{
+    CHECK(std::distance(j.begin(), j.end()) == j.size());
+    CHECK(std::distance(j_const.begin(), j_const.end()) == j_const.size());
+    CHECK(std::distance(j.rbegin(), j.rend()) == j.size());
+    CHECK(std::distance(j_const.crbegin(), j_const.crend()) == j_const.size());
+}
+
+class CapacitySizeStringTest : public ::testing::Test {
+ protected:
+    CapacitySizeStringTest() : j("hello world"), j_const(j) {}
+
+    json j;
+    const json j_const;
+};
+
+
+TEST_F(CapacitySizeStringTest, ResultOfSize)
+{
+    CHECK(j.size() == 1);
+    CHECK(j_const.size() == 1);
+}
+
+TEST_F(CapacitySizeStringTest, DefinitionOfSize)
+{
+    CHECK(std::distance(j.begin(), j.end()) == j.size());
+    CHECK(std::distance(j_const.begin(), j_const.end()) == j_const.size());
+    CHECK(std::distance(j.rbegin(), j.rend()) == j.size());
+    CHECK(std::distance(j_const.crbegin(), j_const.crend()) == j_const.size());
+}
+
+
+
+
+class CapacitySizeArrayEmptyArrayTest : public ::testing::Test {
+ protected:
+    CapacitySizeArrayEmptyArrayTest() : j(json::array()), j_const(j) {}
+
+    json j;
+    const json j_const;
+};
+
+
+TEST_F(CapacitySizeArrayEmptyArrayTest, ResultOfSize)
+{
+    CHECK(j.size() == 0);
+    CHECK(j_const.size() == 0);
+}
+
+TEST_F(CapacitySizeArrayEmptyArrayTest, DefinitionOfSize)
+{
+    CHECK(std::distance(j.begin(), j.end()) == j.size());
+    CHECK(std::distance(j_const.begin(), j_const.end()) == j_const.size());
+    CHECK(std::distance(j.rbegin(), j.rend()) == j.size());
+    CHECK(std::distance(j_const.crbegin(), j_const.crend()) == j_const.size());
+}
+
+class CapacitySizeArrayFilledArrayTest : public ::testing::Test {
+ protected:
+    CapacitySizeArrayFilledArrayTest() : j({1, 2, 3}), j_const(j) {}
+
+    json j;
+    const json j_const;
+};
+
+
+TEST_F(CapacitySizeArrayFilledArrayTest, ResultOfSize)
+{
+    CHECK(j.size() == 3);
+    CHECK(j_const.size() == 3);
+}
+
+TEST_F(CapacitySizeArrayFilledArrayTest, DefinitionOfSize)
+{
+    CHECK(std::distance(j.begin(), j.end()) == j.size());
+    CHECK(std::distance(j_const.begin(), j_const.end()) == j_const.size());
+    CHECK(std::distance(j.rbegin(), j.rend()) == j.size());
+    CHECK(std::distance(j_const.crbegin(), j_const.crend()) == j_const.size());
+}
+
+
+
+
+class CapacitySizeObjectEmptyObjectTest : public ::testing::Test {
+ protected:
+    CapacitySizeObjectEmptyObjectTest() : j(json::object()), j_const(j) {}
+
+    json j;
+    const json j_const;
+};
+
+
+TEST_F(CapacitySizeObjectEmptyObjectTest, ResultOfSize)
+{
+    CHECK(j.size() == 0);
+    CHECK(j_const.size() == 0);
+}
+
+TEST_F(CapacitySizeObjectEmptyObjectTest, DefinitionOfSize)
+{
+    CHECK(std::distance(j.begin(), j.end()) == j.size());
+    CHECK(std::distance(j_const.begin(), j_const.end()) == j_const.size());
+    CHECK(std::distance(j.rbegin(), j.rend()) == j.size());
+    CHECK(std::distance(j_const.crbegin(), j_const.crend()) == j_const.size());
+}
+
+class CapacitySizeObjectFilledObjectTest : public ::testing::Test {
+ protected:
+    CapacitySizeObjectFilledObjectTest() : j({{"one", 1}, {"two", 2}, {"three", 3}}), j_const(j) {}
+
+    json j;
+    const json j_const;
+};
+
+
+TEST_F(CapacitySizeObjectFilledObjectTest, ResultOfSize)
+{
+    CHECK(j.size() == 3);
+    CHECK(j_const.size() == 3);
+}
+
+TEST_F(CapacitySizeObjectFilledObjectTest, DefinitionOfSize)
+{
+    CHECK(std::distance(j.begin(), j.end()) == j.size());
+    CHECK(std::distance(j_const.begin(), j_const.end()) == j_const.size());
+    CHECK(std::distance(j.rbegin(), j.rend()) == j.size());
+    CHECK(std::distance(j_const.crbegin(), j_const.crend()) == j_const.size());
+}
+
+class CapacitySizeNumberIntegerTest : public ::testing::Test {
+ protected:
+    CapacitySizeNumberIntegerTest() : j(-23), j_const(j) {}
+
+    json j;
+    const json j_const;
+};
+
+
+TEST_F(CapacitySizeNumberIntegerTest, ResultOfSize)
+{
+    CHECK(j.size() == 1);
+    CHECK(j_const.size() == 1);
+}
+
+TEST_F(CapacitySizeNumberIntegerTest, DefinitionOfSize)
+{
+    CHECK(std::distance(j.begin(), j.end()) == j.size());
+    CHECK(std::distance(j_const.begin(), j_const.end()) == j_const.size());
+    CHECK(std::distance(j.rbegin(), j.rend()) == j.size());
+    CHECK(std::distance(j_const.crbegin(), j_const.crend()) == j_const.size());
+}
+
+class CapacitySizeNumberUnsignedTest : public ::testing::Test {
+ protected:
+    CapacitySizeNumberUnsignedTest() : j(23u), j_const(j) {}
+
+    json j;
+    const json j_const;
+};
+
+
+TEST_F(CapacitySizeNumberUnsignedTest, ResultOfSize)
+{
+    CHECK(j.size() == 1);
+    CHECK(j_const.size() == 1);
+}
+
+TEST_F(CapacitySizeNumberUnsignedTest, DefinitionOfSize)
+{
+    CHECK(std::distance(j.begin(), j.end()) == j.size());
+    CHECK(std::distance(j_const.begin(), j_const.end()) == j_const.size());
+    CHECK(std::distance(j.rbegin(), j.rend()) == j.size());
+    CHECK(std::distance(j_const.crbegin(), j_const.crend()) == j_const.size());
+}
+
+class CapacitySizeNumberFloatTest : public ::testing::Test {
+ protected:
+    CapacitySizeNumberFloatTest() : j(23.42), j_const(j) {}
+
+    json j;
+    const json j_const;
+};
+
+
+TEST_F(CapacitySizeNumberFloatTest, ResultOfSize)
+{
+    CHECK(j.size() == 1);
+    CHECK(j_const.size() == 1);
+}
+
+TEST_F(CapacitySizeNumberFloatTest, DefinitionOfSize)
+{
+    CHECK(std::distance(j.begin(), j.end()) == j.size());
+    CHECK(std::distance(j_const.begin(), j_const.end()) == j_const.size());
+    CHECK(std::distance(j.rbegin(), j.rend()) == j.size());
+    CHECK(std::distance(j_const.crbegin(), j_const.crend()) == j_const.size());
+}
+
+class CapacitySizeNullTest : public ::testing::Test {
+ protected:
+    CapacitySizeNullTest() : j(nullptr), j_const(j) {}
+
+    json j;
+    const json j_const;
+};
+
+
+TEST_F(CapacitySizeNullTest, ResultOfSize)
+{
+    CHECK(j.size() == 0);
+    CHECK(j_const.size() == 0);
+}
+
+TEST_F(CapacitySizeNullTest, DefinitionOfSize)
+{
+    CHECK(std::distance(j.begin(), j.end()) == j.size());
+    CHECK(std::distance(j_const.begin(), j_const.end()) == j_const.size());
+    CHECK(std::distance(j.rbegin(), j.rend()) == j.size());
+    CHECK(std::distance(j_const.crbegin(), j_const.crend()) == j_const.size());
+}
+
+
+
+
+class CapacityMaxSizeBooleanTest : public ::testing::Test {
+ protected:
     json j = true;
-    json j_const(j);
+    const json j_const = true;
+};
 
-    // result of empty
-    {
-        EXPECT_FALSE(j.empty());
-        EXPECT_FALSE(j_const.empty());
-    }
 
-    // definition of empty
-    {
-        EXPECT_EQ(j.empty(), (j.begin() == j.end()));
-        EXPECT_EQ(j_const.empty(), (j_const.begin() == j_const.end()));
-    }
+TEST_F(CapacityMaxSizeBooleanTest, ResultOfMaxSize)
+{
+    CHECK(j.max_size() == 1);
+    CHECK(j_const.max_size() == 1);
 }
 
-TEST(JsonEmptyTest, String)
-{
+class CapacityMaxSizeStringTest : public ::testing::Test {
+ protected:
     json j = "hello world";
-    json j_const(j);
+    const json j_const = "hello world";
+};
 
-    // result of empty
-    {
-        EXPECT_FALSE(j.empty());
-        EXPECT_FALSE(j_const.empty());
-    }
 
-    // definition of empty
-    {
-        EXPECT_EQ(j.empty(), (j.begin() == j.end()));
-        EXPECT_EQ(j_const.empty(), (j_const.begin() == j_const.end()));
-    }
+TEST_F(CapacityMaxSizeStringTest, ResultOfMaxSize)
+{
+    CHECK(j.max_size() == 1);
+    CHECK(j_const.max_size() == 1);
 }
 
-TEST(JsonEmptyTest, ArrayEmpty)
-{
+
+
+
+class CapacityMaxSizeArrayEmptyArrayTest : public ::testing::Test {
+ protected:
     json j = json::array();
-    json j_const(j);
+    const json j_const = json::array();
+};
 
-    // result of empty
-    {
-        EXPECT_TRUE(j.empty());
-        EXPECT_TRUE(j_const.empty());
-    }
 
-    // definition of empty
-    {
-        EXPECT_EQ(j.empty(), (j.begin() == j.end()));
-        EXPECT_EQ(j_const.empty(), (j_const.begin() == j_const.end()));
-    }
+TEST_F(CapacityMaxSizeArrayEmptyArrayTest, ResultOfMaxSize)
+{
+    CHECK(j.max_size() >= j.size());
+    CHECK(j_const.max_size() >= j_const.size());
 }
 
-TEST(JsonEmptyTest, ArrayFilled)
-{
+class CapacityMaxSizeArrayFilledArrayTest : public ::testing::Test {
+ protected:
     json j = {1, 2, 3};
-    json j_const(j);
+    const json j_const = {1, 2, 3};
+};
 
-    // result of empty
-    {
-        EXPECT_FALSE(j.empty());
-        EXPECT_FALSE(j_const.empty());
-    }
 
-    // definition of empty
-    {
-        EXPECT_EQ(j.empty(), (j.begin() == j.end()));
-        EXPECT_EQ(j_const.empty(), (j_const.begin() == j_const.end()));
-    }
+TEST_F(CapacityMaxSizeArrayFilledArrayTest, ResultOfMaxSize)
+{
+    CHECK(j.max_size() >= j.size());
+    CHECK(j_const.max_size() >= j_const.size());
 }
 
-TEST(JsonEmptyTest, ObjectEmpty)
-{
+
+
+
+class CapacityMaxSizeObjectEmptyObjectTest : public ::testing::Test {
+ protected:
     json j = json::object();
-    json j_const(j);
+    const json j_const = json::object();
+};
 
-    // result of empty
-    {
-        EXPECT_TRUE(j.empty());
-        EXPECT_TRUE(j_const.empty());
-    }
 
-    // definition of empty
-    {
-        EXPECT_EQ(j.empty(), (j.begin() == j.end()));
-        EXPECT_EQ(j_const.empty(), (j_const.begin() == j_const.end()));
-    }
+TEST_F(CapacityMaxSizeObjectEmptyObjectTest, ResultOfMaxSize)
+{
+    CHECK(j.max_size() >= j.size());
+    CHECK(j_const.max_size() >= j_const.size());
 }
 
-TEST(JsonEmptyTest, ObjectFilled)
-{
+class CapacityMaxSizeObjectFilledObjectTest : public ::testing::Test {
+ protected:
     json j = {{"one", 1}, {"two", 2}, {"three", 3}};
-    json j_const(j);
+    const json j_const = {{"one", 1}, {"two", 2}, {"three", 3}};
+};
 
-    // result of empty
-    {
-        EXPECT_FALSE(j.empty());
-        EXPECT_FALSE(j_const.empty());
-    }
 
-    // definition of empty
-    {
-        EXPECT_EQ(j.empty(), (j.begin() == j.end()));
-        EXPECT_EQ(j_const.empty(), (j_const.begin() == j_const.end()));
-    }
+TEST_F(CapacityMaxSizeObjectFilledObjectTest, ResultOfMaxSize)
+{
+    CHECK(j.max_size() >= j.size());
+    CHECK(j_const.max_size() >= j_const.size());
 }
 
-TEST(JsonEmptyTest, NumberInteger)
+class CapacityMaxSizeNumberIntegerTest : public ::testing::Test {
+ protected:
+    json j = -23;
+    const json j_const = -23;
+};
+
+
+TEST_F(CapacityMaxSizeNumberIntegerTest, ResultOfMaxSize)
 {
-    json j = 23;
-    json j_const(j);
-
-    // result of empty
-    {
-        EXPECT_FALSE(j.empty());
-        EXPECT_FALSE(j_const.empty());
-    }
-
-    // definition of empty
-    {
-        EXPECT_EQ(j.empty(), (j.begin() == j.end()));
-        EXPECT_EQ(j_const.empty(), (j_const.begin() == j_const.end()));
-    }
+    CHECK(j.max_size() == 1);
+    CHECK(j_const.max_size() == 1);
 }
 
-TEST(JsonEmptyTest, NumberUnsigned)
-{
+class CapacityMaxSizeNumberUnsignedTest : public ::testing::Test {
+ protected:
     json j = 23u;
-    json j_const(j);
+    const json j_const = 23u;
+};
 
-    // result of empty
-    {
-        EXPECT_FALSE(j.empty());
-        EXPECT_FALSE(j_const.empty());
-    }
 
-    // definition of empty
-    {
-        EXPECT_EQ(j.empty(), (j.begin() == j.end()));
-        EXPECT_EQ(j_const.empty(), (j_const.begin() == j_const.end()));
-    }
+TEST_F(CapacityMaxSizeNumberUnsignedTest, ResultOfMaxSize)
+{
+    CHECK(j.max_size() == 1);
+    CHECK(j_const.max_size() == 1);
 }
 
-TEST(JsonEmptyTest, NumberFloat)
-{
+class CapacityMaxSizeNumberFloatTest : public ::testing::Test {
+ protected:
     json j = 23.42;
-    json j_const(j);
+    const json j_const = 23.42;
+};
 
-    // result of empty
-    {
-        EXPECT_FALSE(j.empty());
-        EXPECT_FALSE(j_const.empty());
-    }
 
-    // definition of empty
-    {
-        EXPECT_EQ(j.empty(), (j.begin() == j.end()));
-        EXPECT_EQ(j_const.empty(), (j_const.begin() == j_const.end()));
-    }
+TEST_F(CapacityMaxSizeNumberFloatTest, ResultOfMaxSize)
+{
+    CHECK(j.max_size() == 1);
+    CHECK(j_const.max_size() == 1);
 }
 
-TEST(JsonEmptyTest, Null)
-{
+class CapacityMaxSizeNullTest : public ::testing::Test {
+ protected:
     json j = nullptr;
-    json j_const(j);
+    const json j_const = nullptr;
+};
 
-    // result of empty
-    {
-        EXPECT_TRUE(j.empty());
-        EXPECT_TRUE(j_const.empty());
-    }
 
-    // definition of empty
-    {
-        EXPECT_EQ(j.empty(), (j.begin() == j.end()));
-        EXPECT_EQ(j_const.empty(), (j_const.begin() == j_const.end()));
-    }
-}
-
-TEST(JsonSizeTest, Boolean)
+TEST_F(CapacityMaxSizeNullTest, ResultOfMaxSize)
 {
-    json j = true;
-    json j_const(j);
-
-    // result of size
-    {
-        EXPECT_EQ(j.size(), 1u);
-        EXPECT_EQ(j_const.size(), 1u);
-    }
-
-    // definition of size
-    {
-        EXPECT_EQ(std::distance(j.begin(), j.end()), static_cast<int>(j.size()));
-        EXPECT_EQ(std::distance(j_const.begin(), j_const.end()),
-                  static_cast<int>(j_const.size()));
-    }
+    CHECK(j.max_size() == 0);
+    CHECK(j_const.max_size() == 0);
 }
 
-TEST(JsonSizeTest, String)
-{
-    json j = "hello world";
-    json j_const(j);
-
-    // result of size
-    {
-        EXPECT_EQ(j.size(), 1u);
-        EXPECT_EQ(j_const.size(), 1u);
-    }
-
-    // definition of size
-    {
-        EXPECT_EQ(std::distance(j.begin(), j.end()), static_cast<int>(j.size()));
-        EXPECT_EQ(std::distance(j_const.begin(), j_const.end()),
-                  static_cast<int>(j_const.size()));
-    }
-}
-
-TEST(JsonSizeTest, ArrayEmpty)
-{
-    json j = json::array();
-    json j_const(j);
-
-    // result of size
-    {
-        EXPECT_EQ(j.size(), 0u);
-        EXPECT_EQ(j_const.size(), 0u);
-    }
-
-    // definition of size
-    {
-        EXPECT_EQ(std::distance(j.begin(), j.end()), static_cast<int>(j.size()));
-        EXPECT_EQ(std::distance(j_const.begin(), j_const.end()),
-                  static_cast<int>(j_const.size()));
-    }
-}
-
-TEST(JsonSizeTest, ArrayFilled)
-{
-    json j = {1, 2, 3};
-    json j_const(j);
-
-    // result of size
-    {
-        EXPECT_EQ(j.size(), 3u);
-        EXPECT_EQ(j_const.size(), 3u);
-    }
-
-    // definition of size
-    {
-        EXPECT_EQ(std::distance(j.begin(), j.end()), static_cast<int>(j.size()));
-        EXPECT_EQ(std::distance(j_const.begin(), j_const.end()),
-                  static_cast<int>(j_const.size()));
-    }
-}
-
-TEST(JsonSizeTest, ObjectEmpty)
-{
-    json j = json::object();
-    json j_const(j);
-
-    // result of size
-    {
-        EXPECT_EQ(j.size(), 0u);
-        EXPECT_EQ(j_const.size(), 0u);
-    }
-
-    // definition of size
-    {
-        EXPECT_EQ(std::distance(j.begin(), j.end()), static_cast<int>(j.size()));
-        EXPECT_EQ(std::distance(j_const.begin(), j_const.end()),
-                  static_cast<int>(j_const.size()));
-    }
-}
-
-TEST(JsonSizeTest, ObjectFilled)
-{
-    json j = {{"one", 1}, {"two", 2}, {"three", 3}};
-    json j_const(j);
-
-    // result of size
-    {
-        EXPECT_EQ(j.size(), 3u);
-        EXPECT_EQ(j_const.size(), 3u);
-    }
-
-    // definition of size
-    {
-        EXPECT_EQ(std::distance(j.begin(), j.end()), static_cast<int>(j.size()));
-        EXPECT_EQ(std::distance(j_const.begin(), j_const.end()),
-                  static_cast<int>(j_const.size()));
-    }
-}
-
-TEST(JsonSizeTest, NumberInteger)
-{
-    json j = 23;
-    json j_const(j);
-
-    // result of size
-    {
-        EXPECT_EQ(j.size(), 1u);
-        EXPECT_EQ(j_const.size(), 1u);
-    }
-
-    // definition of size
-    {
-        EXPECT_EQ(std::distance(j.begin(), j.end()), static_cast<int>(j.size()));
-        EXPECT_EQ(std::distance(j_const.begin(), j_const.end()),
-                  static_cast<int>(j_const.size()));
-    }
-}
-
-TEST(JsonSizeTest, NumberUnsigned)
-{
-    json j = 23u;
-    json j_const(j);
-
-    // result of size
-    {
-        EXPECT_EQ(j.size(), 1u);
-        EXPECT_EQ(j_const.size(), 1u);
-    }
-
-    // definition of size
-    {
-        EXPECT_EQ(std::distance(j.begin(), j.end()), static_cast<int>(j.size()));
-        EXPECT_EQ(std::distance(j_const.begin(), j_const.end()),
-                  static_cast<int>(j_const.size()));
-    }
-}
-
-TEST(JsonSizeTest, NumberFloat)
-{
-    json j = 23.42;
-    json j_const(j);
-
-    // result of size
-    {
-        EXPECT_EQ(j.size(), 1u);
-        EXPECT_EQ(j_const.size(), 1u);
-    }
-
-    // definition of size
-    {
-        EXPECT_EQ(std::distance(j.begin(), j.end()), static_cast<int>(j.size()));
-        EXPECT_EQ(std::distance(j_const.begin(), j_const.end()),
-                  static_cast<int>(j_const.size()));
-    }
-}
-
-TEST(JsonSizeTest, Null)
-{
-    json j = nullptr;
-    json j_const(j);
-
-    // result of size
-    {
-        EXPECT_EQ(j.size(), 0u);
-        EXPECT_EQ(j_const.size(), 0u);
-    }
-
-    // definition of size
-    {
-        EXPECT_EQ(std::distance(j.begin(), j.end()), static_cast<int>(j.size()));
-        EXPECT_EQ(std::distance(j_const.begin(), j_const.end()),
-                  static_cast<int>(j_const.size()));
-    }
-}
-
-TEST(JsonMaxSizeTest, Boolean)
-{
-    json j = true;
-    json j_const(j);
-
-    // result of max_size
-    {
-        EXPECT_EQ(j.max_size(), 1u);
-        EXPECT_EQ(j_const.max_size(), 1u);
-    }
-}
-
-TEST(JsonMaxSizeTest, String)
-{
-    json j = "hello world";
-    json j_const(j);
-
-    // result of max_size
-    {
-        EXPECT_EQ(j.max_size(), 1u);
-        EXPECT_EQ(j_const.max_size(), 1u);
-    }
-}
-
-TEST(JsonMaxSizeTest, ArrayEmpty)
-{
-    json j = json::array();
-    json j_const(j);
-
-    // result of max_size
-    {
-        EXPECT_GE(j.max_size(), j.size());
-        EXPECT_GE(j_const.max_size(), j_const.size());
-    }
-}
-
-TEST(JsonMaxSizeTest, ArrayFilled)
-{
-    json j = {1, 2, 3};
-    json j_const(j);
-
-    // result of max_size
-    {
-        EXPECT_GE(j.max_size(), j.size());
-        EXPECT_GE(j_const.max_size(), j_const.size());
-    }
-}
-
-TEST(JsonMaxSizeTest, ObjectEmpty)
-{
-    json j = json::object();
-    json j_const(j);
-
-    // result of max_size
-    {
-        EXPECT_GE(j.max_size(), j.size());
-        EXPECT_GE(j_const.max_size(), j_const.size());
-    }
-}
-
-TEST(JsonMaxSizeTest, ObjectFilled)
-{
-    json j = {{"one", 1}, {"two", 2}, {"three", 3}};
-    json j_const(j);
-
-    // result of max_size
-    {
-        EXPECT_GE(j.max_size(), j.size());
-        EXPECT_GE(j_const.max_size(), j_const.size());
-    }
-}
-
-TEST(JsonMaxSizeTest, NumberInteger)
-{
-    json j = 23;
-    json j_const(j);
-
-    // result of max_size
-    {
-        EXPECT_EQ(j.max_size(), 1u);
-        EXPECT_EQ(j_const.max_size(), 1u);
-    }
-}
-
-TEST(JsonMaxSizeTest, NumberUnsigned)
-{
-    json j = 23u;
-    json j_const(j);
-
-    // result of max_size
-    {
-        EXPECT_EQ(j.max_size(), 1u);
-        EXPECT_EQ(j_const.max_size(), 1u);
-    }
-}
-
-TEST(JsonMaxSizeTest, NumberFloat)
-{
-    json j = 23.42;
-    json j_const(j);
-
-    // result of max_size
-    {
-        EXPECT_EQ(j.max_size(), 1u);
-        EXPECT_EQ(j_const.max_size(), 1u);
-    }
-}
-
-TEST(JsonMaxSizeTest, Null)
-{
-    json j = nullptr;
-    json j_const(j);
-
-    // result of max_size
-    {
-        EXPECT_EQ(j.max_size(), 0u);
-        EXPECT_EQ(j_const.max_size(), 0u);
-    }
-}

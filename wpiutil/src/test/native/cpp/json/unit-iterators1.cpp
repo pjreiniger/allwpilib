@@ -1,1628 +1,1662 @@
-/*----------------------------------------------------------------------------*/
-/* Modifications Copyright (c) FIRST 2017. All Rights Reserved.               */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
-/*
-    __ _____ _____ _____
- __|  |   __|     |   | |  JSON for Modern C++ (test suite)
-|  |  |__   |  |  | | | |  version 2.1.1
-|_____|_____|_____|_|___|  https://github.com/nlohmann/json
+//     __ _____ _____ _____
+//  __|  |   __|     |   | |  JSON for Modern C++ (supporting code)
+// |  |  |__   |  |  | | | |  version 3.11.2
+// |_____|_____|_____|_|___|  https://github.com/nlohmann/json
+//
+// SPDX-FileCopyrightText: 2013-2022 Niels Lohmann <https://nlohmann.me>
+// SPDX-License-Identifier: MIT
 
-Licensed under the MIT License <http://opensource.org/licenses/MIT>.
-Copyright (c) 2013-2017 Niels Lohmann <http://nlohmann.me>.
+#include "gtest/gtest.h"
 
-Permission is hereby  granted, free of charge, to any  person obtaining a copy
-of this software and associated  documentation files (the "Software"), to deal
-in the Software  without restriction, including without  limitation the rights
-to  use, copy,  modify, merge,  publish, distribute,  sublicense, and/or  sell
-copies  of  the Software,  and  to  permit persons  to  whom  the Software  is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE  IS PROVIDED "AS  IS", WITHOUT WARRANTY  OF ANY KIND,  EXPRESS OR
-IMPLIED,  INCLUDING BUT  NOT  LIMITED TO  THE  WARRANTIES OF  MERCHANTABILITY,
-FITNESS FOR  A PARTICULAR PURPOSE AND  NONINFRINGEMENT. IN NO EVENT  SHALL THE
-AUTHORS  OR COPYRIGHT  HOLDERS  BE  LIABLE FOR  ANY  CLAIM,  DAMAGES OR  OTHER
-LIABILITY, WHETHER IN AN ACTION OF  CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-
+#define JSON_TESTS_PRIVATE
 #include "unit-json.h"
-
-#include <gtest/gtest.h>
-
 using wpi::json;
-using wpi::JsonTest;
 
-TEST(JsonIteratorBasicTest, Uninitialized)
+
+
+
+
+
+
+TEST(Iterators1BasicBehaviorTest, Uninitialized)
 {
     json::iterator it;
-    EXPECT_EQ(JsonTest::GetObject(it), nullptr);
+    CHECK(it.m_object == nullptr);
 
     json::const_iterator cit;
-    EXPECT_EQ(JsonTest::GetObject(cit), nullptr);
+    CHECK(cit.m_object == nullptr);
 }
 
-class JsonIteratorBooleanTest : public ::testing::Test {
- public:
-    JsonIteratorBooleanTest() : j_const(j) {}
-
+class Iterators1BasicBehaviorBooleanTest : public ::testing::Test {
  protected:
-    json j = true;
+    Iterators1BasicBehaviorBooleanTest() : j(true), j_const(j) {}
+
+    json j;
     json j_const;
 };
 
-TEST_F(JsonIteratorBooleanTest, BeginEnd)
+
+TEST_F(Iterators1BasicBehaviorBooleanTest, JsonBeginEnd)
 {
     json::iterator it = j.begin();
-    EXPECT_NE(it, j.end());
-    EXPECT_EQ(*it, j);
+    CHECK(it != j.end());
+    CHECK(*it == j);
 
     it++;
-    EXPECT_NE(it, j.begin());
-    EXPECT_EQ(it, j.end());
+    CHECK(it != j.begin());
+    CHECK(it == j.end());
 
     it--;
-    EXPECT_EQ(it, j.begin());
-    EXPECT_NE(it, j.end());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.begin());
+    CHECK(it != j.end());
+    CHECK(*it == j);
 
     ++it;
-    EXPECT_NE(it, j.begin());
-    EXPECT_EQ(it, j.end());
+    CHECK(it != j.begin());
+    CHECK(it == j.end());
 
     --it;
-    EXPECT_EQ(it, j.begin());
-    EXPECT_NE(it, j.end());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.begin());
+    CHECK(it != j.end());
+    CHECK(*it == j);
 }
 
-TEST_F(JsonIteratorBooleanTest, ConstBeginEnd)
+TEST_F(Iterators1BasicBehaviorBooleanTest, ConstJsonBeginEnd)
 {
     json::const_iterator it = j_const.begin();
-    EXPECT_NE(it, j_const.end());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it != j_const.end());
+    CHECK(*it == j_const);
 
     it++;
-    EXPECT_NE(it, j_const.begin());
-    EXPECT_EQ(it, j_const.end());
+    CHECK(it != j_const.begin());
+    CHECK(it == j_const.end());
 
     it--;
-    EXPECT_EQ(it, j_const.begin());
-    EXPECT_NE(it, j_const.end());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.begin());
+    CHECK(it != j_const.end());
+    CHECK(*it == j_const);
 
     ++it;
-    EXPECT_NE(it, j_const.begin());
-    EXPECT_EQ(it, j_const.end());
+    CHECK(it != j_const.begin());
+    CHECK(it == j_const.end());
 
     --it;
-    EXPECT_EQ(it, j_const.begin());
-    EXPECT_NE(it, j_const.end());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.begin());
+    CHECK(it != j_const.end());
+    CHECK(*it == j_const);
 }
 
-TEST_F(JsonIteratorBooleanTest, CBeginEnd)
+TEST_F(Iterators1BasicBehaviorBooleanTest, JsonCbeginCend)
 {
     json::const_iterator it = j.cbegin();
-    EXPECT_NE(it, j.cend());
-    EXPECT_EQ(*it, j);
+    CHECK(it != j.cend());
+    CHECK(*it == j);
 
     it++;
-    EXPECT_NE(it, j.cbegin());
-    EXPECT_EQ(it, j.cend());
+    CHECK(it != j.cbegin());
+    CHECK(it == j.cend());
 
     it--;
-    EXPECT_EQ(it, j.cbegin());
-    EXPECT_NE(it, j.cend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.cbegin());
+    CHECK(it != j.cend());
+    CHECK(*it == j);
 
     ++it;
-    EXPECT_NE(it, j.cbegin());
-    EXPECT_EQ(it, j.cend());
+    CHECK(it != j.cbegin());
+    CHECK(it == j.cend());
 
     --it;
-    EXPECT_EQ(it, j.cbegin());
-    EXPECT_NE(it, j.cend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.cbegin());
+    CHECK(it != j.cend());
+    CHECK(*it == j);
 }
 
-TEST_F(JsonIteratorBooleanTest, ConstCBeginEnd)
+TEST_F(Iterators1BasicBehaviorBooleanTest, ConstJsonCbeginCend)
 {
     json::const_iterator it = j_const.cbegin();
-    EXPECT_NE(it, j_const.cend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it != j_const.cend());
+    CHECK(*it == j_const);
 
     it++;
-    EXPECT_NE(it, j_const.cbegin());
-    EXPECT_EQ(it, j_const.cend());
+    CHECK(it != j_const.cbegin());
+    CHECK(it == j_const.cend());
 
     it--;
-    EXPECT_EQ(it, j_const.cbegin());
-    EXPECT_NE(it, j_const.cend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.cbegin());
+    CHECK(it != j_const.cend());
+    CHECK(*it == j_const);
 
     ++it;
-    EXPECT_NE(it, j_const.cbegin());
-    EXPECT_EQ(it, j_const.cend());
+    CHECK(it != j_const.cbegin());
+    CHECK(it == j_const.cend());
 
     --it;
-    EXPECT_EQ(it, j_const.cbegin());
-    EXPECT_NE(it, j_const.cend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.cbegin());
+    CHECK(it != j_const.cend());
+    CHECK(*it == j_const);
 }
-#if 0
-TEST_F(JsonIteratorBooleanTest, RBeginEnd)
+
+TEST_F(Iterators1BasicBehaviorBooleanTest, JsonRbeginRend)
 {
     json::reverse_iterator it = j.rbegin();
-    EXPECT_NE(it, j.rend());
-    EXPECT_EQ(*it, j);
+    CHECK(it != j.rend());
+    CHECK(*it == j);
 
     it++;
-    EXPECT_NE(it, j.rbegin());
-    EXPECT_EQ(it, j.rend());
+    CHECK(it != j.rbegin());
+    CHECK(it == j.rend());
 
     it--;
-    EXPECT_EQ(it, j.rbegin());
-    EXPECT_NE(it, j.rend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.rbegin());
+    CHECK(it != j.rend());
+    CHECK(*it == j);
 
     ++it;
-    EXPECT_NE(it, j.rbegin());
-    EXPECT_EQ(it, j.rend());
+    CHECK(it != j.rbegin());
+    CHECK(it == j.rend());
 
     --it;
-    EXPECT_EQ(it, j.rbegin());
-    EXPECT_NE(it, j.rend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.rbegin());
+    CHECK(it != j.rend());
+    CHECK(*it == j);
 }
 
-TEST_F(JsonIteratorBooleanTest, CRBeginEnd)
+TEST_F(Iterators1BasicBehaviorBooleanTest, JsonCrbeginCrend)
 {
     json::const_reverse_iterator it = j.crbegin();
-    EXPECT_NE(it, j.crend());
-    EXPECT_EQ(*it, j);
+    CHECK(it != j.crend());
+    CHECK(*it == j);
 
     it++;
-    EXPECT_NE(it, j.crbegin());
-    EXPECT_EQ(it, j.crend());
+    CHECK(it != j.crbegin());
+    CHECK(it == j.crend());
 
     it--;
-    EXPECT_EQ(it, j.crbegin());
-    EXPECT_NE(it, j.crend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.crbegin());
+    CHECK(it != j.crend());
+    CHECK(*it == j);
 
     ++it;
-    EXPECT_NE(it, j.crbegin());
-    EXPECT_EQ(it, j.crend());
+    CHECK(it != j.crbegin());
+    CHECK(it == j.crend());
 
     --it;
-    EXPECT_EQ(it, j.crbegin());
-    EXPECT_NE(it, j.crend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.crbegin());
+    CHECK(it != j.crend());
+    CHECK(*it == j);
 }
 
-TEST_F(JsonIteratorBooleanTest, ConstCRBeginEnd)
+TEST_F(Iterators1BasicBehaviorBooleanTest, ConstJsonCrbeginCrend)
 {
     json::const_reverse_iterator it = j_const.crbegin();
-    EXPECT_NE(it, j_const.crend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it != j_const.crend());
+    CHECK(*it == j_const);
 
     it++;
-    EXPECT_NE(it, j_const.crbegin());
-    EXPECT_EQ(it, j_const.crend());
+    CHECK(it != j_const.crbegin());
+    CHECK(it == j_const.crend());
 
     it--;
-    EXPECT_EQ(it, j_const.crbegin());
-    EXPECT_NE(it, j_const.crend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.crbegin());
+    CHECK(it != j_const.crend());
+    CHECK(*it == j_const);
 
     ++it;
-    EXPECT_NE(it, j_const.crbegin());
-    EXPECT_EQ(it, j_const.crend());
+    CHECK(it != j_const.crbegin());
+    CHECK(it == j_const.crend());
 
     --it;
-    EXPECT_EQ(it, j_const.crbegin());
-    EXPECT_NE(it, j_const.crend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.crbegin());
+    CHECK(it != j_const.crend());
+    CHECK(*it == j_const);
 }
-#endif
-TEST_F(JsonIteratorBooleanTest, KeyValue)
+
+class Iterators1BasicBehaviorBooleanAdditionalTestsTest : public Iterators1BasicBehaviorBooleanTest{};
+
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, NotBeginNotBegin)
+{
+    CHECK(!(j.begin() != j.begin()));
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, NotEndNotEnd)
+{
+    CHECK(!(j.end() != j.end()));
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, BeginEnd)
+{
+    CHECK(j.begin() < j.end());
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, BeginEnd2)
+{
+    CHECK(j.begin() <= j.end());
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, EndBegin)
+{
+    CHECK(j.end() > j.begin());
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, EndBegin2)
+{
+    CHECK(j.end() >= j.begin());
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, EndEqualsEnd)
+{
+    CHECK(j.end() == j.end());
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, EndEnd)
+{
+    CHECK(j.end() <= j.end());
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, BeginEqualsBegin)
+{
+    CHECK(j.begin() == j.begin());
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, BeginBegin)
+{
+    CHECK(j.begin() <= j.begin());
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, BeginBegin2)
+{
+    CHECK(j.begin() >= j.begin());
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, NotBeginEqualsEnd)
+{
+    CHECK(!(j.begin() == j.end()));
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, BeginNotEnd)
+{
+    CHECK(j.begin() != j.end());
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, Begin1EqualsEnd)
+{
+    CHECK(j.begin() + 1 == j.end());
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, BeginEqualsEnd1)
+{
+    CHECK(j.begin() == j.end() - 1);
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, BeginNotEnd1)
+{
+    CHECK(j.begin() != j.end() + 1);
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, EndNotEnd1)
+{
+    CHECK(j.end() != j.end() + 1);
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, Begin1NotBegin2)
+{
+    CHECK(j.begin() + 1 != j.begin() + 2);
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, Begin1Begin2)
+{
+    CHECK(j.begin() + 1 < j.begin() + 2);
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, Begin1Begin22)
+{
+    CHECK(j.begin() + 1 <= j.begin() + 2);
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanAdditionalTestsTest, End1NotEnd2)
+{
+    CHECK(j.end() + 1 != j.end() + 2);
+}
+
+TEST_F(Iterators1BasicBehaviorBooleanTest, KeyValue)
 {
     auto it = j.begin();
     auto cit = j_const.cbegin();
-    EXPECT_THROW_MSG(it.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_EQ(it.value(), json(true));
-    EXPECT_THROW_MSG(cit.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_EQ(cit.value(), json(true));
-#if 0
+    CHECK_THROWS_WITH_AS(it.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK(it.value() == json(true));
+    CHECK_THROWS_WITH_AS(cit.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK(cit.value() == json(true));
+
     auto rit = j.rend();
     auto crit = j.crend();
-    EXPECT_THROW_MSG(rit.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_THROW_MSG(rit.value(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.214] cannot get value");
-    EXPECT_THROW_MSG(crit.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_THROW_MSG(crit.value(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.214] cannot get value");
-#endif
+    CHECK_THROWS_WITH_AS(rit.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(rit.value(), "[json.exception.invalid_iterator.214] cannot get value", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(crit.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(crit.value(), "[json.exception.invalid_iterator.214] cannot get value", json::invalid_iterator&);
 }
 
-class JsonIteratorStringTest : public ::testing::Test {
- public:
-    JsonIteratorStringTest() : j_const(j) {}
-
+class Iterators1BasicBehaviorStringTest : public ::testing::Test {
  protected:
-    json j = "hello world";
+    Iterators1BasicBehaviorStringTest() : j("hello world"), j_const(j) {}
+
+    json j;
     json j_const;
 };
 
-TEST_F(JsonIteratorStringTest, BeginEnd)
+
+TEST_F(Iterators1BasicBehaviorStringTest, JsonBeginEnd)
 {
     json::iterator it = j.begin();
-    EXPECT_NE(it, j.end());
-    EXPECT_EQ(*it, j);
+    CHECK(it != j.end());
+    CHECK(*it == j);
 
     it++;
-    EXPECT_NE(it, j.begin());
-    EXPECT_EQ(it, j.end());
+    CHECK(it != j.begin());
+    CHECK(it == j.end());
 
     it--;
-    EXPECT_EQ(it, j.begin());
-    EXPECT_NE(it, j.end());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.begin());
+    CHECK(it != j.end());
+    CHECK(*it == j);
 
     ++it;
-    EXPECT_NE(it, j.begin());
-    EXPECT_EQ(it, j.end());
+    CHECK(it != j.begin());
+    CHECK(it == j.end());
 
     --it;
-    EXPECT_EQ(it, j.begin());
-    EXPECT_NE(it, j.end());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.begin());
+    CHECK(it != j.end());
+    CHECK(*it == j);
 }
 
-TEST_F(JsonIteratorStringTest, ConstBeginEnd)
+TEST_F(Iterators1BasicBehaviorStringTest, ConstJsonBeginEnd)
 {
     json::const_iterator it = j_const.begin();
-    EXPECT_NE(it, j_const.end());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it != j_const.end());
+    CHECK(*it == j_const);
 
     it++;
-    EXPECT_NE(it, j_const.begin());
-    EXPECT_EQ(it, j_const.end());
+    CHECK(it != j_const.begin());
+    CHECK(it == j_const.end());
 
     it--;
-    EXPECT_EQ(it, j_const.begin());
-    EXPECT_NE(it, j_const.end());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.begin());
+    CHECK(it != j_const.end());
+    CHECK(*it == j_const);
 
     ++it;
-    EXPECT_NE(it, j_const.begin());
-    EXPECT_EQ(it, j_const.end());
+    CHECK(it != j_const.begin());
+    CHECK(it == j_const.end());
 
     --it;
-    EXPECT_EQ(it, j_const.begin());
-    EXPECT_NE(it, j_const.end());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.begin());
+    CHECK(it != j_const.end());
+    CHECK(*it == j_const);
 }
 
-TEST_F(JsonIteratorStringTest, CBeginEnd)
+TEST_F(Iterators1BasicBehaviorStringTest, JsonCbeginCend)
 {
     json::const_iterator it = j.cbegin();
-    EXPECT_NE(it, j.cend());
-    EXPECT_EQ(*it, j);
+    CHECK(it != j.cend());
+    CHECK(*it == j);
 
     it++;
-    EXPECT_NE(it, j.cbegin());
-    EXPECT_EQ(it, j.cend());
+    CHECK(it != j.cbegin());
+    CHECK(it == j.cend());
 
     it--;
-    EXPECT_EQ(it, j.cbegin());
-    EXPECT_NE(it, j.cend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.cbegin());
+    CHECK(it != j.cend());
+    CHECK(*it == j);
 
     ++it;
-    EXPECT_NE(it, j.cbegin());
-    EXPECT_EQ(it, j.cend());
+    CHECK(it != j.cbegin());
+    CHECK(it == j.cend());
 
     --it;
-    EXPECT_EQ(it, j.cbegin());
-    EXPECT_NE(it, j.cend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.cbegin());
+    CHECK(it != j.cend());
+    CHECK(*it == j);
 }
 
-TEST_F(JsonIteratorStringTest, ConstCBeginEnd)
+TEST_F(Iterators1BasicBehaviorStringTest, ConstJsonCbeginCend)
 {
     json::const_iterator it = j_const.cbegin();
-    EXPECT_NE(it, j_const.cend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it != j_const.cend());
+    CHECK(*it == j_const);
 
     it++;
-    EXPECT_NE(it, j_const.cbegin());
-    EXPECT_EQ(it, j_const.cend());
+    CHECK(it != j_const.cbegin());
+    CHECK(it == j_const.cend());
 
     it--;
-    EXPECT_EQ(it, j_const.cbegin());
-    EXPECT_NE(it, j_const.cend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.cbegin());
+    CHECK(it != j_const.cend());
+    CHECK(*it == j_const);
 
     ++it;
-    EXPECT_NE(it, j_const.cbegin());
-    EXPECT_EQ(it, j_const.cend());
+    CHECK(it != j_const.cbegin());
+    CHECK(it == j_const.cend());
 
     --it;
-    EXPECT_EQ(it, j_const.cbegin());
-    EXPECT_NE(it, j_const.cend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.cbegin());
+    CHECK(it != j_const.cend());
+    CHECK(*it == j_const);
 }
-#if 0
-TEST_F(JsonIteratorStringTest, RBeginEnd)
+
+TEST_F(Iterators1BasicBehaviorStringTest, JsonRbeginRend)
 {
     json::reverse_iterator it = j.rbegin();
-    EXPECT_NE(it, j.rend());
-    EXPECT_EQ(*it, j);
+    CHECK(it != j.rend());
+    CHECK(*it == j);
 
     it++;
-    EXPECT_NE(it, j.rbegin());
-    EXPECT_EQ(it, j.rend());
+    CHECK(it != j.rbegin());
+    CHECK(it == j.rend());
 
     it--;
-    EXPECT_EQ(it, j.rbegin());
-    EXPECT_NE(it, j.rend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.rbegin());
+    CHECK(it != j.rend());
+    CHECK(*it == j);
 
     ++it;
-    EXPECT_NE(it, j.rbegin());
-    EXPECT_EQ(it, j.rend());
+    CHECK(it != j.rbegin());
+    CHECK(it == j.rend());
 
     --it;
-    EXPECT_EQ(it, j.rbegin());
-    EXPECT_NE(it, j.rend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.rbegin());
+    CHECK(it != j.rend());
+    CHECK(*it == j);
 }
 
-TEST_F(JsonIteratorStringTest, CRBeginEnd)
+TEST_F(Iterators1BasicBehaviorStringTest, JsonCrbeginCrend)
 {
     json::const_reverse_iterator it = j.crbegin();
-    EXPECT_NE(it, j.crend());
-    EXPECT_EQ(*it, j);
+    CHECK(it != j.crend());
+    CHECK(*it == j);
 
     it++;
-    EXPECT_NE(it, j.crbegin());
-    EXPECT_EQ(it, j.crend());
+    CHECK(it != j.crbegin());
+    CHECK(it == j.crend());
 
     it--;
-    EXPECT_EQ(it, j.crbegin());
-    EXPECT_NE(it, j.crend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.crbegin());
+    CHECK(it != j.crend());
+    CHECK(*it == j);
 
     ++it;
-    EXPECT_NE(it, j.crbegin());
-    EXPECT_EQ(it, j.crend());
+    CHECK(it != j.crbegin());
+    CHECK(it == j.crend());
 
     --it;
-    EXPECT_EQ(it, j.crbegin());
-    EXPECT_NE(it, j.crend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.crbegin());
+    CHECK(it != j.crend());
+    CHECK(*it == j);
 }
 
-TEST_F(JsonIteratorStringTest, ConstCRBeginEnd)
+TEST_F(Iterators1BasicBehaviorStringTest, ConstJsonCrbeginCrend)
 {
     json::const_reverse_iterator it = j_const.crbegin();
-    EXPECT_NE(it, j_const.crend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it != j_const.crend());
+    CHECK(*it == j_const);
 
     it++;
-    EXPECT_NE(it, j_const.crbegin());
-    EXPECT_EQ(it, j_const.crend());
+    CHECK(it != j_const.crbegin());
+    CHECK(it == j_const.crend());
 
     it--;
-    EXPECT_EQ(it, j_const.crbegin());
-    EXPECT_NE(it, j_const.crend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.crbegin());
+    CHECK(it != j_const.crend());
+    CHECK(*it == j_const);
 
     ++it;
-    EXPECT_NE(it, j_const.crbegin());
-    EXPECT_EQ(it, j_const.crend());
+    CHECK(it != j_const.crbegin());
+    CHECK(it == j_const.crend());
 
     --it;
-    EXPECT_EQ(it, j_const.crbegin());
-    EXPECT_NE(it, j_const.crend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.crbegin());
+    CHECK(it != j_const.crend());
+    CHECK(*it == j_const);
 }
-#endif
-TEST_F(JsonIteratorStringTest, KeyValue)
+
+TEST_F(Iterators1BasicBehaviorStringTest, KeyValue)
 {
     auto it = j.begin();
     auto cit = j_const.cbegin();
-    EXPECT_THROW_MSG(it.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_EQ(it.value(), json("hello world"));
-    EXPECT_THROW_MSG(cit.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_EQ(cit.value(), json("hello world"));
-#if 0
+    CHECK_THROWS_WITH_AS(it.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK(it.value() == json("hello world"));
+    CHECK_THROWS_WITH_AS(cit.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK(cit.value() == json("hello world"));
+
     auto rit = j.rend();
     auto crit = j.crend();
-    EXPECT_THROW_MSG(rit.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_THROW_MSG(rit.value(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.214] cannot get value");
-    EXPECT_THROW_MSG(crit.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_THROW_MSG(crit.value(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.214] cannot get value");
-#endif
+    CHECK_THROWS_WITH_AS(rit.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(rit.value(), "[json.exception.invalid_iterator.214] cannot get value", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(crit.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(crit.value(), "[json.exception.invalid_iterator.214] cannot get value", json::invalid_iterator&);
 }
 
-class JsonIteratorArrayTest : public ::testing::Test {
- public:
-    JsonIteratorArrayTest() : j_const(j) {}
-
+class Iterators1BasicBehaviorArrayTest : public ::testing::Test {
  protected:
-    json j = {1, 2, 3};
+    Iterators1BasicBehaviorArrayTest() : j({1, 2, 3}), j_const(j) {}
+
+    json j;
     json j_const;
 };
 
-TEST_F(JsonIteratorArrayTest, BeginEnd)
+
+TEST_F(Iterators1BasicBehaviorArrayTest, JsonBeginEnd)
 {
     json::iterator it_begin = j.begin();
     json::iterator it_end = j.end();
 
     auto it = it_begin;
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j[0]);
+    CHECK(it != it_end);
+    CHECK(*it == j[0]);
 
     it++;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j[1]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j[1]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j[2]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j[2]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_EQ(it, it_end);
+    CHECK(it != it_begin);
+    CHECK(it == it_end);
 }
 
-TEST_F(JsonIteratorArrayTest, ConstBeginEnd)
+TEST_F(Iterators1BasicBehaviorArrayTest, ConstJsonBeginEnd)
 {
     json::const_iterator it_begin = j_const.begin();
     json::const_iterator it_end = j_const.end();
 
     auto it = it_begin;
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j_const[0]);
+    CHECK(it != it_end);
+    CHECK(*it == j_const[0]);
 
     it++;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j_const[1]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j_const[1]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j_const[2]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j_const[2]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_EQ(it, it_end);
+    CHECK(it != it_begin);
+    CHECK(it == it_end);
 }
 
-TEST_F(JsonIteratorArrayTest, CBeginEnd)
+TEST_F(Iterators1BasicBehaviorArrayTest, JsonCbeginCend)
 {
     json::const_iterator it_begin = j.cbegin();
     json::const_iterator it_end = j.cend();
 
     auto it = it_begin;
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j[0]);
+    CHECK(it != it_end);
+    CHECK(*it == j[0]);
 
     it++;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j[1]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j[1]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j[2]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j[2]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_EQ(it, it_end);
+    CHECK(it != it_begin);
+    CHECK(it == it_end);
 }
 
-TEST_F(JsonIteratorArrayTest, ConstCBeginEnd)
+TEST_F(Iterators1BasicBehaviorArrayTest, ConstJsonCbeginCend)
 {
     json::const_iterator it_begin = j_const.cbegin();
     json::const_iterator it_end = j_const.cend();
 
     auto it = it_begin;
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j[0]);
+    CHECK(it != it_end);
+    CHECK(*it == j[0]);
 
     it++;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j[1]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j[1]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j[2]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j[2]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_EQ(it, it_end);
+    CHECK(it != it_begin);
+    CHECK(it == it_end);
 }
-#if 0
-TEST_F(JsonIteratorArrayTest, RBeginEnd)
+
+TEST_F(Iterators1BasicBehaviorArrayTest, JsonRbeginRend)
 {
     json::reverse_iterator it_begin = j.rbegin();
     json::reverse_iterator it_end = j.rend();
 
     auto it = it_begin;
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j[2]);
+    CHECK(it != it_end);
+    CHECK(*it == j[2]);
 
     it++;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j[1]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j[1]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j[0]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j[0]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_EQ(it, it_end);
+    CHECK(it != it_begin);
+    CHECK(it == it_end);
 }
 
-TEST_F(JsonIteratorArrayTest, CRBeginEnd)
+TEST_F(Iterators1BasicBehaviorArrayTest, JsonCrbeginCrend)
 {
     json::const_reverse_iterator it_begin = j.crbegin();
     json::const_reverse_iterator it_end = j.crend();
 
     auto it = it_begin;
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j[2]);
+    CHECK(it != it_end);
+    CHECK(*it == j[2]);
 
     it++;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j[1]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j[1]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j[0]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j[0]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_EQ(it, it_end);
+    CHECK(it != it_begin);
+    CHECK(it == it_end);
 }
 
-TEST_F(JsonIteratorArrayTest, ConstCRBeginEnd)
+TEST_F(Iterators1BasicBehaviorArrayTest, ConstJsonCrbeginCrend)
 {
     json::const_reverse_iterator it_begin = j_const.crbegin();
     json::const_reverse_iterator it_end = j_const.crend();
 
     auto it = it_begin;
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j[2]);
+    CHECK(it != it_end);
+    CHECK(*it == j[2]);
 
     it++;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j[1]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j[1]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j[0]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j[0]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_EQ(it, it_end);
+    CHECK(it != it_begin);
+    CHECK(it == it_end);
 }
-#endif
-TEST_F(JsonIteratorArrayTest, KeyValue)
+
+TEST_F(Iterators1BasicBehaviorArrayTest, KeyValue)
 {
     auto it = j.begin();
     auto cit = j_const.cbegin();
-    EXPECT_THROW_MSG(it.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_EQ(it.value(), json(1));
-    EXPECT_THROW_MSG(cit.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_EQ(cit.value(), json(1));
+    CHECK_THROWS_WITH_AS(it.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK(it.value() == json(1));
+    CHECK_THROWS_WITH_AS(cit.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK(cit.value() == json(1));
 }
 
-class JsonIteratorObjectTest : public ::testing::Test {
- public:
-    JsonIteratorObjectTest() : j_const(j) {}
-
+class Iterators1BasicBehaviorObjectTest : public ::testing::Test {
  protected:
-    json j = {{"A", 1}, {"B", 2}, {"C", 3}};
+    Iterators1BasicBehaviorObjectTest() : j({{"A", 1}, {"B", 2}, {"C", 3}}), j_const(j) {}
+
+    json j;
     json j_const;
 };
 
-// Disabled because iteration order isn't guaranteed by the underlying map
-// container
-TEST_F(JsonIteratorObjectTest, DISABLED_BeginEnd)
+
+TEST_F(Iterators1BasicBehaviorObjectTest, JsonBeginEnd)
 {
     json::iterator it_begin = j.begin();
     json::iterator it_end = j.end();
 
     auto it = it_begin;
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j["A"]);
+    CHECK(it != it_end);
+    CHECK(*it == j["A"]);
 
     it++;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j["B"]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j["B"]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j["C"]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j["C"]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_EQ(it, it_end);
+    CHECK(it != it_begin);
+    CHECK(it == it_end);
 }
 
-// Disabled because iteration order isn't guaranteed by the underlying map
-// container
-TEST_F(JsonIteratorObjectTest, DISABLED_ConstBeginEnd)
+TEST_F(Iterators1BasicBehaviorObjectTest, ConstJsonBeginEnd)
 {
     json::const_iterator it_begin = j_const.begin();
     json::const_iterator it_end = j_const.end();
 
     auto it = it_begin;
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j_const["A"]);
+    CHECK(it != it_end);
+    CHECK(*it == j_const["A"]);
 
     it++;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j_const["B"]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j_const["B"]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j_const["C"]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j_const["C"]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_EQ(it, it_end);
+    CHECK(it != it_begin);
+    CHECK(it == it_end);
 }
 
-// Disabled because iteration order isn't guaranteed by the underlying map
-// container
-TEST_F(JsonIteratorObjectTest, DISABLED_CBeginEnd)
+TEST_F(Iterators1BasicBehaviorObjectTest, JsonCbeginCend)
 {
     json::const_iterator it_begin = j.cbegin();
     json::const_iterator it_end = j.cend();
 
     auto it = it_begin;
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j["A"]);
+    CHECK(it != it_end);
+    CHECK(*it == j["A"]);
 
     it++;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j["B"]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j["B"]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j["C"]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j["C"]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_EQ(it, it_end);
+    CHECK(it != it_begin);
+    CHECK(it == it_end);
 }
 
-// Disabled because iteration order isn't guaranteed by the underlying map
-// container
-TEST_F(JsonIteratorObjectTest, DISABLED_ConstCBeginEnd)
+TEST_F(Iterators1BasicBehaviorObjectTest, ConstJsonCbeginCend)
 {
     json::const_iterator it_begin = j_const.cbegin();
     json::const_iterator it_end = j_const.cend();
 
     auto it = it_begin;
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j_const["A"]);
+    CHECK(it != it_end);
+    CHECK(*it == j_const["A"]);
 
     it++;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j_const["B"]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j_const["B"]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j_const["C"]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j_const["C"]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_EQ(it, it_end);
+    CHECK(it != it_begin);
+    CHECK(it == it_end);
 }
-#if 0
-TEST_F(JsonIteratorObjectTest, RBeginEnd)
+
+TEST_F(Iterators1BasicBehaviorObjectTest, JsonRbeginRend)
 {
     json::reverse_iterator it_begin = j.rbegin();
     json::reverse_iterator it_end = j.rend();
 
     auto it = it_begin;
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j["C"]);
+    CHECK(it != it_end);
+    CHECK(*it == j["C"]);
 
     it++;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j["B"]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j["B"]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j["A"]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j["A"]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_EQ(it, it_end);
+    CHECK(it != it_begin);
+    CHECK(it == it_end);
 }
 
-TEST_F(JsonIteratorObjectTest, CRBeginEnd)
+TEST_F(Iterators1BasicBehaviorObjectTest, JsonCrbeginCrend)
 {
     json::const_reverse_iterator it_begin = j.crbegin();
     json::const_reverse_iterator it_end = j.crend();
 
     auto it = it_begin;
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j["C"]);
+    CHECK(it != it_end);
+    CHECK(*it == j["C"]);
 
     it++;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j["B"]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j["B"]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j["A"]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j["A"]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_EQ(it, it_end);
+    CHECK(it != it_begin);
+    CHECK(it == it_end);
 }
 
-TEST_F(JsonIteratorObjectTest, ConstCRBeginEnd)
+TEST_F(Iterators1BasicBehaviorObjectTest, ConstJsonCrbeginCrend)
 {
     json::const_reverse_iterator it_begin = j_const.crbegin();
     json::const_reverse_iterator it_end = j_const.crend();
 
     auto it = it_begin;
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j["C"]);
+    CHECK(it != it_end);
+    CHECK(*it == j["C"]);
 
     it++;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j["B"]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j["B"]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_NE(it, it_end);
-    EXPECT_EQ(*it, j["A"]);
+    CHECK(it != it_begin);
+    CHECK(it != it_end);
+    CHECK(*it == j["A"]);
 
     ++it;
-    EXPECT_NE(it, it_begin);
-    EXPECT_EQ(it, it_end);
+    CHECK(it != it_begin);
+    CHECK(it == it_end);
 }
-#endif
 
-// Disabled because iteration order isn't guaranteed by the underlying map
-// container
-TEST_F(JsonIteratorObjectTest, DISABLED_KeyValue)
+TEST_F(Iterators1BasicBehaviorObjectTest, KeyValue)
 {
     auto it = j.begin();
     auto cit = j_const.cbegin();
-    EXPECT_EQ(it.key(), "A");
-    EXPECT_EQ(it.value(), json(1));
-    EXPECT_EQ(cit.key(), "A");
-    EXPECT_EQ(cit.value(), json(1));
+    CHECK(it.key() == "A");
+    CHECK(it.value() == json(1));
+    CHECK(cit.key() == "A");
+    CHECK(cit.value() == json(1));
 }
 
-class JsonIteratorIntegerTest : public ::testing::Test {
- public:
-    JsonIteratorIntegerTest() : j_const(j) {}
-
+class Iterators1BasicBehaviorNumberIntegerTest : public ::testing::Test {
  protected:
-    json j = 23;
+    Iterators1BasicBehaviorNumberIntegerTest() : j(23), j_const(j) {}
+
+    json j;
     json j_const;
 };
 
-TEST_F(JsonIteratorIntegerTest, BeginEnd)
+
+TEST_F(Iterators1BasicBehaviorNumberIntegerTest, JsonBeginEnd)
 {
     json::iterator it = j.begin();
-    EXPECT_NE(it, j.end());
-    EXPECT_EQ(*it, j);
+    CHECK(it != j.end());
+    CHECK(*it == j);
 
     it++;
-    EXPECT_NE(it, j.begin());
-    EXPECT_EQ(it, j.end());
+    CHECK(it != j.begin());
+    CHECK(it == j.end());
 
     it--;
-    EXPECT_EQ(it, j.begin());
-    EXPECT_NE(it, j.end());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.begin());
+    CHECK(it != j.end());
+    CHECK(*it == j);
 
     ++it;
-    EXPECT_NE(it, j.begin());
-    EXPECT_EQ(it, j.end());
+    CHECK(it != j.begin());
+    CHECK(it == j.end());
 
     --it;
-    EXPECT_EQ(it, j.begin());
-    EXPECT_NE(it, j.end());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.begin());
+    CHECK(it != j.end());
+    CHECK(*it == j);
 }
 
-TEST_F(JsonIteratorIntegerTest, ConstBeginEnd)
+TEST_F(Iterators1BasicBehaviorNumberIntegerTest, ConstJsonBeginEnd)
 {
     json::const_iterator it = j_const.begin();
-    EXPECT_NE(it, j_const.end());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it != j_const.end());
+    CHECK(*it == j_const);
 
     it++;
-    EXPECT_NE(it, j_const.begin());
-    EXPECT_EQ(it, j_const.end());
+    CHECK(it != j_const.begin());
+    CHECK(it == j_const.end());
 
     it--;
-    EXPECT_EQ(it, j_const.begin());
-    EXPECT_NE(it, j_const.end());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.begin());
+    CHECK(it != j_const.end());
+    CHECK(*it == j_const);
 
     ++it;
-    EXPECT_NE(it, j_const.begin());
-    EXPECT_EQ(it, j_const.end());
+    CHECK(it != j_const.begin());
+    CHECK(it == j_const.end());
 
     --it;
-    EXPECT_EQ(it, j_const.begin());
-    EXPECT_NE(it, j_const.end());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.begin());
+    CHECK(it != j_const.end());
+    CHECK(*it == j_const);
 }
 
-TEST_F(JsonIteratorIntegerTest, CBeginEnd)
+TEST_F(Iterators1BasicBehaviorNumberIntegerTest, JsonCbeginCend)
 {
     json::const_iterator it = j.cbegin();
-    EXPECT_NE(it, j.cend());
-    EXPECT_EQ(*it, j);
+    CHECK(it != j.cend());
+    CHECK(*it == j);
 
     it++;
-    EXPECT_NE(it, j.cbegin());
-    EXPECT_EQ(it, j.cend());
+    CHECK(it != j.cbegin());
+    CHECK(it == j.cend());
 
     it--;
-    EXPECT_EQ(it, j.cbegin());
-    EXPECT_NE(it, j.cend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.cbegin());
+    CHECK(it != j.cend());
+    CHECK(*it == j);
 
     ++it;
-    EXPECT_NE(it, j.cbegin());
-    EXPECT_EQ(it, j.cend());
+    CHECK(it != j.cbegin());
+    CHECK(it == j.cend());
 
     --it;
-    EXPECT_EQ(it, j.cbegin());
-    EXPECT_NE(it, j.cend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.cbegin());
+    CHECK(it != j.cend());
+    CHECK(*it == j);
 }
 
-TEST_F(JsonIteratorIntegerTest, ConstCBeginEnd)
+TEST_F(Iterators1BasicBehaviorNumberIntegerTest, ConstJsonCbeginCend)
 {
     json::const_iterator it = j_const.cbegin();
-    EXPECT_NE(it, j_const.cend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it != j_const.cend());
+    CHECK(*it == j_const);
 
     it++;
-    EXPECT_NE(it, j_const.cbegin());
-    EXPECT_EQ(it, j_const.cend());
+    CHECK(it != j_const.cbegin());
+    CHECK(it == j_const.cend());
 
     it--;
-    EXPECT_EQ(it, j_const.cbegin());
-    EXPECT_NE(it, j_const.cend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.cbegin());
+    CHECK(it != j_const.cend());
+    CHECK(*it == j_const);
 
     ++it;
-    EXPECT_NE(it, j_const.cbegin());
-    EXPECT_EQ(it, j_const.cend());
+    CHECK(it != j_const.cbegin());
+    CHECK(it == j_const.cend());
 
     --it;
-    EXPECT_EQ(it, j_const.cbegin());
-    EXPECT_NE(it, j_const.cend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.cbegin());
+    CHECK(it != j_const.cend());
+    CHECK(*it == j_const);
 }
-#if 0
-TEST_F(JsonIteratorIntegerTest, RBeginEnd)
+
+TEST_F(Iterators1BasicBehaviorNumberIntegerTest, JsonRbeginRend)
 {
     json::reverse_iterator it = j.rbegin();
-    EXPECT_NE(it, j.rend());
-    EXPECT_EQ(*it, j);
+    CHECK(it != j.rend());
+    CHECK(*it == j);
 
     it++;
-    EXPECT_NE(it, j.rbegin());
-    EXPECT_EQ(it, j.rend());
+    CHECK(it != j.rbegin());
+    CHECK(it == j.rend());
 
     it--;
-    EXPECT_EQ(it, j.rbegin());
-    EXPECT_NE(it, j.rend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.rbegin());
+    CHECK(it != j.rend());
+    CHECK(*it == j);
 
     ++it;
-    EXPECT_NE(it, j.rbegin());
-    EXPECT_EQ(it, j.rend());
+    CHECK(it != j.rbegin());
+    CHECK(it == j.rend());
 
     --it;
-    EXPECT_EQ(it, j.rbegin());
-    EXPECT_NE(it, j.rend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.rbegin());
+    CHECK(it != j.rend());
+    CHECK(*it == j);
 }
 
-TEST_F(JsonIteratorIntegerTest, CRBeginEnd)
+TEST_F(Iterators1BasicBehaviorNumberIntegerTest, JsonCrbeginCrend)
 {
     json::const_reverse_iterator it = j.crbegin();
-    EXPECT_NE(it, j.crend());
-    EXPECT_EQ(*it, j);
+    CHECK(it != j.crend());
+    CHECK(*it == j);
 
     it++;
-    EXPECT_NE(it, j.crbegin());
-    EXPECT_EQ(it, j.crend());
+    CHECK(it != j.crbegin());
+    CHECK(it == j.crend());
 
     it--;
-    EXPECT_EQ(it, j.crbegin());
-    EXPECT_NE(it, j.crend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.crbegin());
+    CHECK(it != j.crend());
+    CHECK(*it == j);
 
     ++it;
-    EXPECT_NE(it, j.crbegin());
-    EXPECT_EQ(it, j.crend());
+    CHECK(it != j.crbegin());
+    CHECK(it == j.crend());
 
     --it;
-    EXPECT_EQ(it, j.crbegin());
-    EXPECT_NE(it, j.crend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.crbegin());
+    CHECK(it != j.crend());
+    CHECK(*it == j);
 }
 
-TEST_F(JsonIteratorIntegerTest, ConstCRBeginEnd)
+TEST_F(Iterators1BasicBehaviorNumberIntegerTest, ConstJsonCrbeginCrend)
 {
     json::const_reverse_iterator it = j_const.crbegin();
-    EXPECT_NE(it, j_const.crend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it != j_const.crend());
+    CHECK(*it == j_const);
 
     it++;
-    EXPECT_NE(it, j_const.crbegin());
-    EXPECT_EQ(it, j_const.crend());
+    CHECK(it != j_const.crbegin());
+    CHECK(it == j_const.crend());
 
     it--;
-    EXPECT_EQ(it, j_const.crbegin());
-    EXPECT_NE(it, j_const.crend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.crbegin());
+    CHECK(it != j_const.crend());
+    CHECK(*it == j_const);
 
     ++it;
-    EXPECT_NE(it, j_const.crbegin());
-    EXPECT_EQ(it, j_const.crend());
+    CHECK(it != j_const.crbegin());
+    CHECK(it == j_const.crend());
 
     --it;
-    EXPECT_EQ(it, j_const.crbegin());
-    EXPECT_NE(it, j_const.crend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.crbegin());
+    CHECK(it != j_const.crend());
+    CHECK(*it == j_const);
 }
-#endif
-TEST_F(JsonIteratorIntegerTest, KeyValue)
+
+TEST_F(Iterators1BasicBehaviorNumberIntegerTest, KeyValue)
 {
     auto it = j.begin();
     auto cit = j_const.cbegin();
-    EXPECT_THROW_MSG(it.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_EQ(it.value(), json(23));
-    EXPECT_THROW_MSG(cit.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_EQ(cit.value(), json(23));
-#if 0
+    CHECK_THROWS_WITH_AS(it.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK(it.value() == json(23));
+    CHECK_THROWS_WITH_AS(cit.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK(cit.value() == json(23));
+
     auto rit = j.rend();
     auto crit = j.crend();
-    EXPECT_THROW_MSG(rit.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_THROW_MSG(rit.value(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.214] cannot get value");
-    EXPECT_THROW_MSG(crit.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_THROW_MSG(crit.value(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.214] cannot get value");
-#endif
+    CHECK_THROWS_WITH_AS(rit.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(rit.value(), "[json.exception.invalid_iterator.214] cannot get value", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(crit.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(crit.value(), "[json.exception.invalid_iterator.214] cannot get value", json::invalid_iterator&);
 }
 
-class JsonIteratorUnsignedTest : public ::testing::Test {
- public:
-    JsonIteratorUnsignedTest() : j_const(j) {}
-
+class Iterators1BasicBehaviorNumberUnsignedTest : public ::testing::Test {
  protected:
-    json j = 23u;
+    Iterators1BasicBehaviorNumberUnsignedTest() : j(23u), j_const(j) {}
+
+    json j;
     json j_const;
 };
 
-TEST_F(JsonIteratorUnsignedTest, BeginEnd)
+
+TEST_F(Iterators1BasicBehaviorNumberUnsignedTest, JsonBeginEnd)
 {
     json::iterator it = j.begin();
-    EXPECT_NE(it, j.end());
-    EXPECT_EQ(*it, j);
+    CHECK(it != j.end());
+    CHECK(*it == j);
 
     it++;
-    EXPECT_NE(it, j.begin());
-    EXPECT_EQ(it, j.end());
+    CHECK(it != j.begin());
+    CHECK(it == j.end());
 
     it--;
-    EXPECT_EQ(it, j.begin());
-    EXPECT_NE(it, j.end());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.begin());
+    CHECK(it != j.end());
+    CHECK(*it == j);
 
     ++it;
-    EXPECT_NE(it, j.begin());
-    EXPECT_EQ(it, j.end());
+    CHECK(it != j.begin());
+    CHECK(it == j.end());
 
     --it;
-    EXPECT_EQ(it, j.begin());
-    EXPECT_NE(it, j.end());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.begin());
+    CHECK(it != j.end());
+    CHECK(*it == j);
 }
 
-TEST_F(JsonIteratorUnsignedTest, ConstBeginEnd)
+TEST_F(Iterators1BasicBehaviorNumberUnsignedTest, ConstJsonBeginEnd)
 {
     json::const_iterator it = j_const.begin();
-    EXPECT_NE(it, j_const.end());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it != j_const.end());
+    CHECK(*it == j_const);
 
     it++;
-    EXPECT_NE(it, j_const.begin());
-    EXPECT_EQ(it, j_const.end());
+    CHECK(it != j_const.begin());
+    CHECK(it == j_const.end());
 
     it--;
-    EXPECT_EQ(it, j_const.begin());
-    EXPECT_NE(it, j_const.end());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.begin());
+    CHECK(it != j_const.end());
+    CHECK(*it == j_const);
 
     ++it;
-    EXPECT_NE(it, j_const.begin());
-    EXPECT_EQ(it, j_const.end());
+    CHECK(it != j_const.begin());
+    CHECK(it == j_const.end());
 
     --it;
-    EXPECT_EQ(it, j_const.begin());
-    EXPECT_NE(it, j_const.end());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.begin());
+    CHECK(it != j_const.end());
+    CHECK(*it == j_const);
 }
 
-TEST_F(JsonIteratorUnsignedTest, CBeginEnd)
+TEST_F(Iterators1BasicBehaviorNumberUnsignedTest, JsonCbeginCend)
 {
     json::const_iterator it = j.cbegin();
-    EXPECT_NE(it, j.cend());
-    EXPECT_EQ(*it, j);
+    CHECK(it != j.cend());
+    CHECK(*it == j);
 
     it++;
-    EXPECT_NE(it, j.cbegin());
-    EXPECT_EQ(it, j.cend());
+    CHECK(it != j.cbegin());
+    CHECK(it == j.cend());
 
     it--;
-    EXPECT_EQ(it, j.cbegin());
-    EXPECT_NE(it, j.cend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.cbegin());
+    CHECK(it != j.cend());
+    CHECK(*it == j);
 
     ++it;
-    EXPECT_NE(it, j.cbegin());
-    EXPECT_EQ(it, j.cend());
+    CHECK(it != j.cbegin());
+    CHECK(it == j.cend());
 
     --it;
-    EXPECT_EQ(it, j.cbegin());
-    EXPECT_NE(it, j.cend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.cbegin());
+    CHECK(it != j.cend());
+    CHECK(*it == j);
 }
 
-TEST_F(JsonIteratorUnsignedTest, ConstCBeginEnd)
+TEST_F(Iterators1BasicBehaviorNumberUnsignedTest, ConstJsonCbeginCend)
 {
     json::const_iterator it = j_const.cbegin();
-    EXPECT_NE(it, j_const.cend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it != j_const.cend());
+    CHECK(*it == j_const);
 
     it++;
-    EXPECT_NE(it, j_const.cbegin());
-    EXPECT_EQ(it, j_const.cend());
+    CHECK(it != j_const.cbegin());
+    CHECK(it == j_const.cend());
 
     it--;
-    EXPECT_EQ(it, j_const.cbegin());
-    EXPECT_NE(it, j_const.cend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.cbegin());
+    CHECK(it != j_const.cend());
+    CHECK(*it == j_const);
 
     ++it;
-    EXPECT_NE(it, j_const.cbegin());
-    EXPECT_EQ(it, j_const.cend());
+    CHECK(it != j_const.cbegin());
+    CHECK(it == j_const.cend());
 
     --it;
-    EXPECT_EQ(it, j_const.cbegin());
-    EXPECT_NE(it, j_const.cend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.cbegin());
+    CHECK(it != j_const.cend());
+    CHECK(*it == j_const);
 }
-#if 0
-TEST_F(JsonIteratorUnsignedTest, RBeginEnd)
+
+TEST_F(Iterators1BasicBehaviorNumberUnsignedTest, JsonRbeginRend)
 {
     json::reverse_iterator it = j.rbegin();
-    EXPECT_NE(it, j.rend());
-    EXPECT_EQ(*it, j);
+    CHECK(it != j.rend());
+    CHECK(*it == j);
 
     it++;
-    EXPECT_NE(it, j.rbegin());
-    EXPECT_EQ(it, j.rend());
+    CHECK(it != j.rbegin());
+    CHECK(it == j.rend());
 
     it--;
-    EXPECT_EQ(it, j.rbegin());
-    EXPECT_NE(it, j.rend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.rbegin());
+    CHECK(it != j.rend());
+    CHECK(*it == j);
 
     ++it;
-    EXPECT_NE(it, j.rbegin());
-    EXPECT_EQ(it, j.rend());
+    CHECK(it != j.rbegin());
+    CHECK(it == j.rend());
 
     --it;
-    EXPECT_EQ(it, j.rbegin());
-    EXPECT_NE(it, j.rend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.rbegin());
+    CHECK(it != j.rend());
+    CHECK(*it == j);
 }
 
-TEST_F(JsonIteratorUnsignedTest, CRBeginEnd)
+TEST_F(Iterators1BasicBehaviorNumberUnsignedTest, JsonCrbeginCrend)
 {
     json::const_reverse_iterator it = j.crbegin();
-    EXPECT_NE(it, j.crend());
-    EXPECT_EQ(*it, j);
+    CHECK(it != j.crend());
+    CHECK(*it == j);
 
     it++;
-    EXPECT_NE(it, j.crbegin());
-    EXPECT_EQ(it, j.crend());
+    CHECK(it != j.crbegin());
+    CHECK(it == j.crend());
 
     it--;
-    EXPECT_EQ(it, j.crbegin());
-    EXPECT_NE(it, j.crend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.crbegin());
+    CHECK(it != j.crend());
+    CHECK(*it == j);
 
     ++it;
-    EXPECT_NE(it, j.crbegin());
-    EXPECT_EQ(it, j.crend());
+    CHECK(it != j.crbegin());
+    CHECK(it == j.crend());
 
     --it;
-    EXPECT_EQ(it, j.crbegin());
-    EXPECT_NE(it, j.crend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.crbegin());
+    CHECK(it != j.crend());
+    CHECK(*it == j);
 }
 
-TEST_F(JsonIteratorUnsignedTest, ConstCRBeginEnd)
+TEST_F(Iterators1BasicBehaviorNumberUnsignedTest, ConstJsonCrbeginCrend)
 {
     json::const_reverse_iterator it = j_const.crbegin();
-    EXPECT_NE(it, j_const.crend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it != j_const.crend());
+    CHECK(*it == j_const);
 
     it++;
-    EXPECT_NE(it, j_const.crbegin());
-    EXPECT_EQ(it, j_const.crend());
+    CHECK(it != j_const.crbegin());
+    CHECK(it == j_const.crend());
 
     it--;
-    EXPECT_EQ(it, j_const.crbegin());
-    EXPECT_NE(it, j_const.crend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.crbegin());
+    CHECK(it != j_const.crend());
+    CHECK(*it == j_const);
 
     ++it;
-    EXPECT_NE(it, j_const.crbegin());
-    EXPECT_EQ(it, j_const.crend());
+    CHECK(it != j_const.crbegin());
+    CHECK(it == j_const.crend());
 
     --it;
-    EXPECT_EQ(it, j_const.crbegin());
-    EXPECT_NE(it, j_const.crend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.crbegin());
+    CHECK(it != j_const.crend());
+    CHECK(*it == j_const);
 }
-#endif
-TEST_F(JsonIteratorUnsignedTest, KeyValue)
+
+TEST_F(Iterators1BasicBehaviorNumberUnsignedTest, KeyValue)
 {
     auto it = j.begin();
     auto cit = j_const.cbegin();
-    EXPECT_THROW_MSG(it.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_EQ(it.value(), json(23));
-    EXPECT_THROW_MSG(cit.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_EQ(cit.value(), json(23));
-#if 0
+    CHECK_THROWS_WITH_AS(it.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK(it.value() == json(23));
+    CHECK_THROWS_WITH_AS(cit.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK(cit.value() == json(23));
+
     auto rit = j.rend();
     auto crit = j.crend();
-    EXPECT_THROW_MSG(rit.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_THROW_MSG(rit.value(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.214] cannot get value");
-    EXPECT_THROW_MSG(crit.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_THROW_MSG(crit.value(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.214] cannot get value");
-#endif
+    CHECK_THROWS_WITH_AS(rit.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(rit.value(), "[json.exception.invalid_iterator.214] cannot get value", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(crit.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(crit.value(), "[json.exception.invalid_iterator.214] cannot get value", json::invalid_iterator&);
 }
 
-class JsonIteratorFloatTest : public ::testing::Test {
- public:
-    JsonIteratorFloatTest() : j_const(j) {}
-
+class Iterators1BasicBehaviorNumberFloatTest : public ::testing::Test {
  protected:
-    json j = 23.42;
+    Iterators1BasicBehaviorNumberFloatTest() : j(23.42), j_const(j) {}
+
+    json j;
     json j_const;
 };
 
-TEST_F(JsonIteratorFloatTest, BeginEnd)
+
+TEST_F(Iterators1BasicBehaviorNumberFloatTest, JsonBeginEnd)
 {
     json::iterator it = j.begin();
-    EXPECT_NE(it, j.end());
-    EXPECT_EQ(*it, j);
+    CHECK(it != j.end());
+    CHECK(*it == j);
 
     it++;
-    EXPECT_NE(it, j.begin());
-    EXPECT_EQ(it, j.end());
+    CHECK(it != j.begin());
+    CHECK(it == j.end());
 
     it--;
-    EXPECT_EQ(it, j.begin());
-    EXPECT_NE(it, j.end());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.begin());
+    CHECK(it != j.end());
+    CHECK(*it == j);
 
     ++it;
-    EXPECT_NE(it, j.begin());
-    EXPECT_EQ(it, j.end());
+    CHECK(it != j.begin());
+    CHECK(it == j.end());
 
     --it;
-    EXPECT_EQ(it, j.begin());
-    EXPECT_NE(it, j.end());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.begin());
+    CHECK(it != j.end());
+    CHECK(*it == j);
 }
 
-TEST_F(JsonIteratorFloatTest, ConstBeginEnd)
+TEST_F(Iterators1BasicBehaviorNumberFloatTest, ConstJsonBeginEnd)
 {
     json::const_iterator it = j_const.begin();
-    EXPECT_NE(it, j_const.end());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it != j_const.end());
+    CHECK(*it == j_const);
 
     it++;
-    EXPECT_NE(it, j_const.begin());
-    EXPECT_EQ(it, j_const.end());
+    CHECK(it != j_const.begin());
+    CHECK(it == j_const.end());
 
     it--;
-    EXPECT_EQ(it, j_const.begin());
-    EXPECT_NE(it, j_const.end());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.begin());
+    CHECK(it != j_const.end());
+    CHECK(*it == j_const);
 
     ++it;
-    EXPECT_NE(it, j_const.begin());
-    EXPECT_EQ(it, j_const.end());
+    CHECK(it != j_const.begin());
+    CHECK(it == j_const.end());
 
     --it;
-    EXPECT_EQ(it, j_const.begin());
-    EXPECT_NE(it, j_const.end());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.begin());
+    CHECK(it != j_const.end());
+    CHECK(*it == j_const);
 }
 
-TEST_F(JsonIteratorFloatTest, CBeginEnd)
+TEST_F(Iterators1BasicBehaviorNumberFloatTest, JsonCbeginCend)
 {
     json::const_iterator it = j.cbegin();
-    EXPECT_NE(it, j.cend());
-    EXPECT_EQ(*it, j);
+    CHECK(it != j.cend());
+    CHECK(*it == j);
 
     it++;
-    EXPECT_NE(it, j.cbegin());
-    EXPECT_EQ(it, j.cend());
+    CHECK(it != j.cbegin());
+    CHECK(it == j.cend());
 
     it--;
-    EXPECT_EQ(it, j.cbegin());
-    EXPECT_NE(it, j.cend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.cbegin());
+    CHECK(it != j.cend());
+    CHECK(*it == j);
 
     ++it;
-    EXPECT_NE(it, j.cbegin());
-    EXPECT_EQ(it, j.cend());
+    CHECK(it != j.cbegin());
+    CHECK(it == j.cend());
 
     --it;
-    EXPECT_EQ(it, j.cbegin());
-    EXPECT_NE(it, j.cend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.cbegin());
+    CHECK(it != j.cend());
+    CHECK(*it == j);
 }
 
-TEST_F(JsonIteratorFloatTest, ConstCBeginEnd)
+TEST_F(Iterators1BasicBehaviorNumberFloatTest, ConstJsonCbeginCend)
 {
     json::const_iterator it = j_const.cbegin();
-    EXPECT_NE(it, j_const.cend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it != j_const.cend());
+    CHECK(*it == j_const);
 
     it++;
-    EXPECT_NE(it, j_const.cbegin());
-    EXPECT_EQ(it, j_const.cend());
+    CHECK(it != j_const.cbegin());
+    CHECK(it == j_const.cend());
 
     it--;
-    EXPECT_EQ(it, j_const.cbegin());
-    EXPECT_NE(it, j_const.cend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.cbegin());
+    CHECK(it != j_const.cend());
+    CHECK(*it == j_const);
 
     ++it;
-    EXPECT_NE(it, j_const.cbegin());
-    EXPECT_EQ(it, j_const.cend());
+    CHECK(it != j_const.cbegin());
+    CHECK(it == j_const.cend());
 
     --it;
-    EXPECT_EQ(it, j_const.cbegin());
-    EXPECT_NE(it, j_const.cend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.cbegin());
+    CHECK(it != j_const.cend());
+    CHECK(*it == j_const);
 }
-#if 0
-TEST_F(JsonIteratorFloatTest, RBeginEnd)
+
+TEST_F(Iterators1BasicBehaviorNumberFloatTest, JsonRbeginRend)
 {
     json::reverse_iterator it = j.rbegin();
-    EXPECT_NE(it, j.rend());
-    EXPECT_EQ(*it, j);
+    CHECK(it != j.rend());
+    CHECK(*it == j);
 
     it++;
-    EXPECT_NE(it, j.rbegin());
-    EXPECT_EQ(it, j.rend());
+    CHECK(it != j.rbegin());
+    CHECK(it == j.rend());
 
     it--;
-    EXPECT_EQ(it, j.rbegin());
-    EXPECT_NE(it, j.rend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.rbegin());
+    CHECK(it != j.rend());
+    CHECK(*it == j);
 
     ++it;
-    EXPECT_NE(it, j.rbegin());
-    EXPECT_EQ(it, j.rend());
+    CHECK(it != j.rbegin());
+    CHECK(it == j.rend());
 
     --it;
-    EXPECT_EQ(it, j.rbegin());
-    EXPECT_NE(it, j.rend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.rbegin());
+    CHECK(it != j.rend());
+    CHECK(*it == j);
 }
 
-TEST_F(JsonIteratorFloatTest, CRBeginEnd)
+TEST_F(Iterators1BasicBehaviorNumberFloatTest, JsonCrbeginCrend)
 {
     json::const_reverse_iterator it = j.crbegin();
-    EXPECT_NE(it, j.crend());
-    EXPECT_EQ(*it, j);
+    CHECK(it != j.crend());
+    CHECK(*it == j);
 
     it++;
-    EXPECT_NE(it, j.crbegin());
-    EXPECT_EQ(it, j.crend());
+    CHECK(it != j.crbegin());
+    CHECK(it == j.crend());
 
     it--;
-    EXPECT_EQ(it, j.crbegin());
-    EXPECT_NE(it, j.crend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.crbegin());
+    CHECK(it != j.crend());
+    CHECK(*it == j);
 
     ++it;
-    EXPECT_NE(it, j.crbegin());
-    EXPECT_EQ(it, j.crend());
+    CHECK(it != j.crbegin());
+    CHECK(it == j.crend());
 
     --it;
-    EXPECT_EQ(it, j.crbegin());
-    EXPECT_NE(it, j.crend());
-    EXPECT_EQ(*it, j);
+    CHECK(it == j.crbegin());
+    CHECK(it != j.crend());
+    CHECK(*it == j);
 }
 
-TEST_F(JsonIteratorFloatTest, ConstCRBeginEnd)
+TEST_F(Iterators1BasicBehaviorNumberFloatTest, ConstJsonCrbeginCrend)
 {
     json::const_reverse_iterator it = j_const.crbegin();
-    EXPECT_NE(it, j_const.crend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it != j_const.crend());
+    CHECK(*it == j_const);
 
     it++;
-    EXPECT_NE(it, j_const.crbegin());
-    EXPECT_EQ(it, j_const.crend());
+    CHECK(it != j_const.crbegin());
+    CHECK(it == j_const.crend());
 
     it--;
-    EXPECT_EQ(it, j_const.crbegin());
-    EXPECT_NE(it, j_const.crend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.crbegin());
+    CHECK(it != j_const.crend());
+    CHECK(*it == j_const);
 
     ++it;
-    EXPECT_NE(it, j_const.crbegin());
-    EXPECT_EQ(it, j_const.crend());
+    CHECK(it != j_const.crbegin());
+    CHECK(it == j_const.crend());
 
     --it;
-    EXPECT_EQ(it, j_const.crbegin());
-    EXPECT_NE(it, j_const.crend());
-    EXPECT_EQ(*it, j_const);
+    CHECK(it == j_const.crbegin());
+    CHECK(it != j_const.crend());
+    CHECK(*it == j_const);
 }
-#endif
-TEST_F(JsonIteratorFloatTest, KeyValue)
+
+TEST_F(Iterators1BasicBehaviorNumberFloatTest, KeyValue)
 {
     auto it = j.begin();
     auto cit = j_const.cbegin();
-    EXPECT_THROW_MSG(it.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_EQ(it.value(), json(23.42));
-    EXPECT_THROW_MSG(cit.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_EQ(cit.value(), json(23.42));
-#if 0
+    CHECK_THROWS_WITH_AS(it.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK(it.value() == json(23.42));
+    CHECK_THROWS_WITH_AS(cit.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK(cit.value() == json(23.42));
+
     auto rit = j.rend();
     auto crit = j.crend();
-    EXPECT_THROW_MSG(rit.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_THROW_MSG(rit.value(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.214] cannot get value");
-    EXPECT_THROW_MSG(crit.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_THROW_MSG(crit.value(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.214] cannot get value");
-#endif
+    CHECK_THROWS_WITH_AS(rit.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(rit.value(), "[json.exception.invalid_iterator.214] cannot get value", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(crit.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(crit.value(), "[json.exception.invalid_iterator.214] cannot get value", json::invalid_iterator&);
 }
 
-class JsonIteratorNullTest : public ::testing::Test {
- public:
-    JsonIteratorNullTest() : j_const(j) {}
-
+class Iterators1BasicBehaviorNullTest : public ::testing::Test {
  protected:
-    json j = nullptr;
+    Iterators1BasicBehaviorNullTest() : j(nullptr), j_const(j) {}
+
+    json j;
     json j_const;
 };
 
-TEST_F(JsonIteratorNullTest, BeginEnd)
+
+TEST_F(Iterators1BasicBehaviorNullTest, JsonBeginEnd)
 {
     json::iterator it = j.begin();
-    EXPECT_EQ(it, j.end());
+    CHECK(it == j.end());
 }
 
-TEST_F(JsonIteratorNullTest, ConstBeginEnd)
+TEST_F(Iterators1BasicBehaviorNullTest, ConstJsonBeginEnd)
 {
     json::const_iterator it_begin = j_const.begin();
     json::const_iterator it_end = j_const.end();
-    EXPECT_EQ(it_begin, it_end);
+    CHECK(it_begin == it_end);
 }
 
-TEST_F(JsonIteratorNullTest, CBeginEnd)
+TEST_F(Iterators1BasicBehaviorNullTest, JsonCbeginCend)
 {
     json::const_iterator it_begin = j.cbegin();
     json::const_iterator it_end = j.cend();
-    EXPECT_EQ(it_begin, it_end);
+    CHECK(it_begin == it_end);
 }
 
-TEST_F(JsonIteratorNullTest, ConstCBeginEnd)
+TEST_F(Iterators1BasicBehaviorNullTest, ConstJsonCbeginCend)
 {
     json::const_iterator it_begin = j_const.cbegin();
     json::const_iterator it_end = j_const.cend();
-    EXPECT_EQ(it_begin, it_end);
+    CHECK(it_begin == it_end);
 }
-#if 0
-TEST_F(JsonIteratorNullTest, RBeginEnd)
+
+TEST_F(Iterators1BasicBehaviorNullTest, JsonRbeginRend)
 {
     json::reverse_iterator it = j.rbegin();
-    EXPECT_EQ(it, j.rend());
+    CHECK(it == j.rend());
 }
 
-TEST_F(JsonIteratorNullTest, CRBeginEnd)
+TEST_F(Iterators1BasicBehaviorNullTest, JsonCrbeginCrend)
 {
     json::const_reverse_iterator it = j.crbegin();
-    EXPECT_EQ(it, j.crend());
+    CHECK(it == j.crend());
 }
 
-TEST_F(JsonIteratorNullTest, ConstCRBeginEnd)
+TEST_F(Iterators1BasicBehaviorNullTest, ConstJsonCrbeginCrend)
 {
     json::const_reverse_iterator it = j_const.crbegin();
-    EXPECT_EQ(it, j_const.crend());
+    CHECK(it == j_const.crend());
 }
-#endif
-TEST_F(JsonIteratorNullTest, KeyValue)
+
+TEST_F(Iterators1BasicBehaviorNullTest, KeyValue)
 {
     auto it = j.begin();
     auto cit = j_const.cbegin();
-    EXPECT_THROW_MSG(it.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_THROW_MSG(it.value(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.214] cannot get value");
-    EXPECT_THROW_MSG(cit.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_THROW_MSG(cit.value(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.214] cannot get value");
-#if 0
+    CHECK_THROWS_WITH_AS(it.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(it.value(), "[json.exception.invalid_iterator.214] cannot get value", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(cit.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(cit.value(), "[json.exception.invalid_iterator.214] cannot get value", json::invalid_iterator&);
+
     auto rit = j.rend();
     auto crit = j.crend();
-    EXPECT_THROW_MSG(rit.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_THROW_MSG(rit.value(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.214] cannot get value");
-    EXPECT_THROW_MSG(crit.key(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators");
-    EXPECT_THROW_MSG(crit.value(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.214] cannot get value");
-#endif
+    CHECK_THROWS_WITH_AS(rit.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(rit.value(), "[json.exception.invalid_iterator.214] cannot get value", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(crit.key(), "[json.exception.invalid_iterator.207] cannot use key() for non-object iterators", json::invalid_iterator&);
+    CHECK_THROWS_WITH_AS(crit.value(), "[json.exception.invalid_iterator.214] cannot get value", json::invalid_iterator&);
 }
 
-TEST(JsonIteratorConstConversionTest, Boolean)
+
+
+
+TEST(Iterators1ConversionFromIteratorToConstIteratorTest, Boolean)
 {
     json j = true;
     json::const_iterator it = j.begin();
-    EXPECT_EQ(it, j.cbegin());
+    CHECK(it == j.cbegin());
     it = j.begin();
-    EXPECT_EQ(it, j.cbegin());
+    CHECK(it == j.cbegin());
 }
 
-TEST(JsonIteratorConstConversionTest, String)
+TEST(Iterators1ConversionFromIteratorToConstIteratorTest, String)
 {
     json j = "hello world";
     json::const_iterator it = j.begin();
-    EXPECT_EQ(it, j.cbegin());
+    CHECK(it == j.cbegin());
     it = j.begin();
-    EXPECT_EQ(it, j.cbegin());
+    CHECK(it == j.cbegin());
 }
 
-TEST(JsonIteratorConstConversionTest, Array)
+TEST(Iterators1ConversionFromIteratorToConstIteratorTest, Array)
 {
     json j = {1, 2, 3};
     json::const_iterator it = j.begin();
-    EXPECT_EQ(it, j.cbegin());
+    CHECK(it == j.cbegin());
     it = j.begin();
-    EXPECT_EQ(it, j.cbegin());
+    CHECK(it == j.cbegin());
 }
 
-TEST(JsonIteratorConstConversionTest, Object)
+TEST(Iterators1ConversionFromIteratorToConstIteratorTest, Object)
 {
     json j = {{"A", 1}, {"B", 2}, {"C", 3}};
     json::const_iterator it = j.begin();
-    EXPECT_EQ(it, j.cbegin());
+    CHECK(it == j.cbegin());
     it = j.begin();
-    EXPECT_EQ(it, j.cbegin());
+    CHECK(it == j.cbegin());
 }
 
-TEST(JsonIteratorConstConversionTest, Integer)
+TEST(Iterators1ConversionFromIteratorToConstIteratorTest, NumberInteger)
 {
     json j = 23;
     json::const_iterator it = j.begin();
-    EXPECT_EQ(it, j.cbegin());
+    CHECK(it == j.cbegin());
     it = j.begin();
-    EXPECT_EQ(it, j.cbegin());
+    CHECK(it == j.cbegin());
 }
 
-TEST(JsonIteratorConstConversionTest, Unsigned)
+TEST(Iterators1ConversionFromIteratorToConstIteratorTest, NumberUnsigned)
 {
     json j = 23u;
     json::const_iterator it = j.begin();
-    EXPECT_EQ(it, j.cbegin());
+    CHECK(it == j.cbegin());
     it = j.begin();
-    EXPECT_EQ(it, j.cbegin());
+    CHECK(it == j.cbegin());
 }
 
-TEST(JsonIteratorConstConversionTest, Float)
+TEST(Iterators1ConversionFromIteratorToConstIteratorTest, NumberFloat)
 {
     json j = 23.42;
     json::const_iterator it = j.begin();
-    EXPECT_EQ(it, j.cbegin());
+    CHECK(it == j.cbegin());
     it = j.begin();
-    EXPECT_EQ(it, j.cbegin());
+    CHECK(it == j.cbegin());
 }
 
-TEST(JsonIteratorConstConversionTest, Null)
+TEST(Iterators1ConversionFromIteratorToConstIteratorTest, Null)
 {
     json j = nullptr;
     json::const_iterator it = j.begin();
-    EXPECT_EQ(it, j.cbegin());
+    CHECK(it == j.cbegin());
     it = j.begin();
-    EXPECT_EQ(it, j.cbegin());
+    CHECK(it == j.cbegin());
 }
+

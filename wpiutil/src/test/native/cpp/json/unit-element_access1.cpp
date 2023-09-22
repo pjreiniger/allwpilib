@@ -1,874 +1,883 @@
-/*----------------------------------------------------------------------------*/
-/* Modifications Copyright (c) FIRST 2017. All Rights Reserved.               */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
-/*
-    __ _____ _____ _____
- __|  |   __|     |   | |  JSON for Modern C++ (test suite)
-|  |  |__   |  |  | | | |  version 2.1.1
-|_____|_____|_____|_|___|  https://github.com/nlohmann/json
+//     __ _____ _____ _____
+//  __|  |   __|     |   | |  JSON for Modern C++ (supporting code)
+// |  |  |__   |  |  | | | |  version 3.11.2
+// |_____|_____|_____|_|___|  https://github.com/nlohmann/json
+//
+// Copyright (c) 2013-2022 Niels Lohmann <http://nlohmann.me>.
+// SPDX-FileCopyrightText: 2013-2022 Niels Lohmann <https://nlohmann.me>
+// SPDX-License-Identifier: MIT
 
-Licensed under the MIT License <http://opensource.org/licenses/MIT>.
-Copyright (c) 2013-2017 Niels Lohmann <http://nlohmann.me>.
-
-Permission is hereby  granted, free of charge, to any  person obtaining a copy
-of this software and associated  documentation files (the "Software"), to deal
-in the Software  without restriction, including without  limitation the rights
-to  use, copy,  modify, merge,  publish, distribute,  sublicense, and/or  sell
-copies  of  the Software,  and  to  permit persons  to  whom  the Software  is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE  IS PROVIDED "AS  IS", WITHOUT WARRANTY  OF ANY KIND,  EXPRESS OR
-IMPLIED,  INCLUDING BUT  NOT  LIMITED TO  THE  WARRANTIES OF  MERCHANTABILITY,
-FITNESS FOR  A PARTICULAR PURPOSE AND  NONINFRINGEMENT. IN NO EVENT  SHALL THE
-AUTHORS  OR COPYRIGHT  HOLDERS  BE  LIABLE FOR  ANY  CLAIM,  DAMAGES OR  OTHER
-LIABILITY, WHETHER IN AN ACTION OF  CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+#include "gtest/gtest.h"
 
 #include "unit-json.h"
-
-#include <gtest/gtest.h>
-
 using wpi::json;
 
-class JsonElementArrayAccessTestBase {
- public:
-    JsonElementArrayAccessTestBase() : j_const(j) {}
 
+
+
+class ElementAccess1ArrayTest : public ::testing::Test {
  protected:
     json j = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
-    const json j_const;
+    const json j_const = j;
 };
 
-class JsonElementArrayAccessTest : public ::testing::Test,
-                                   public JsonElementArrayAccessTestBase {};
 
-TEST_F(JsonElementArrayAccessTest, AtWithinBounds)
+class ElementAccess1ArrayAccessSpecifiedElementWithBoundsCheckingTest : public ElementAccess1ArrayTest{};
+
+
+TEST_F(ElementAccess1ArrayAccessSpecifiedElementWithBoundsCheckingTest, AccessWithinBounds)
 {
-    EXPECT_EQ(j.at(0), json(1));
-    EXPECT_EQ(j.at(1), json(1u));
-    EXPECT_EQ(j.at(2), json(true));
-    EXPECT_EQ(j.at(3), json(nullptr));
-    EXPECT_EQ(j.at(4), json("string"));
-    EXPECT_EQ(j.at(5), json(42.23));
-    EXPECT_EQ(j.at(6), json::object());
-    EXPECT_EQ(j.at(7), json({1, 2, 3}));
+    CHECK(j.at(0) == json(1));
+    CHECK(j.at(1) == json(1u));
+    CHECK(j.at(2) == json(true));
+    CHECK(j.at(3) == json(nullptr));
+    CHECK(j.at(4) == json("string"));
+    CHECK(j.at(5) == json(42.23));
+    CHECK(j.at(6) == json::object());
+    CHECK(j.at(7) == json({1, 2, 3}));
 
-    EXPECT_EQ(j_const.at(0), json(1));
-    EXPECT_EQ(j_const.at(1), json(1u));
-    EXPECT_EQ(j_const.at(2), json(true));
-    EXPECT_EQ(j_const.at(3), json(nullptr));
-    EXPECT_EQ(j_const.at(4), json("string"));
-    EXPECT_EQ(j_const.at(5), json(42.23));
-    EXPECT_EQ(j_const.at(6), json::object());
-    EXPECT_EQ(j_const.at(7), json({1, 2, 3}));
+    CHECK(j_const.at(0) == json(1));
+    CHECK(j_const.at(1) == json(1u));
+    CHECK(j_const.at(2) == json(true));
+    CHECK(j_const.at(3) == json(nullptr));
+    CHECK(j_const.at(4) == json("string"));
+    CHECK(j_const.at(5) == json(42.23));
+    CHECK(j_const.at(6) == json::object());
+    CHECK(j_const.at(7) == json({1, 2, 3}));
 }
 
-TEST_F(JsonElementArrayAccessTest, AtOutsideBounds)
+TEST_F(ElementAccess1ArrayAccessSpecifiedElementWithBoundsCheckingTest, AccessOutsideBounds)
 {
-    EXPECT_THROW_MSG(j.at(8), json::out_of_range,
-                     "[json.exception.out_of_range.401] array index 8 is out of range");
-    EXPECT_THROW_MSG(j_const.at(8), json::out_of_range,
-                     "[json.exception.out_of_range.401] array index 8 is out of range");
+    CHECK_THROWS_WITH_AS(j.at(8),
+                         "[json.exception.out_of_range.401] array index 8 is out of range", json::out_of_range&);
+    CHECK_THROWS_WITH_AS(j_const.at(8),
+                         "[json.exception.out_of_range.401] array index 8 is out of range", json::out_of_range&);
 }
 
-TEST(JsonElementNonArrayAtAccessTest, Null)
+class ElementAccess1ArrayAccessSpecifiedElementWithBoundsCheckingAccessOnNonArrayTypeTest : public ElementAccess1ArrayTest{};
+
+
+TEST_F(ElementAccess1ArrayAccessSpecifiedElementWithBoundsCheckingAccessOnNonArrayTypeTest, Null)
 {
     json j_nonarray(json::value_t::null);
     const json j_nonarray_const(j_nonarray);
-    EXPECT_THROW_MSG(j_nonarray.at(0), json::type_error,
-                     "[json.exception.type_error.304] cannot use at() with null");
-    EXPECT_THROW_MSG(j_nonarray_const.at(0), json::type_error,
-                     "[json.exception.type_error.304] cannot use at() with null");
+
+    CHECK_THROWS_WITH_AS(j_nonarray.at(0), "[json.exception.type_error.304] cannot use at() with null", json::type_error&);
+    CHECK_THROWS_WITH_AS(j_nonarray_const.at(0), "[json.exception.type_error.304] cannot use at() with null", json::type_error&);
 }
 
-TEST(JsonElementNonArrayAtAccessTest, Boolean)
+TEST_F(ElementAccess1ArrayAccessSpecifiedElementWithBoundsCheckingAccessOnNonArrayTypeTest, Boolean)
 {
     json j_nonarray(json::value_t::boolean);
     const json j_nonarray_const(j_nonarray);
-    EXPECT_THROW_MSG(j_nonarray.at(0), json::type_error,
-                     "[json.exception.type_error.304] cannot use at() with boolean");
-    EXPECT_THROW_MSG(j_nonarray_const.at(0), json::type_error,
-                     "[json.exception.type_error.304] cannot use at() with boolean");
+
+    CHECK_THROWS_WITH_AS(j_nonarray.at(0), "[json.exception.type_error.304] cannot use at() with boolean", json::type_error&);
+    CHECK_THROWS_WITH_AS(j_nonarray_const.at(0), "[json.exception.type_error.304] cannot use at() with boolean", json::type_error&);
 }
 
-TEST(JsonElementNonArrayAtAccessTest, String)
+TEST_F(ElementAccess1ArrayAccessSpecifiedElementWithBoundsCheckingAccessOnNonArrayTypeTest, String)
 {
     json j_nonarray(json::value_t::string);
     const json j_nonarray_const(j_nonarray);
-    EXPECT_THROW_MSG(j_nonarray.at(0), json::type_error,
-                     "[json.exception.type_error.304] cannot use at() with string");
-    EXPECT_THROW_MSG(j_nonarray_const.at(0), json::type_error,
-                     "[json.exception.type_error.304] cannot use at() with string");
+
+    CHECK_THROWS_WITH_AS(j_nonarray.at(0), "[json.exception.type_error.304] cannot use at() with string", json::type_error&);
+    CHECK_THROWS_WITH_AS(j_nonarray_const.at(0), "[json.exception.type_error.304] cannot use at() with string", json::type_error&);
 }
 
-TEST(JsonElementNonArrayAtAccessTest, Object)
+TEST_F(ElementAccess1ArrayAccessSpecifiedElementWithBoundsCheckingAccessOnNonArrayTypeTest, Object)
 {
     json j_nonarray(json::value_t::object);
     const json j_nonarray_const(j_nonarray);
-    EXPECT_THROW_MSG(j_nonarray.at(0), json::type_error,
-                     "[json.exception.type_error.304] cannot use at() with object");
-    EXPECT_THROW_MSG(j_nonarray_const.at(0), json::type_error,
-                     "[json.exception.type_error.304] cannot use at() with object");
+
+    CHECK_THROWS_WITH_AS(j_nonarray.at(0), "[json.exception.type_error.304] cannot use at() with object", json::type_error&);
+    CHECK_THROWS_WITH_AS(j_nonarray_const.at(0), "[json.exception.type_error.304] cannot use at() with object", json::type_error&);
 }
 
-TEST(JsonElementNonArrayAtAccessTest, Integer)
+TEST_F(ElementAccess1ArrayAccessSpecifiedElementWithBoundsCheckingAccessOnNonArrayTypeTest, NumberInteger)
 {
     json j_nonarray(json::value_t::number_integer);
     const json j_nonarray_const(j_nonarray);
-    EXPECT_THROW_MSG(j_nonarray.at(0), json::type_error,
-                     "[json.exception.type_error.304] cannot use at() with number");
-    EXPECT_THROW_MSG(j_nonarray_const.at(0), json::type_error,
-                     "[json.exception.type_error.304] cannot use at() with number");
+
+    CHECK_THROWS_WITH_AS(j_nonarray.at(0), "[json.exception.type_error.304] cannot use at() with number", json::type_error&);
+    CHECK_THROWS_WITH_AS(j_nonarray_const.at(0), "[json.exception.type_error.304] cannot use at() with number", json::type_error&);
 }
 
-TEST(JsonElementNonArrayAtAccessTest, Unsigned)
+TEST_F(ElementAccess1ArrayAccessSpecifiedElementWithBoundsCheckingAccessOnNonArrayTypeTest, NumberUnsigned)
 {
     json j_nonarray(json::value_t::number_unsigned);
     const json j_nonarray_const(j_nonarray);
-    EXPECT_THROW_MSG(j_nonarray.at(0), json::type_error,
-                     "[json.exception.type_error.304] cannot use at() with number");
-    EXPECT_THROW_MSG(j_nonarray_const.at(0), json::type_error,
-                     "[json.exception.type_error.304] cannot use at() with number");
+
+    CHECK_THROWS_WITH_AS(j_nonarray.at(0), "[json.exception.type_error.304] cannot use at() with number", json::type_error&);
+    CHECK_THROWS_WITH_AS(j_nonarray_const.at(0), "[json.exception.type_error.304] cannot use at() with number", json::type_error&);
 }
 
-TEST(JsonElementNonArrayAtAccessTest, Float)
+TEST_F(ElementAccess1ArrayAccessSpecifiedElementWithBoundsCheckingAccessOnNonArrayTypeTest, NumberFloatingPoint)
 {
     json j_nonarray(json::value_t::number_float);
     const json j_nonarray_const(j_nonarray);
-    EXPECT_THROW_MSG(j_nonarray.at(0), json::type_error,
-                     "[json.exception.type_error.304] cannot use at() with number");
-    EXPECT_THROW_MSG(j_nonarray_const.at(0), json::type_error,
-                     "[json.exception.type_error.304] cannot use at() with number");
+
+    CHECK_THROWS_WITH_AS(j_nonarray.at(0), "[json.exception.type_error.304] cannot use at() with number", json::type_error&);
+    CHECK_THROWS_WITH_AS(j_nonarray_const.at(0), "[json.exception.type_error.304] cannot use at() with number", json::type_error&);
 }
 
-TEST_F(JsonElementArrayAccessTest, FrontAndBack)
+TEST_F(ElementAccess1ArrayTest, FrontAndBack)
 {
-    EXPECT_EQ(j.front(), json(1));
-    EXPECT_EQ(j_const.front(), json(1));
-    EXPECT_EQ(j.back(), json({1, 2, 3}));
-    EXPECT_EQ(j_const.back(), json({1, 2, 3}));
+    CHECK(j.front() == json(1));
+    CHECK(j_const.front() == json(1));
+    CHECK(j.back() == json({1, 2, 3}));
+    CHECK(j_const.back() == json({1, 2, 3}));
 }
 
-TEST_F(JsonElementArrayAccessTest, OperatorWithinBounds)
+class ElementAccess1ArrayAccessSpecifiedElementTest : public ElementAccess1ArrayTest{};
+
+
+TEST_F(ElementAccess1ArrayAccessSpecifiedElementTest, AccessWithinBounds)
 {
-    EXPECT_EQ(j[0], json(1));
-    EXPECT_EQ(j[1], json(1u));
-    EXPECT_EQ(j[2], json(true));
-    EXPECT_EQ(j[3], json(nullptr));
-    EXPECT_EQ(j[4], json("string"));
-    EXPECT_EQ(j[5], json(42.23));
-    EXPECT_EQ(j[6], json::object());
-    EXPECT_EQ(j[7], json({1, 2, 3}));
+    CHECK(j[0] == json(1));
+    CHECK(j[1] == json(1u));
+    CHECK(j[2] == json(true));
+    CHECK(j[3] == json(nullptr));
+    CHECK(j[4] == json("string"));
+    CHECK(j[5] == json(42.23));
+    CHECK(j[6] == json::object());
+    CHECK(j[7] == json({1, 2, 3}));
 
-    EXPECT_EQ(j_const[0], json(1));
-    EXPECT_EQ(j_const[1], json(1u));
-    EXPECT_EQ(j_const[2], json(true));
-    EXPECT_EQ(j_const[3], json(nullptr));
-    EXPECT_EQ(j_const[4], json("string"));
-    EXPECT_EQ(j_const[5], json(42.23));
-    EXPECT_EQ(j_const[6], json::object());
-    EXPECT_EQ(j_const[7], json({1, 2, 3}));
+    CHECK(j_const[0] == json(1));
+    CHECK(j_const[1] == json(1u));
+    CHECK(j_const[2] == json(true));
+    CHECK(j_const[3] == json(nullptr));
+    CHECK(j_const[4] == json("string"));
+    CHECK(j_const[5] == json(42.23));
+    CHECK(j_const[6] == json::object());
+    CHECK(j_const[7] == json({1, 2, 3}));
 }
 
-TEST(JsonElementNonArrayOperatorAccessTest, NullStandard)
+class ElementAccess1ArrayAccessSpecifiedElementAccessOnNonArrayTypeTest : public ElementAccess1ArrayTest{};
+
+
+class ElementAccess1ArrayAccessSpecifiedElementAccessOnNonArrayTypeNullTest : public ElementAccess1ArrayTest{};
+
+
+TEST_F(ElementAccess1ArrayAccessSpecifiedElementAccessOnNonArrayTypeNullTest, StandardTests)
 {
     json j_nonarray(json::value_t::null);
     const json j_nonarray_const(j_nonarray);
-    EXPECT_NO_THROW(j_nonarray[0]);
-    EXPECT_THROW_MSG(j_nonarray_const[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with null");
+    CHECK_NOTHROW(j_nonarray[0]);
+    CHECK_THROWS_WITH_AS(j_nonarray_const[0], "[json.exception.type_error.305] cannot use operator[] with a numeric argument with null", json::type_error&);
 }
 
-// implicit transformation to properly filled array
-TEST(JsonElementNonArrayOperatorAccessTest, NullImplicitFilled)
+TEST_F(ElementAccess1ArrayAccessSpecifiedElementAccessOnNonArrayTypeNullTest, ImplicitTransformationToProperlyFilledArray)
 {
     json j_nonarray;
     j_nonarray[3] = 42;
-    EXPECT_EQ(j_nonarray, json({nullptr, nullptr, nullptr, 42}));
+    CHECK(j_nonarray == json({nullptr, nullptr, nullptr, 42}));
 }
 
-TEST(JsonElementNonArrayOperatorAccessTest, Boolean)
+TEST_F(ElementAccess1ArrayAccessSpecifiedElementAccessOnNonArrayTypeTest, Boolean)
 {
     json j_nonarray(json::value_t::boolean);
     const json j_nonarray_const(j_nonarray);
-    EXPECT_THROW_MSG(j_nonarray[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with boolean");
-    EXPECT_THROW_MSG(j_nonarray_const[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with boolean");
+    CHECK_THROWS_WITH_AS(j_nonarray[0], "[json.exception.type_error.305] cannot use operator[] with a numeric argument with boolean", json::type_error&);
+    CHECK_THROWS_WITH_AS(j_nonarray_const[0], "[json.exception.type_error.305] cannot use operator[] with a numeric argument with boolean", json::type_error&);
 }
 
-TEST(JsonElementNonArrayOperatorAccessTest, String)
+TEST_F(ElementAccess1ArrayAccessSpecifiedElementAccessOnNonArrayTypeTest, String)
 {
     json j_nonarray(json::value_t::string);
     const json j_nonarray_const(j_nonarray);
-    EXPECT_THROW_MSG(j_nonarray[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with string");
-    EXPECT_THROW_MSG(j_nonarray_const[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with string");
+    CHECK_THROWS_WITH_AS(j_nonarray[0], "[json.exception.type_error.305] cannot use operator[] with a numeric argument with string", json::type_error&);
+    CHECK_THROWS_WITH_AS(j_nonarray_const[0], "[json.exception.type_error.305] cannot use operator[] with a numeric argument with string", json::type_error&);
 }
 
-TEST(JsonElementNonArrayOperatorAccessTest, Object)
+TEST_F(ElementAccess1ArrayAccessSpecifiedElementAccessOnNonArrayTypeTest, Object)
 {
     json j_nonarray(json::value_t::object);
     const json j_nonarray_const(j_nonarray);
-    EXPECT_THROW_MSG(j_nonarray[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with object");
-    EXPECT_THROW_MSG(j_nonarray_const[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with object");
+    CHECK_THROWS_WITH_AS(j_nonarray[0], "[json.exception.type_error.305] cannot use operator[] with a numeric argument with object", json::type_error&);
+    CHECK_THROWS_WITH_AS(j_nonarray_const[0], "[json.exception.type_error.305] cannot use operator[] with a numeric argument with object", json::type_error&);
 }
 
-TEST(JsonElementNonArrayOperatorAccessTest, Integer)
+TEST_F(ElementAccess1ArrayAccessSpecifiedElementAccessOnNonArrayTypeTest, NumberInteger)
 {
     json j_nonarray(json::value_t::number_integer);
     const json j_nonarray_const(j_nonarray);
-    EXPECT_THROW_MSG(j_nonarray[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
-    EXPECT_THROW_MSG(j_nonarray_const[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+    CHECK_THROWS_WITH_AS(j_nonarray[0], "[json.exception.type_error.305] cannot use operator[] with a numeric argument with number", json::type_error&);
+    CHECK_THROWS_WITH_AS(j_nonarray_const[0], "[json.exception.type_error.305] cannot use operator[] with a numeric argument with number", json::type_error&);
 }
 
-TEST(JsonElementNonArrayOperatorAccessTest, Unsigned)
+TEST_F(ElementAccess1ArrayAccessSpecifiedElementAccessOnNonArrayTypeTest, NumberUnsigned)
 {
     json j_nonarray(json::value_t::number_unsigned);
     const json j_nonarray_const(j_nonarray);
-    EXPECT_THROW_MSG(j_nonarray[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
-    EXPECT_THROW_MSG(j_nonarray_const[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+    CHECK_THROWS_WITH_AS(j_nonarray[0], "[json.exception.type_error.305] cannot use operator[] with a numeric argument with number", json::type_error&);
+    CHECK_THROWS_WITH_AS(j_nonarray_const[0], "[json.exception.type_error.305] cannot use operator[] with a numeric argument with number", json::type_error&);
 }
 
-TEST(JsonElementNonArrayOperatorAccessTest, Float)
+TEST_F(ElementAccess1ArrayAccessSpecifiedElementAccessOnNonArrayTypeTest, NumberFloatingPoint)
 {
     json j_nonarray(json::value_t::number_float);
     const json j_nonarray_const(j_nonarray);
-    EXPECT_THROW_MSG(j_nonarray[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
-    EXPECT_THROW_MSG(j_nonarray_const[0], json::type_error,
-                     "[json.exception.type_error.305] cannot use operator[] with number");
+    CHECK_THROWS_WITH_AS(j_nonarray[0], "[json.exception.type_error.305] cannot use operator[] with a numeric argument with number", json::type_error&);
+    CHECK_THROWS_WITH_AS(j_nonarray_const[0], "[json.exception.type_error.305] cannot use operator[] with a numeric argument with number", json::type_error&);
 }
 
-class JsonElementArrayRemoveTest : public ::testing::Test,
-                                   public JsonElementArrayAccessTestBase {};
+class ElementAccess1ArrayRemoveSpecifiedElementTest : public ElementAccess1ArrayTest{};
 
 
-// remove element by index
-TEST_F(JsonElementArrayRemoveTest, Index0)
+TEST_F(ElementAccess1ArrayRemoveSpecifiedElementTest, RemoveElementByIndex)
 {
-    j.erase(0);
-    EXPECT_EQ(j, json({1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}}));
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        jarray.erase(0);
+        CHECK(jarray == json({1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}}));
+    }
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        jarray.erase(1);
+        CHECK(jarray == json({1, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}}));
+    }
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        jarray.erase(2);
+        CHECK(jarray == json({1, 1u, nullptr, "string", 42.23, json::object(), {1, 2, 3}}));
+    }
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        jarray.erase(3);
+        CHECK(jarray == json({1, 1u, true, "string", 42.23, json::object(), {1, 2, 3}}));
+    }
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        jarray.erase(4);
+        CHECK(jarray == json({1, 1u, true, nullptr, 42.23, json::object(), {1, 2, 3}}));
+    }
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        jarray.erase(5);
+        CHECK(jarray == json({1, 1u, true, nullptr, "string", json::object(), {1, 2, 3}}));
+    }
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        jarray.erase(6);
+        CHECK(jarray == json({1, 1u, true, nullptr, "string", 42.23, {1, 2, 3}}));
+    }
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        jarray.erase(7);
+        CHECK(jarray == json({1, 1u, true, nullptr, "string", 42.23, json::object()}));
+    }
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        CHECK_THROWS_WITH_AS(jarray.erase(8), "[json.exception.out_of_range.401] array index 8 is out of range", json::out_of_range&);
+    }
 }
 
-TEST_F(JsonElementArrayRemoveTest, Index1)
+class ElementAccess1ArrayRemoveSpecifiedElementRemoveElementByIteratorTest : public ElementAccess1ArrayTest{};
+
+
+TEST_F(ElementAccess1ArrayRemoveSpecifiedElementRemoveElementByIteratorTest, EraseBegin)
 {
-    j.erase(1);
-    EXPECT_EQ(j, json({1, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}}));
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        json::iterator it2 = jarray.erase(jarray.begin());
+        CHECK(jarray == json({1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}}));
+        CHECK(*it2 == json(1u));
+    }
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        json::const_iterator it2 = jarray.erase(jarray.cbegin());
+        CHECK(jarray == json({1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}}));
+        CHECK(*it2 == json(1u));
+    }
 }
 
-TEST_F(JsonElementArrayRemoveTest, Index2)
+TEST_F(ElementAccess1ArrayRemoveSpecifiedElementRemoveElementByIteratorTest, EraseBeginEnd)
 {
-    j.erase(2);
-    EXPECT_EQ(j, json({1, 1u, nullptr, "string", 42.23, json::object(), {1, 2, 3}}));
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        json::iterator it2 = jarray.erase(jarray.begin(), jarray.end());
+        CHECK(jarray == json::array());
+        CHECK(it2 == jarray.end());
+    }
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        json::const_iterator it2 = jarray.erase(jarray.cbegin(), jarray.cend());
+        CHECK(jarray == json::array());
+        CHECK(it2 == jarray.cend());
+    }
 }
 
-TEST_F(JsonElementArrayRemoveTest, Index3)
+TEST_F(ElementAccess1ArrayRemoveSpecifiedElementRemoveElementByIteratorTest, EraseBeginBegin)
 {
-    j.erase(3);
-    EXPECT_EQ(j, json({1, 1u, true, "string", 42.23, json::object(), {1, 2, 3}}));
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        json::iterator it2 = jarray.erase(jarray.begin(), jarray.begin());
+        CHECK(jarray == json({1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}}));
+        CHECK(*it2 == json(1));
+    }
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        json::const_iterator it2 = jarray.erase(jarray.cbegin(), jarray.cbegin());
+        CHECK(jarray == json({1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}}));
+        CHECK(*it2 == json(1));
+    }
 }
 
-TEST_F(JsonElementArrayRemoveTest, Index4)
+TEST_F(ElementAccess1ArrayRemoveSpecifiedElementRemoveElementByIteratorTest, EraseAtOffset)
 {
-    j.erase(4);
-    EXPECT_EQ(j, json({1, 1u, true, nullptr, 42.23, json::object(), {1, 2, 3}}));
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        json::iterator it = jarray.begin() + 4;
+        json::iterator it2 = jarray.erase(it);
+        CHECK(jarray == json({1, 1u, true, nullptr, 42.23, json::object(), {1, 2, 3}}));
+        CHECK(*it2 == json(42.23));
+    }
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        json::const_iterator it = jarray.cbegin() + 4;
+        json::const_iterator it2 = jarray.erase(it);
+        CHECK(jarray == json({1, 1u, true, nullptr, 42.23, json::object(), {1, 2, 3}}));
+        CHECK(*it2 == json(42.23));
+    }
 }
 
-TEST_F(JsonElementArrayRemoveTest, Index5)
+TEST_F(ElementAccess1ArrayRemoveSpecifiedElementRemoveElementByIteratorTest, EraseSubrange)
 {
-    j.erase(5);
-    EXPECT_EQ(j, json({1, 1u, true, nullptr, "string", json::object(), {1, 2, 3}}));
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        json::iterator it2 = jarray.erase(jarray.begin() + 3, jarray.begin() + 6);
+        CHECK(jarray == json({1, 1u, true, json::object(), {1, 2, 3}}));
+        CHECK(*it2 == json::object());
+    }
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        json::const_iterator it2 = jarray.erase(jarray.cbegin() + 3, jarray.cbegin() + 6);
+        CHECK(jarray == json({1, 1u, true, json::object(), {1, 2, 3}}));
+        CHECK(*it2 == json::object());
+    }
 }
 
-TEST_F(JsonElementArrayRemoveTest, Index6)
+TEST_F(ElementAccess1ArrayRemoveSpecifiedElementRemoveElementByIteratorTest, DifferentArrays)
 {
-    j.erase(6);
-    EXPECT_EQ(j, json({1, 1u, true, nullptr, "string", 42.23, {1, 2, 3}}));
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        json jarray2 = {"foo", "bar"};
+
+        CHECK_THROWS_WITH_AS(jarray.erase(jarray2.begin()),
+                             "[json.exception.invalid_iterator.202] iterator does not fit current value", json::invalid_iterator&);
+        CHECK_THROWS_WITH_AS(jarray.erase(jarray.begin(), jarray2.end()),
+                             "[json.exception.invalid_iterator.203] iterators do not fit current value", json::invalid_iterator&);
+        CHECK_THROWS_WITH_AS(jarray.erase(jarray2.begin(), jarray.end()),
+                             "[json.exception.invalid_iterator.203] iterators do not fit current value", json::invalid_iterator&);
+        CHECK_THROWS_WITH_AS(jarray.erase(jarray2.begin(), jarray2.end()),
+                             "[json.exception.invalid_iterator.203] iterators do not fit current value", json::invalid_iterator&);
+    }
+    {
+        json jarray = {1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}};
+        json jarray2 = {"foo", "bar"};
+
+        CHECK_THROWS_WITH_AS(jarray.erase(jarray2.cbegin()),
+                             "[json.exception.invalid_iterator.202] iterator does not fit current value", json::invalid_iterator&);
+        CHECK_THROWS_WITH_AS(jarray.erase(jarray.cbegin(), jarray2.cend()),
+                             "[json.exception.invalid_iterator.203] iterators do not fit current value", json::invalid_iterator&);
+        CHECK_THROWS_WITH_AS(jarray.erase(jarray2.cbegin(), jarray.cend()),
+                             "[json.exception.invalid_iterator.203] iterators do not fit current value", json::invalid_iterator&);
+        CHECK_THROWS_WITH_AS(jarray.erase(jarray2.cbegin(), jarray2.cend()),
+                             "[json.exception.invalid_iterator.203] iterators do not fit current value", json::invalid_iterator&);
+    }
 }
 
-TEST_F(JsonElementArrayRemoveTest, Index7)
-{
-    j.erase(7);
-    EXPECT_EQ(j, json({1, 1u, true, nullptr, "string", 42.23, json::object()}));
-}
+class ElementAccess1ArrayRemoveSpecifiedElementRemoveElementByIndexInNonArrayTypeTest : public ElementAccess1ArrayTest{};
 
-TEST_F(JsonElementArrayRemoveTest, Index8)
-{
-    EXPECT_THROW_MSG(j.erase(8), json::out_of_range,
-                     "[json.exception.out_of_range.401] array index 8 is out of range");
-}
 
-// erase(begin())
-TEST_F(JsonElementArrayRemoveTest, Begin)
-{
-    j.erase(j.begin());
-    EXPECT_EQ(j, json({1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}}));
-}
-
-TEST_F(JsonElementArrayRemoveTest, BeginConst)
-{
-    j.erase(j.cbegin());
-    EXPECT_EQ(j, json({1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}}));
-}
-
-// erase(begin(), end())
-TEST_F(JsonElementArrayRemoveTest, BeginEnd)
-{
-    j.erase(j.begin(), j.end());
-    EXPECT_EQ(j, json::array());
-}
-TEST_F(JsonElementArrayRemoveTest, BeginEndConst)
-{
-    j.erase(j.cbegin(), j.cend());
-    EXPECT_EQ(j, json::array());
-}
-
-// erase(begin(), begin())
-TEST_F(JsonElementArrayRemoveTest, BeginBegin)
-{
-    j.erase(j.begin(), j.begin());
-    EXPECT_EQ(j, json({1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}}));
-}
-
-TEST_F(JsonElementArrayRemoveTest, BeginBeginConst)
-{
-    j.erase(j.cbegin(), j.cbegin());
-    EXPECT_EQ(j, json({1, 1u, true, nullptr, "string", 42.23, json::object(), {1, 2, 3}}));
-}
-
-// erase at offset
-TEST_F(JsonElementArrayRemoveTest, Offset)
-{
-    json::iterator it = j.begin() + 4;
-    j.erase(it);
-    EXPECT_EQ(j, json({1, 1u, true, nullptr, 42.23, json::object(), {1, 2, 3}}));
-}
-
-TEST_F(JsonElementArrayRemoveTest, OffsetConst)
-{
-    json::const_iterator it = j.cbegin() + 4;
-    j.erase(it);
-    EXPECT_EQ(j, json({1, 1u, true, nullptr, 42.23, json::object(), {1, 2, 3}}));
-}
-
-// erase subrange
-TEST_F(JsonElementArrayRemoveTest, Subrange)
-{
-    j.erase(j.begin() + 3, j.begin() + 6);
-    EXPECT_EQ(j, json({1, 1u, true, json::object(), {1, 2, 3}}));
-}
-
-TEST_F(JsonElementArrayRemoveTest, SubrangeConst)
-{
-    j.erase(j.cbegin() + 3, j.cbegin() + 6);
-    EXPECT_EQ(j, json({1, 1u, true, json::object(), {1, 2, 3}}));
-}
-
-// different arrays
-TEST_F(JsonElementArrayRemoveTest, Different)
-{
-    json j2 = {"foo", "bar"};
-    EXPECT_THROW_MSG(j.erase(j2.begin()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.202] iterator does not fit current value");
-    EXPECT_THROW_MSG(j.erase(j.begin(), j2.end()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.203] iterators do not fit current value");
-    EXPECT_THROW_MSG(j.erase(j2.begin(), j.end()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.203] iterators do not fit current value");
-    EXPECT_THROW_MSG(j.erase(j2.begin(), j2.end()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.203] iterators do not fit current value");
-}
-
-TEST_F(JsonElementArrayRemoveTest, DifferentConst)
-{
-    json j2 = {"foo", "bar"};
-    EXPECT_THROW_MSG(j.erase(j2.cbegin()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.202] iterator does not fit current value");
-    EXPECT_THROW_MSG(j.erase(j.cbegin(), j2.cend()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.203] iterators do not fit current value");
-    EXPECT_THROW_MSG(j.erase(j2.cbegin(), j.cend()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.203] iterators do not fit current value");
-    EXPECT_THROW_MSG(j.erase(j2.cbegin(), j2.cend()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.203] iterators do not fit current value");
-}
-
-// remove element by index in non-array type
-TEST(JsonElementNonArrayIndexRemoveTest, Null)
+TEST_F(ElementAccess1ArrayRemoveSpecifiedElementRemoveElementByIndexInNonArrayTypeTest, Null)
 {
     json j_nonobject(json::value_t::null);
-    EXPECT_THROW_MSG(j_nonobject.erase(0), json::type_error,
-                     "[json.exception.type_error.307] cannot use erase() with null");
+    CHECK_THROWS_WITH_AS(j_nonobject.erase(0), "[json.exception.type_error.307] cannot use erase() with null", json::type_error&);
 }
 
-TEST(JsonElementNonArrayIndexRemoveTest, Boolean)
+TEST_F(ElementAccess1ArrayRemoveSpecifiedElementRemoveElementByIndexInNonArrayTypeTest, Boolean)
 {
     json j_nonobject(json::value_t::boolean);
-    EXPECT_THROW_MSG(j_nonobject.erase(0), json::type_error,
-                     "[json.exception.type_error.307] cannot use erase() with boolean");
+    CHECK_THROWS_WITH_AS(j_nonobject.erase(0), "[json.exception.type_error.307] cannot use erase() with boolean", json::type_error&);
 }
 
-TEST(JsonElementNonArrayIndexRemoveTest, String)
+TEST_F(ElementAccess1ArrayRemoveSpecifiedElementRemoveElementByIndexInNonArrayTypeTest, String)
 {
     json j_nonobject(json::value_t::string);
-    EXPECT_THROW_MSG(j_nonobject.erase(0), json::type_error,
-                     "[json.exception.type_error.307] cannot use erase() with string");
+    CHECK_THROWS_WITH_AS(j_nonobject.erase(0), "[json.exception.type_error.307] cannot use erase() with string", json::type_error&);
 }
 
-TEST(JsonElementNonArrayIndexRemoveTest, Object)
+TEST_F(ElementAccess1ArrayRemoveSpecifiedElementRemoveElementByIndexInNonArrayTypeTest, Object)
 {
     json j_nonobject(json::value_t::object);
-    EXPECT_THROW_MSG(j_nonobject.erase(0), json::type_error,
-                     "[json.exception.type_error.307] cannot use erase() with object");
+    CHECK_THROWS_WITH_AS(j_nonobject.erase(0), "[json.exception.type_error.307] cannot use erase() with object", json::type_error&);
 }
 
-TEST(JsonElementNonArrayIndexRemoveTest, Integer)
+TEST_F(ElementAccess1ArrayRemoveSpecifiedElementRemoveElementByIndexInNonArrayTypeTest, NumberInteger)
 {
     json j_nonobject(json::value_t::number_integer);
-    EXPECT_THROW_MSG(j_nonobject.erase(0), json::type_error,
-                     "[json.exception.type_error.307] cannot use erase() with number");
+    CHECK_THROWS_WITH_AS(j_nonobject.erase(0), "[json.exception.type_error.307] cannot use erase() with number", json::type_error&);
 }
 
-TEST(JsonElementNonArrayIndexRemoveTest, Unsigned)
+TEST_F(ElementAccess1ArrayRemoveSpecifiedElementRemoveElementByIndexInNonArrayTypeTest, NumberUnsigned)
 {
     json j_nonobject(json::value_t::number_unsigned);
-    EXPECT_THROW_MSG(j_nonobject.erase(0), json::type_error,
-                     "[json.exception.type_error.307] cannot use erase() with number");
+    CHECK_THROWS_WITH_AS(j_nonobject.erase(0), "[json.exception.type_error.307] cannot use erase() with number", json::type_error&);
 }
 
-TEST(JsonElementNonArrayIndexRemoveTest, Float)
+TEST_F(ElementAccess1ArrayRemoveSpecifiedElementRemoveElementByIndexInNonArrayTypeTest, NumberFloatingPoint)
 {
     json j_nonobject(json::value_t::number_float);
-    EXPECT_THROW_MSG(j_nonobject.erase(0), json::type_error,
-                     "[json.exception.type_error.307] cannot use erase() with number");
+    CHECK_THROWS_WITH_AS(j_nonobject.erase(0), "[json.exception.type_error.307] cannot use erase() with number", json::type_error&);
 }
 
-TEST(JsonElementNonArrayFrontBackAccessTest, Null)
+
+
+
+
+
+
+TEST(ElementAccess1OtherValuesFrontAndBackTest, Null)
 {
-    json j;
-    EXPECT_THROW_MSG(j.front(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.214] cannot get value");
-    EXPECT_THROW_MSG(j.back(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.214] cannot get value");
+    {
+        json j;
+        CHECK_THROWS_WITH_AS(j.front(), "[json.exception.invalid_iterator.214] cannot get value", json::invalid_iterator&);
+        CHECK_THROWS_WITH_AS(j.back(), "[json.exception.invalid_iterator.214] cannot get value", json::invalid_iterator&);
+    }
+    {
+        const json j{};
+        CHECK_THROWS_WITH_AS(j.front(), "[json.exception.invalid_iterator.214] cannot get value", json::invalid_iterator&);
+        CHECK_THROWS_WITH_AS(j.back(), "[json.exception.invalid_iterator.214] cannot get value", json::invalid_iterator&);
+    }
 }
 
-TEST(JsonElementNonArrayFrontBackAccessTest, NullConst)
+TEST(ElementAccess1OtherValuesFrontAndBackTest, String)
 {
-    const json j{};
-    EXPECT_THROW_MSG(j.front(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.214] cannot get value");
-    EXPECT_THROW_MSG(j.back(), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.214] cannot get value");
+    {
+        json j = "foo";
+        CHECK(j.front() == j);
+        CHECK(j.back() == j);
+    }
+    {
+        const json j = "bar";
+        CHECK(j.front() == j);
+        CHECK(j.back() == j);
+    }
 }
 
-TEST(JsonElementNonArrayFrontBackAccessTest, String)
+TEST(ElementAccess1OtherValuesFrontAndBackTest, NumberBoolean)
 {
-    json j = "foo";
-    EXPECT_EQ(j.front(), j);
-    EXPECT_EQ(j.back(), j);
+    {
+        json j = false;
+        CHECK(j.front() == j);
+        CHECK(j.back() == j);
+    }
+    {
+        const json j = true;
+        CHECK(j.front() == j);
+        CHECK(j.back() == j);
+    }
 }
 
-TEST(JsonElementNonArrayFrontBackAccessTest, StringConst)
+TEST(ElementAccess1OtherValuesFrontAndBackTest, NumberInteger)
 {
-    const json j = "bar";
-    EXPECT_EQ(j.front(), j);
-    EXPECT_EQ(j.back(), j);
+    {
+        json j = 17;
+        CHECK(j.front() == j);
+        CHECK(j.back() == j);
+    }
+    {
+        const json j = 17;
+        CHECK(j.front() == j);
+        CHECK(j.back() == j);
+    }
 }
 
-TEST(JsonElementNonArrayFrontBackAccessTest, Boolean)
+TEST(ElementAccess1OtherValuesFrontAndBackTest, NumberUnsigned)
 {
-    json j = false;
-    EXPECT_EQ(j.front(), j);
-    EXPECT_EQ(j.back(), j);
+    {
+        json j = 17u;
+        CHECK(j.front() == j);
+        CHECK(j.back() == j);
+    }
+    {
+        const json j = 17u;
+        CHECK(j.front() == j);
+        CHECK(j.back() == j);
+    }
 }
 
-TEST(JsonElementNonArrayFrontBackAccessTest, BooleanConst)
+TEST(ElementAccess1OtherValuesFrontAndBackTest, NumberFloatingPoint)
 {
-    const json j = true;
-    EXPECT_EQ(j.front(), j);
-    EXPECT_EQ(j.back(), j);
+    {
+        json j = 23.42;
+        CHECK(j.front() == j);
+        CHECK(j.back() == j);
+    }
+    {
+        const json j = 23.42;
+        CHECK(j.front() == j);
+        CHECK(j.back() == j);
+    }
 }
 
-TEST(JsonElementNonArrayFrontBackAccessTest, Integer)
+
+
+
+TEST(ElementAccess1OtherValuesEraseWithOneValidIteratorTest, Null)
 {
-    json j = 17;
-    EXPECT_EQ(j.front(), j);
-    EXPECT_EQ(j.back(), j);
+    {
+        json j;
+        CHECK_THROWS_WITH_AS(j.erase(j.begin()), "[json.exception.type_error.307] cannot use erase() with null", json::type_error&);
+    }
+    {
+        json j;
+        CHECK_THROWS_WITH_AS(j.erase(j.begin()),
+                             "[json.exception.type_error.307] cannot use erase() with null", json::type_error&);
+    }
 }
 
-TEST(JsonElementNonArrayFrontBackAccessTest, IntegerConst)
+TEST(ElementAccess1OtherValuesEraseWithOneValidIteratorTest, String)
 {
-    const json j = 17;
-    EXPECT_EQ(j.front(), j);
-    EXPECT_EQ(j.back(), j);
+    {
+        json j = "foo";
+        json::iterator it = j.erase(j.begin());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
+    {
+        json j = "bar";
+        json::const_iterator it = j.erase(j.cbegin());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
 }
 
-TEST(JsonElementNonArrayFrontBackAccessTest, Unsigned)
+TEST(ElementAccess1OtherValuesEraseWithOneValidIteratorTest, NumberBoolean)
 {
-    json j = 17u;
-    EXPECT_EQ(j.front(), j);
-    EXPECT_EQ(j.back(), j);
+    {
+        json j = false;
+        json::iterator it = j.erase(j.begin());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
+    {
+        json j = true;
+        json::const_iterator it = j.erase(j.cbegin());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
 }
 
-TEST(JsonElementNonArrayFrontBackAccessTest, UnsignedConst)
+TEST(ElementAccess1OtherValuesEraseWithOneValidIteratorTest, NumberInteger)
 {
-    const json j = 17u;
-    EXPECT_EQ(j.front(), j);
-    EXPECT_EQ(j.back(), j);
+    {
+        json j = 17;
+        json::iterator it = j.erase(j.begin());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
+    {
+        json j = 17;
+        json::const_iterator it = j.erase(j.cbegin());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
 }
 
-TEST(JsonElementNonArrayFrontBackAccessTest, Float)
+TEST(ElementAccess1OtherValuesEraseWithOneValidIteratorTest, NumberUnsigned)
 {
-    json j = 23.42;
-    EXPECT_EQ(j.front(), j);
-    EXPECT_EQ(j.back(), j);
+    {
+        json j = 17u;
+        json::iterator it = j.erase(j.begin());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
+    {
+        json j = 17u;
+        json::const_iterator it = j.erase(j.cbegin());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
 }
 
-TEST(JsonElementNonArrayFrontBackAccessTest, FloatConst)
+TEST(ElementAccess1OtherValuesEraseWithOneValidIteratorTest, NumberFloatingPoint)
 {
-    const json j = 23.42;
-    EXPECT_EQ(j.front(), j);
-    EXPECT_EQ(j.back(), j);
+    {
+        json j = 23.42;
+        json::iterator it = j.erase(j.begin());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
+    {
+        json j = 23.42;
+        json::const_iterator it = j.erase(j.cbegin());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
 }
 
-TEST(JsonElementNonArrayOneValidIteratorRemoveTest, Null)
+TEST(ElementAccess1OtherValuesEraseWithOneValidIteratorTest, Binary)
 {
-    json j;
-    EXPECT_THROW_MSG(j.erase(j.begin()), json::type_error,
-                     "[json.exception.type_error.307] cannot use erase() with null");
+    {
+        json j = json::binary({1, 2, 3});
+        json::iterator it = j.erase(j.begin());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
+    {
+        json j = json::binary({1, 2, 3});
+        json::const_iterator it = j.erase(j.cbegin());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
 }
 
-TEST(JsonElementNonArrayOneValidIteratorRemoveTest, NullConst)
+
+
+
+TEST(ElementAccess1OtherValuesEraseWithOneInvalidIteratorTest, String)
 {
-    json j;
-    EXPECT_THROW_MSG(j.erase(j.cbegin()), json::type_error,
-                     "[json.exception.type_error.307] cannot use erase() with null");
+    {
+        json j = "foo";
+        CHECK_THROWS_WITH_AS(j.erase(j.end()), "[json.exception.invalid_iterator.205] iterator out of range", json::invalid_iterator&);
+    }
+    {
+        json j = "bar";
+        CHECK_THROWS_WITH_AS(j.erase(j.cend()), "[json.exception.invalid_iterator.205] iterator out of range", json::invalid_iterator&);
+    }
 }
 
-TEST(JsonElementNonArrayOneValidIteratorRemoveTest, String)
+TEST(ElementAccess1OtherValuesEraseWithOneInvalidIteratorTest, NumberBoolean)
 {
-    json j = "foo";
-    j.erase(j.begin());
-    EXPECT_EQ(j.type(), json::value_t::null);
+    {
+        json j = false;
+        CHECK_THROWS_WITH_AS(j.erase(j.end()), "[json.exception.invalid_iterator.205] iterator out of range", json::invalid_iterator&);
+    }
+    {
+        json j = true;
+        CHECK_THROWS_WITH_AS(j.erase(j.cend()), "[json.exception.invalid_iterator.205] iterator out of range", json::invalid_iterator&);
+    }
 }
 
-TEST(JsonElementNonArrayOneValidIteratorRemoveTest, StringConst)
+TEST(ElementAccess1OtherValuesEraseWithOneInvalidIteratorTest, NumberInteger)
 {
-    json j = "bar";
-    j.erase(j.cbegin());
-    EXPECT_EQ(j.type(), json::value_t::null);
+    {
+        json j = 17;
+        CHECK_THROWS_WITH_AS(j.erase(j.end()), "[json.exception.invalid_iterator.205] iterator out of range", json::invalid_iterator&);
+    }
+    {
+        json j = 17;
+        CHECK_THROWS_WITH_AS(j.erase(j.cend()), "[json.exception.invalid_iterator.205] iterator out of range", json::invalid_iterator&);
+    }
 }
 
-TEST(JsonElementNonArrayOneValidIteratorRemoveTest, Boolean)
+TEST(ElementAccess1OtherValuesEraseWithOneInvalidIteratorTest, NumberUnsigned)
 {
-    json j = false;
-    j.erase(j.begin());
-    EXPECT_EQ(j.type(), json::value_t::null);
+    {
+        json j = 17u;
+        CHECK_THROWS_WITH_AS(j.erase(j.end()), "[json.exception.invalid_iterator.205] iterator out of range", json::invalid_iterator&);
+    }
+    {
+        json j = 17u;
+        CHECK_THROWS_WITH_AS(j.erase(j.cend()), "[json.exception.invalid_iterator.205] iterator out of range", json::invalid_iterator&);
+    }
 }
 
-TEST(JsonElementNonArrayOneValidIteratorRemoveTest, BooleanConst)
+TEST(ElementAccess1OtherValuesEraseWithOneInvalidIteratorTest, NumberFloatingPoint)
 {
-    json j = true;
-    j.erase(j.cbegin());
-    EXPECT_EQ(j.type(), json::value_t::null);
+    {
+        json j = 23.42;
+        CHECK_THROWS_WITH_AS(j.erase(j.end()), "[json.exception.invalid_iterator.205] iterator out of range", json::invalid_iterator&);
+    }
+    {
+        json j = 23.42;
+        CHECK_THROWS_WITH_AS(j.erase(j.cend()), "[json.exception.invalid_iterator.205] iterator out of range", json::invalid_iterator&);
+    }
 }
 
-TEST(JsonElementNonArrayOneValidIteratorRemoveTest, Integer)
+
+
+
+TEST(ElementAccess1OtherValuesEraseWithTwoValidIteratorsTest, Null)
 {
-    json j = 17;
-    j.erase(j.begin());
-    EXPECT_EQ(j.type(), json::value_t::null);
+    {
+        json j;
+        CHECK_THROWS_WITH_AS(j.erase(j.begin(), j.end()), "[json.exception.type_error.307] cannot use erase() with null", json::type_error&);
+    }
+    {
+        json j;
+        CHECK_THROWS_WITH_AS(j.erase(j.cbegin(), j.cend()), "[json.exception.type_error.307] cannot use erase() with null", json::type_error&);
+    }
 }
 
-TEST(JsonElementNonArrayOneValidIteratorRemoveTest, IntegerConst)
+TEST(ElementAccess1OtherValuesEraseWithTwoValidIteratorsTest, String)
 {
-    json j = 17;
-    j.erase(j.cbegin());
-    EXPECT_EQ(j.type(), json::value_t::null);
+    {
+        json j = "foo";
+        json::iterator it = j.erase(j.begin(), j.end());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
+    {
+        json j = "bar";
+        json::const_iterator it = j.erase(j.cbegin(), j.cend());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
 }
 
-TEST(JsonElementNonArrayOneValidIteratorRemoveTest, Unsigned)
+TEST(ElementAccess1OtherValuesEraseWithTwoValidIteratorsTest, NumberBoolean)
 {
-    json j = 17u;
-    j.erase(j.begin());
-    EXPECT_EQ(j.type(), json::value_t::null);
+    {
+        json j = false;
+        json::iterator it = j.erase(j.begin(), j.end());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
+    {
+        json j = true;
+        json::const_iterator it = j.erase(j.cbegin(), j.cend());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
 }
 
-TEST(JsonElementNonArrayOneValidIteratorRemoveTest, UnsignedConst)
+TEST(ElementAccess1OtherValuesEraseWithTwoValidIteratorsTest, NumberInteger)
 {
-    json j = 17u;
-    j.erase(j.cbegin());
-    EXPECT_EQ(j.type(), json::value_t::null);
+    {
+        json j = 17;
+        json::iterator it = j.erase(j.begin(), j.end());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
+    {
+        json j = 17;
+        json::const_iterator it = j.erase(j.cbegin(), j.cend());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
 }
 
-TEST(JsonElementNonArrayOneValidIteratorRemoveTest, Float)
+TEST(ElementAccess1OtherValuesEraseWithTwoValidIteratorsTest, NumberUnsigned)
 {
-    json j = 23.42;
-    j.erase(j.begin());
-    EXPECT_EQ(j.type(), json::value_t::null);
+    {
+        json j = 17u;
+        json::iterator it = j.erase(j.begin(), j.end());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
+    {
+        json j = 17u;
+        json::const_iterator it = j.erase(j.cbegin(), j.cend());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
 }
 
-TEST(JsonElementNonArrayOneValidIteratorRemoveTest, FloatConst)
+TEST(ElementAccess1OtherValuesEraseWithTwoValidIteratorsTest, NumberFloatingPoint)
 {
-    json j = 23.42;
-    j.erase(j.cbegin());
-    EXPECT_EQ(j.type(), json::value_t::null);
+    {
+        json j = 23.42;
+        json::iterator it = j.erase(j.begin(), j.end());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
+    {
+        json j = 23.42;
+        json::const_iterator it = j.erase(j.cbegin(), j.cend());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
 }
 
-TEST(JsonElementNonArrayOneInvalidIteratorRemoveTest, String)
+TEST(ElementAccess1OtherValuesEraseWithTwoValidIteratorsTest, Binary)
 {
-    json j = "foo";
-    EXPECT_THROW_MSG(j.erase(j.end()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.205] iterator out of range");
+    {
+        json j = json::binary({1, 2, 3});
+        json::iterator it = j.erase(j.begin(), j.end());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
+    {
+        json j = json::binary({1, 2, 3});
+        json::const_iterator it = j.erase(j.cbegin(), j.cend());
+        CHECK(j.type() == json::value_t::null);
+        CHECK(it == j.end());
+    }
 }
 
-TEST(JsonElementNonArrayOneInvalidIteratorRemoveTest, StringConst)
+
+
+
+TEST(ElementAccess1OtherValuesEraseWithTwoInvalidIteratorsTest, String)
 {
-    json j = "bar";
-    EXPECT_THROW_MSG(j.erase(j.cend()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.205] iterator out of range");
+    {
+        json j = "foo";
+        CHECK_THROWS_WITH_AS(j.erase(j.end(), j.end()), "[json.exception.invalid_iterator.204] iterators out of range", json::invalid_iterator&);
+        CHECK_THROWS_WITH_AS(j.erase(j.begin(), j.begin()), "[json.exception.invalid_iterator.204] iterators out of range", json::invalid_iterator&);
+    }
+    {
+        json j = "bar";
+        CHECK_THROWS_WITH_AS(j.erase(j.cend(), j.cend()), "[json.exception.invalid_iterator.204] iterators out of range", json::invalid_iterator&);
+        CHECK_THROWS_WITH_AS(j.erase(j.cbegin(), j.cbegin()), "[json.exception.invalid_iterator.204] iterators out of range", json::invalid_iterator&);
+    }
 }
 
-TEST(JsonElementNonArrayOneInvalidIteratorRemoveTest, Boolean)
+TEST(ElementAccess1OtherValuesEraseWithTwoInvalidIteratorsTest, NumberBoolean)
 {
-    json j = false;
-    EXPECT_THROW_MSG(j.erase(j.end()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.205] iterator out of range");
+    {
+        json j = false;
+        CHECK_THROWS_WITH_AS(j.erase(j.end(), j.end()), "[json.exception.invalid_iterator.204] iterators out of range", json::invalid_iterator&);
+        CHECK_THROWS_WITH_AS(j.erase(j.begin(), j.begin()), "[json.exception.invalid_iterator.204] iterators out of range", json::invalid_iterator&);
+    }
+    {
+        json j = true;
+        CHECK_THROWS_WITH_AS(j.erase(j.cend(), j.cend()), "[json.exception.invalid_iterator.204] iterators out of range", json::invalid_iterator&);
+        CHECK_THROWS_WITH_AS(j.erase(j.cbegin(), j.cbegin()), "[json.exception.invalid_iterator.204] iterators out of range", json::invalid_iterator&);
+    }
 }
 
-TEST(JsonElementNonArrayOneInvalidIteratorRemoveTest, BooleanConst)
+TEST(ElementAccess1OtherValuesEraseWithTwoInvalidIteratorsTest, NumberInteger)
 {
-    json j = true;
-    EXPECT_THROW_MSG(j.erase(j.cend()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.205] iterator out of range");
+    {
+        json j = 17;
+        CHECK_THROWS_WITH_AS(j.erase(j.end(), j.end()), "[json.exception.invalid_iterator.204] iterators out of range", json::invalid_iterator&);
+        CHECK_THROWS_WITH_AS(j.erase(j.begin(), j.begin()), "[json.exception.invalid_iterator.204] iterators out of range", json::invalid_iterator&);
+    }
+    {
+        json j = 17;
+        CHECK_THROWS_WITH_AS(j.erase(j.cend(), j.cend()), "[json.exception.invalid_iterator.204] iterators out of range", json::invalid_iterator&);
+        CHECK_THROWS_WITH_AS(j.erase(j.cbegin(), j.cbegin()), "[json.exception.invalid_iterator.204] iterators out of range", json::invalid_iterator&);
+    }
 }
 
-TEST(JsonElementNonArrayOneInvalidIteratorRemoveTest, Integer)
+TEST(ElementAccess1OtherValuesEraseWithTwoInvalidIteratorsTest, NumberUnsigned)
 {
-    json j = 17;
-    EXPECT_THROW_MSG(j.erase(j.end()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.205] iterator out of range");
+    {
+        json j = 17u;
+        CHECK_THROWS_WITH_AS(j.erase(j.end(), j.end()), "[json.exception.invalid_iterator.204] iterators out of range", json::invalid_iterator&);
+        CHECK_THROWS_WITH_AS(j.erase(j.begin(), j.begin()), "[json.exception.invalid_iterator.204] iterators out of range", json::invalid_iterator&);
+    }
+    {
+        json j = 17u;
+        CHECK_THROWS_WITH_AS(j.erase(j.cend(), j.cend()), "[json.exception.invalid_iterator.204] iterators out of range", json::invalid_iterator&);
+        CHECK_THROWS_WITH_AS(j.erase(j.cbegin(), j.cbegin()), "[json.exception.invalid_iterator.204] iterators out of range", json::invalid_iterator&);
+    }
 }
 
-TEST(JsonElementNonArrayOneInvalidIteratorRemoveTest, IntegerConst)
+TEST(ElementAccess1OtherValuesEraseWithTwoInvalidIteratorsTest, NumberFloatingPoint)
 {
-    json j = 17;
-    EXPECT_THROW_MSG(j.erase(j.cend()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.205] iterator out of range");
+    {
+        json j = 23.42;
+        CHECK_THROWS_WITH_AS(j.erase(j.end(), j.end()), "[json.exception.invalid_iterator.204] iterators out of range", json::invalid_iterator&);
+        CHECK_THROWS_WITH_AS(j.erase(j.begin(), j.begin()), "[json.exception.invalid_iterator.204] iterators out of range", json::invalid_iterator&);
+    }
+    {
+        json j = 23.42;
+        CHECK_THROWS_WITH_AS(j.erase(j.cend(), j.cend()), "[json.exception.invalid_iterator.204] iterators out of range", json::invalid_iterator&);
+        CHECK_THROWS_WITH_AS(j.erase(j.cbegin(), j.cbegin()), "[json.exception.invalid_iterator.204] iterators out of range", json::invalid_iterator&);
+    }
 }
 
-TEST(JsonElementNonArrayOneInvalidIteratorRemoveTest, Unsigned)
-{
-    json j = 17u;
-    EXPECT_THROW_MSG(j.erase(j.end()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.205] iterator out of range");
-}
-
-TEST(JsonElementNonArrayOneInvalidIteratorRemoveTest, UnsignedConst)
-{
-    json j = 17u;
-    EXPECT_THROW_MSG(j.erase(j.cend()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.205] iterator out of range");
-}
-
-TEST(JsonElementNonArrayOneInvalidIteratorRemoveTest, Float)
-{
-    json j = 23.42;
-    EXPECT_THROW_MSG(j.erase(j.end()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.205] iterator out of range");
-}
-
-TEST(JsonElementNonArrayOneInvalidIteratorRemoveTest, FloatConst)
-{
-    json j = 23.42;
-    EXPECT_THROW_MSG(j.erase(j.cend()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.205] iterator out of range");
-}
-
-TEST(JsonElementNonArrayTwoValidIteratorRemoveTest, Null)
-{
-    json j;
-    EXPECT_THROW_MSG(j.erase(j.begin(), j.end()), json::type_error,
-                     "[json.exception.type_error.307] cannot use erase() with null");
-}
-
-TEST(JsonElementNonArrayTwoValidIteratorRemoveTest, NullConst)
-{
-    json j;
-    EXPECT_THROW_MSG(j.erase(j.cbegin(), j.cend()), json::type_error,
-                     "[json.exception.type_error.307] cannot use erase() with null");
-}
-
-TEST(JsonElementNonArrayTwoValidIteratorRemoveTest, String)
-{
-    json j = "foo";
-    j.erase(j.begin(), j.end());
-    EXPECT_EQ(j.type(), json::value_t::null);
-}
-
-TEST(JsonElementNonArrayTwoValidIteratorRemoveTest, StringConst)
-{
-    json j = "bar";
-    j.erase(j.cbegin(), j.cend());
-    EXPECT_EQ(j.type(), json::value_t::null);
-}
-
-TEST(JsonElementNonArrayTwoValidIteratorRemoveTest, Boolean)
-{
-    json j = false;
-    j.erase(j.begin(), j.end());
-    EXPECT_EQ(j.type(), json::value_t::null);
-}
-
-TEST(JsonElementNonArrayTwoValidIteratorRemoveTest, BooleanConst)
-{
-    json j = true;
-    j.erase(j.cbegin(), j.cend());
-    EXPECT_EQ(j.type(), json::value_t::null);
-}
-
-TEST(JsonElementNonArrayTwoValidIteratorRemoveTest, Integer)
-{
-    json j = 17;
-    j.erase(j.begin(), j.end());
-    EXPECT_EQ(j.type(), json::value_t::null);
-}
-
-TEST(JsonElementNonArrayTwoValidIteratorRemoveTest, IntegerConst)
-{
-    json j = 17;
-    j.erase(j.cbegin(), j.cend());
-    EXPECT_EQ(j.type(), json::value_t::null);
-}
-
-TEST(JsonElementNonArrayTwoValidIteratorRemoveTest, Unsigned)
-{
-    json j = 17u;
-    j.erase(j.begin(), j.end());
-    EXPECT_EQ(j.type(), json::value_t::null);
-}
-
-TEST(JsonElementNonArrayTwoValidIteratorRemoveTest, UnsignedConst)
-{
-    json j = 17u;
-    j.erase(j.cbegin(), j.cend());
-    EXPECT_EQ(j.type(), json::value_t::null);
-}
-
-TEST(JsonElementNonArrayTwoValidIteratorRemoveTest, Float)
-{
-    json j = 23.42;
-    j.erase(j.begin(), j.end());
-    EXPECT_EQ(j.type(), json::value_t::null);
-}
-
-TEST(JsonElementNonArrayTwoValidIteratorRemoveTest, FloatConst)
-{
-    json j = 23.42;
-    j.erase(j.cbegin(), j.cend());
-    EXPECT_EQ(j.type(), json::value_t::null);
-}
-
-TEST(JsonElementNonArrayTwoInvalidIteratorRemoveTest, String)
-{
-    json j = "foo";
-    EXPECT_THROW_MSG(j.erase(j.end(), j.end()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.204] iterators out of range");
-    EXPECT_THROW_MSG(j.erase(j.begin(), j.begin()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.204] iterators out of range");
-}
-
-TEST(JsonElementNonArrayTwoInvalidIteratorRemoveTest, StringConst)
-{
-    json j = "bar";
-    EXPECT_THROW_MSG(j.erase(j.cend(), j.cend()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.204] iterators out of range");
-    EXPECT_THROW_MSG(j.erase(j.cbegin(), j.cbegin()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.204] iterators out of range");
-}
-
-TEST(JsonElementNonArrayTwoInvalidIteratorRemoveTest, Boolean)
-{
-    json j = false;
-    EXPECT_THROW_MSG(j.erase(j.end(), j.end()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.204] iterators out of range");
-    EXPECT_THROW_MSG(j.erase(j.begin(), j.begin()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.204] iterators out of range");
-}
-
-TEST(JsonElementNonArrayTwoInvalidIteratorRemoveTest, BooleanConst)
-{
-    json j = true;
-    EXPECT_THROW_MSG(j.erase(j.cend(), j.cend()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.204] iterators out of range");
-    EXPECT_THROW_MSG(j.erase(j.cbegin(), j.cbegin()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.204] iterators out of range");
-}
-
-TEST(JsonElementNonArrayTwoInvalidIteratorRemoveTest, Integer)
-{
-    json j = 17;
-    EXPECT_THROW_MSG(j.erase(j.end(), j.end()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.204] iterators out of range");
-    EXPECT_THROW_MSG(j.erase(j.begin(), j.begin()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.204] iterators out of range");
-}
-
-TEST(JsonElementNonArrayTwoInvalidIteratorRemoveTest, IntegerConst)
-{
-    json j = 17;
-    EXPECT_THROW_MSG(j.erase(j.cend(), j.cend()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.204] iterators out of range");
-    EXPECT_THROW_MSG(j.erase(j.cbegin(), j.cbegin()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.204] iterators out of range");
-}
-
-TEST(JsonElementNonArrayTwoInvalidIteratorRemoveTest, Unsigned)
-{
-    json j = 17u;
-    EXPECT_THROW_MSG(j.erase(j.end(), j.end()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.204] iterators out of range");
-    EXPECT_THROW_MSG(j.erase(j.begin(), j.begin()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.204] iterators out of range");
-}
-
-TEST(JsonElementNonArrayTwoInvalidIteratorRemoveTest, UnsignedConst)
-{
-    json j = 17u;
-    EXPECT_THROW_MSG(j.erase(j.cend(), j.cend()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.204] iterators out of range");
-    EXPECT_THROW_MSG(j.erase(j.cbegin(), j.cbegin()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.204] iterators out of range");
-}
-
-TEST(JsonElementNonArrayTwoInvalidIteratorRemoveTest, Float)
-{
-    json j = 23.42;
-    EXPECT_THROW_MSG(j.erase(j.end(), j.end()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.204] iterators out of range");
-    EXPECT_THROW_MSG(j.erase(j.begin(), j.begin()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.204] iterators out of range");
-}
-
-TEST(JsonElementNonArrayTwoInvalidIteratorRemoveTest, FloatConst)
-{
-    json j = 23.42;
-    EXPECT_THROW_MSG(j.erase(j.cend(), j.cend()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.204] iterators out of range");
-    EXPECT_THROW_MSG(j.erase(j.cbegin(), j.cbegin()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.204] iterators out of range");
-}

@@ -1,386 +1,434 @@
-/*----------------------------------------------------------------------------*/
-/* Modifications Copyright (c) FIRST 2017. All Rights Reserved.               */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
-/*
-    __ _____ _____ _____
- __|  |   __|     |   | |  JSON for Modern C++ (test suite)
-|  |  |__   |  |  | | | |  version 2.1.1
-|_____|_____|_____|_|___|  https://github.com/nlohmann/json
+//     __ _____ _____ _____
+//  __|  |   __|     |   | |  JSON for Modern C++ (supporting code)
+// |  |  |__   |  |  | | | |  version 3.11.2
+// |_____|_____|_____|_|___|  https://github.com/nlohmann/json
+//
+// SPDX-FileCopyrightText: 2013-2022 Niels Lohmann <https://nlohmann.me>
+// SPDX-License-Identifier: MIT
 
-Licensed under the MIT License <http://opensource.org/licenses/MIT>.
-Copyright (c) 2013-2017 Niels Lohmann <http://nlohmann.me>.
-
-Permission is hereby  granted, free of charge, to any  person obtaining a copy
-of this software and associated  documentation files (the "Software"), to deal
-in the Software  without restriction, including without  limitation the rights
-to  use, copy,  modify, merge,  publish, distribute,  sublicense, and/or  sell
-copies  of  the Software,  and  to  permit persons  to  whom  the Software  is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE  IS PROVIDED "AS  IS", WITHOUT WARRANTY  OF ANY KIND,  EXPRESS OR
-IMPLIED,  INCLUDING BUT  NOT  LIMITED TO  THE  WARRANTIES OF  MERCHANTABILITY,
-FITNESS FOR  A PARTICULAR PURPOSE AND  NONINFRINGEMENT. IN NO EVENT  SHALL THE
-AUTHORS  OR COPYRIGHT  HOLDERS  BE  LIABLE FOR  ANY  CLAIM,  DAMAGES OR  OTHER
-LIABILITY, WHETHER IN AN ACTION OF  CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+#include "gtest/gtest.h"
 
 #include "unit-json.h"
-
-#include <gtest/gtest.h>
-
 using wpi::json;
 
-TEST(JsonConvTypeCheckTest, Object)
+#include <fstream>
+#include <sstream>
+
+
+
+
+
+
+
+TEST(ObjectInspectionConvenienceTypeCheckerTest, Object)
 {
     json j {{"foo", 1}, {"bar", false}};
-    EXPECT_FALSE(j.is_null());
-    EXPECT_FALSE(j.is_boolean());
-    EXPECT_FALSE(j.is_number());
-    EXPECT_FALSE(j.is_number_integer());
-    EXPECT_FALSE(j.is_number_unsigned());
-    EXPECT_FALSE(j.is_number_float());
-    EXPECT_TRUE(j.is_object());
-    EXPECT_FALSE(j.is_array());
-    EXPECT_FALSE(j.is_string());
-    EXPECT_FALSE(j.is_discarded());
-    EXPECT_FALSE(j.is_primitive());
-    EXPECT_TRUE(j.is_structured());
+    CHECK(!j.is_null());
+    CHECK(!j.is_boolean());
+    CHECK(!j.is_number());
+    CHECK(!j.is_number_integer());
+    CHECK(!j.is_number_unsigned());
+    CHECK(!j.is_number_float());
+    CHECK(!j.is_binary());
+    CHECK(j.is_object());
+    CHECK(!j.is_array());
+    CHECK(!j.is_string());
+    CHECK(!j.is_discarded());
+    CHECK(!j.is_primitive());
+    CHECK(j.is_structured());
 }
 
-TEST(JsonConvTypeCheckTest, Array)
+TEST(ObjectInspectionConvenienceTypeCheckerTest, Array)
 {
     json j {"foo", 1, 1u, 42.23, false};
-    EXPECT_FALSE(j.is_null());
-    EXPECT_FALSE(j.is_boolean());
-    EXPECT_FALSE(j.is_number());
-    EXPECT_FALSE(j.is_number_integer());
-    EXPECT_FALSE(j.is_number_unsigned());
-    EXPECT_FALSE(j.is_number_float());
-    EXPECT_FALSE(j.is_object());
-    EXPECT_TRUE(j.is_array());
-    EXPECT_FALSE(j.is_string());
-    EXPECT_FALSE(j.is_discarded());
-    EXPECT_FALSE(j.is_primitive());
-    EXPECT_TRUE(j.is_structured());
+    CHECK(!j.is_null());
+    CHECK(!j.is_boolean());
+    CHECK(!j.is_number());
+    CHECK(!j.is_number_integer());
+    CHECK(!j.is_number_unsigned());
+    CHECK(!j.is_number_float());
+    CHECK(!j.is_binary());
+    CHECK(!j.is_object());
+    CHECK(j.is_array());
+    CHECK(!j.is_string());
+    CHECK(!j.is_discarded());
+    CHECK(!j.is_primitive());
+    CHECK(j.is_structured());
 }
 
-TEST(JsonConvTypeCheckTest, Null)
+TEST(ObjectInspectionConvenienceTypeCheckerTest, Null)
 {
     json j(nullptr);
-    EXPECT_TRUE(j.is_null());
-    EXPECT_FALSE(j.is_boolean());
-    EXPECT_FALSE(j.is_number());
-    EXPECT_FALSE(j.is_number_integer());
-    EXPECT_FALSE(j.is_number_unsigned());
-    EXPECT_FALSE(j.is_number_float());
-    EXPECT_FALSE(j.is_object());
-    EXPECT_FALSE(j.is_array());
-    EXPECT_FALSE(j.is_string());
-    EXPECT_FALSE(j.is_discarded());
-    EXPECT_TRUE(j.is_primitive());
-    EXPECT_FALSE(j.is_structured());
+    CHECK(j.is_null());
+    CHECK(!j.is_boolean());
+    CHECK(!j.is_number());
+    CHECK(!j.is_number_integer());
+    CHECK(!j.is_number_unsigned());
+    CHECK(!j.is_number_float());
+    CHECK(!j.is_binary());
+    CHECK(!j.is_object());
+    CHECK(!j.is_array());
+    CHECK(!j.is_string());
+    CHECK(!j.is_discarded());
+    CHECK(j.is_primitive());
+    CHECK(!j.is_structured());
 }
 
-TEST(JsonConvTypeCheckTest, Boolean)
+TEST(ObjectInspectionConvenienceTypeCheckerTest, Boolean)
 {
     json j(true);
-    EXPECT_FALSE(j.is_null());
-    EXPECT_TRUE(j.is_boolean());
-    EXPECT_FALSE(j.is_number());
-    EXPECT_FALSE(j.is_number_integer());
-    EXPECT_FALSE(j.is_number_unsigned());
-    EXPECT_FALSE(j.is_number_float());
-    EXPECT_FALSE(j.is_object());
-    EXPECT_FALSE(j.is_array());
-    EXPECT_FALSE(j.is_string());
-    EXPECT_FALSE(j.is_discarded());
-    EXPECT_TRUE(j.is_primitive());
-    EXPECT_FALSE(j.is_structured());
+    CHECK(!j.is_null());
+    CHECK(j.is_boolean());
+    CHECK(!j.is_number());
+    CHECK(!j.is_number_integer());
+    CHECK(!j.is_number_unsigned());
+    CHECK(!j.is_number_float());
+    CHECK(!j.is_binary());
+    CHECK(!j.is_object());
+    CHECK(!j.is_array());
+    CHECK(!j.is_string());
+    CHECK(!j.is_discarded());
+    CHECK(j.is_primitive());
+    CHECK(!j.is_structured());
 }
 
-TEST(JsonConvTypeCheckTest, String)
+TEST(ObjectInspectionConvenienceTypeCheckerTest, String)
 {
     json j("Hello world");
-    EXPECT_FALSE(j.is_null());
-    EXPECT_FALSE(j.is_boolean());
-    EXPECT_FALSE(j.is_number());
-    EXPECT_FALSE(j.is_number_integer());
-    EXPECT_FALSE(j.is_number_unsigned());
-    EXPECT_FALSE(j.is_number_float());
-    EXPECT_FALSE(j.is_object());
-    EXPECT_FALSE(j.is_array());
-    EXPECT_TRUE(j.is_string());
-    EXPECT_FALSE(j.is_discarded());
-    EXPECT_TRUE(j.is_primitive());
-    EXPECT_FALSE(j.is_structured());
+    CHECK(!j.is_null());
+    CHECK(!j.is_boolean());
+    CHECK(!j.is_number());
+    CHECK(!j.is_number_integer());
+    CHECK(!j.is_number_unsigned());
+    CHECK(!j.is_number_float());
+    CHECK(!j.is_binary());
+    CHECK(!j.is_object());
+    CHECK(!j.is_array());
+    CHECK(j.is_string());
+    CHECK(!j.is_discarded());
+    CHECK(j.is_primitive());
+    CHECK(!j.is_structured());
 }
 
-TEST(JsonConvTypeCheckTest, Integer)
+TEST(ObjectInspectionConvenienceTypeCheckerTest, NumberInteger)
 {
     json j(42);
-    EXPECT_FALSE(j.is_null());
-    EXPECT_FALSE(j.is_boolean());
-    EXPECT_TRUE(j.is_number());
-    EXPECT_TRUE(j.is_number_integer());
-    EXPECT_FALSE(j.is_number_unsigned());
-    EXPECT_FALSE(j.is_number_float());
-    EXPECT_FALSE(j.is_object());
-    EXPECT_FALSE(j.is_array());
-    EXPECT_FALSE(j.is_string());
-    EXPECT_FALSE(j.is_discarded());
-    EXPECT_TRUE(j.is_primitive());
-    EXPECT_FALSE(j.is_structured());
+    CHECK(!j.is_null());
+    CHECK(!j.is_boolean());
+    CHECK(j.is_number());
+    CHECK(j.is_number_integer());
+    CHECK(!j.is_number_unsigned());
+    CHECK(!j.is_number_float());
+    CHECK(!j.is_binary());
+    CHECK(!j.is_object());
+    CHECK(!j.is_array());
+    CHECK(!j.is_string());
+    CHECK(!j.is_discarded());
+    CHECK(j.is_primitive());
+    CHECK(!j.is_structured());
 }
 
-TEST(JsonConvTypeCheckTest, Unsigned)
+TEST(ObjectInspectionConvenienceTypeCheckerTest, NumberUnsigned)
 {
     json j(42u);
-    EXPECT_FALSE(j.is_null());
-    EXPECT_FALSE(j.is_boolean());
-    EXPECT_TRUE(j.is_number());
-    EXPECT_TRUE(j.is_number_integer());
-    EXPECT_TRUE(j.is_number_unsigned());
-    EXPECT_FALSE(j.is_number_float());
-    EXPECT_FALSE(j.is_object());
-    EXPECT_FALSE(j.is_array());
-    EXPECT_FALSE(j.is_string());
-    EXPECT_FALSE(j.is_discarded());
-    EXPECT_TRUE(j.is_primitive());
-    EXPECT_FALSE(j.is_structured());
+    CHECK(!j.is_null());
+    CHECK(!j.is_boolean());
+    CHECK(j.is_number());
+    CHECK(j.is_number_integer());
+    CHECK(j.is_number_unsigned());
+    CHECK(!j.is_number_float());
+    CHECK(!j.is_binary());
+    CHECK(!j.is_object());
+    CHECK(!j.is_array());
+    CHECK(!j.is_string());
+    CHECK(!j.is_discarded());
+    CHECK(j.is_primitive());
+    CHECK(!j.is_structured());
 }
 
-TEST(JsonConvTypeCheckTest, Float)
+TEST(ObjectInspectionConvenienceTypeCheckerTest, NumberFloatingPoint)
 {
     json j(42.23);
-    EXPECT_FALSE(j.is_null());
-    EXPECT_FALSE(j.is_boolean());
-    EXPECT_TRUE(j.is_number());
-    EXPECT_FALSE(j.is_number_integer());
-    EXPECT_FALSE(j.is_number_unsigned());
-    EXPECT_TRUE(j.is_number_float());
-    EXPECT_FALSE(j.is_object());
-    EXPECT_FALSE(j.is_array());
-    EXPECT_FALSE(j.is_string());
-    EXPECT_FALSE(j.is_discarded());
-    EXPECT_TRUE(j.is_primitive());
-    EXPECT_FALSE(j.is_structured());
+    CHECK(!j.is_null());
+    CHECK(!j.is_boolean());
+    CHECK(j.is_number());
+    CHECK(!j.is_number_integer());
+    CHECK(!j.is_number_unsigned());
+    CHECK(j.is_number_float());
+    CHECK(!j.is_binary());
+    CHECK(!j.is_object());
+    CHECK(!j.is_array());
+    CHECK(!j.is_string());
+    CHECK(!j.is_discarded());
+    CHECK(j.is_primitive());
+    CHECK(!j.is_structured());
 }
 
-TEST(JsonConvTypeCheckTest, Discarded)
+TEST(ObjectInspectionConvenienceTypeCheckerTest, Binary)
+{
+    json j(json::value_t::binary);
+    CHECK(!j.is_null());
+    CHECK(!j.is_boolean());
+    CHECK(!j.is_number());
+    CHECK(!j.is_number_integer());
+    CHECK(!j.is_number_unsigned());
+    CHECK(!j.is_number_float());
+    CHECK(j.is_binary());
+    CHECK(!j.is_object());
+    CHECK(!j.is_array());
+    CHECK(!j.is_string());
+    CHECK(!j.is_discarded());
+    CHECK(j.is_primitive());
+    CHECK(!j.is_structured());
+}
+
+TEST(ObjectInspectionConvenienceTypeCheckerTest, Discarded)
 {
     json j(json::value_t::discarded);
-    EXPECT_FALSE(j.is_null());
-    EXPECT_FALSE(j.is_boolean());
-    EXPECT_FALSE(j.is_number());
-    EXPECT_FALSE(j.is_number_integer());
-    EXPECT_FALSE(j.is_number_unsigned());
-    EXPECT_FALSE(j.is_number_float());
-    EXPECT_FALSE(j.is_object());
-    EXPECT_FALSE(j.is_array());
-    EXPECT_FALSE(j.is_string());
-    EXPECT_TRUE(j.is_discarded());
-    EXPECT_FALSE(j.is_primitive());
-    EXPECT_FALSE(j.is_structured());
+    CHECK(!j.is_null());
+    CHECK(!j.is_boolean());
+    CHECK(!j.is_number());
+    CHECK(!j.is_number_integer());
+    CHECK(!j.is_number_unsigned());
+    CHECK(!j.is_number_float());
+    CHECK(!j.is_binary());
+    CHECK(!j.is_object());
+    CHECK(!j.is_array());
+    CHECK(!j.is_string());
+    CHECK(j.is_discarded());
+    CHECK(!j.is_primitive());
+    CHECK(!j.is_structured());
 }
 
-class JsonConvSerializationTest : public ::testing::Test {
+class ObjectInspectionSerializationTest : public ::testing::Test {
  protected:
     json j {{"object", json::object()}, {"array", {1, 2, 3, 4}}, {"number", 42}, {"boolean", false}, {"null", nullptr}, {"string", "Hello world"} };
 };
-#if 0
-// no indent / indent=-1
-TEST_F(JsonConvSerializationTest, NoIndent)
+
+
+TEST_F(ObjectInspectionSerializationTest, NoIndentIndent1)
 {
-    EXPECT_EQ(j.dump(),
+    CHECK(j.dump() ==
           "{\"array\":[1,2,3,4],\"boolean\":false,\"null\":null,\"number\":42,\"object\":{},\"string\":\"Hello world\"}");
 
-    EXPECT_EQ(j.dump(), j.dump(-1));
+    CHECK(j.dump() == j.dump(-1));
 }
 
-// indent=0
-TEST_F(JsonConvSerializationTest, Indent0)
+TEST_F(ObjectInspectionSerializationTest, Indent0)
 {
-    EXPECT_EQ(j.dump(0),
+    CHECK(j.dump(0) ==
           "{\n\"array\": [\n1,\n2,\n3,\n4\n],\n\"boolean\": false,\n\"null\": null,\n\"number\": 42,\n\"object\": {},\n\"string\": \"Hello world\"\n}");
 }
 
-// indent=1, space='\t'
-TEST_F(JsonConvSerializationTest, Indent1)
+TEST_F(ObjectInspectionSerializationTest, Indent1SpaceTab)
 {
-    EXPECT_EQ(j.dump(1, '\t'),
+    CHECK(j.dump(1, '\t') ==
           "{\n\t\"array\": [\n\t\t1,\n\t\t2,\n\t\t3,\n\t\t4\n\t],\n\t\"boolean\": false,\n\t\"null\": null,\n\t\"number\": 42,\n\t\"object\": {},\n\t\"string\": \"Hello world\"\n}");
 }
 
-// indent=4
-TEST_F(JsonConvSerializationTest, Indent4)
+TEST_F(ObjectInspectionSerializationTest, Indent4)
 {
-    EXPECT_EQ(j.dump(4),
+    CHECK(j.dump(4) ==
           "{\n    \"array\": [\n        1,\n        2,\n        3,\n        4\n    ],\n    \"boolean\": false,\n    \"null\": null,\n    \"number\": 42,\n    \"object\": {},\n    \"string\": \"Hello world\"\n}");
 }
-#endif
-// indent=x
-TEST_F(JsonConvSerializationTest, IndentX)
+
+TEST_F(ObjectInspectionSerializationTest, IndentX)
 {
-    EXPECT_EQ(j.dump().size(), 94u);
-    EXPECT_EQ(j.dump(1).size(), 127u);
-    EXPECT_EQ(j.dump(2).size(), 142u);
-    EXPECT_EQ(j.dump(512).size(), 7792u);
+    CHECK(j.dump().size() == 94);
+    CHECK(j.dump(1).size() == 127);
+    CHECK(j.dump(2).size() == 142);
+    CHECK(j.dump(512).size() == 7792);
+
+    // important test, because it yields a resize of the indent_string
+    // inside the dump() function
+    CHECK(j.dump(1024).size() == 15472);
+
+    const auto binary = json::binary({1, 2, 3}, 128);
+    CHECK(binary.dump(1024).size() == 2086);
 }
 
-// dump and floating-point numbers
-TEST_F(JsonConvSerializationTest, Float)
+TEST_F(ObjectInspectionSerializationTest, DumpAndFloatingPointNumbers)
 {
     auto s = json(42.23).dump();
-    EXPECT_NE(s.find("42.23"), std::string::npos);
+    CHECK(s.find("42.23") != std::string::npos);
 }
 
-// dump and small floating-point numbers
-TEST_F(JsonConvSerializationTest, SmallFloat)
+TEST_F(ObjectInspectionSerializationTest, DumpAndSmallFloatingPointNumbers)
 {
     auto s = json(1.23456e-78).dump();
-    EXPECT_NE(s.find("1.23456e-78"), std::string::npos);
+    CHECK(s.find("1.23456e-78") != std::string::npos);
 }
 
-// dump and non-ASCII characters
-TEST_F(JsonConvSerializationTest, NonAscii)
+TEST_F(ObjectInspectionSerializationTest, DumpAndNonASCIICharacters)
 {
-    EXPECT_EQ(json("ä").dump(), "\"ä\"");
-    EXPECT_EQ(json("Ö").dump(), "\"Ö\"");
-    EXPECT_EQ(json("❤️").dump(), "\"❤️\"");
+    CHECK(json("ä").dump() == "\"ä\"");
+    CHECK(json("Ö").dump() == "\"Ö\"");
+    CHECK(json("❤️").dump() == "\"❤️\"");
 }
 
-// serialization of discarded element
-TEST_F(JsonConvSerializationTest, Discarded)
+TEST_F(ObjectInspectionSerializationTest, DumpWithEnsureAsciiAndNonASCIICharacters)
+{
+    CHECK(json("ä").dump(-1, ' ', true) == "\"\\u00e4\"");
+    CHECK(json("Ö").dump(-1, ' ', true) == "\"\\u00d6\"");
+    CHECK(json("❤️").dump(-1, ' ', true) == "\"\\u2764\\ufe0f\"");
+}
+
+TEST_F(ObjectInspectionSerializationTest, SerializationOfDiscardedElement)
 {
     json j_discarded(json::value_t::discarded);
-    EXPECT_EQ(j_discarded.dump(), "<discarded>");
+    CHECK(j_discarded.dump() == "<discarded>");
 }
 
-TEST(JsonConvRoundTripTest, Case)
+TEST_F(ObjectInspectionSerializationTest, CheckThatPrecisionIsResetAfterSerialization)
+{
+    // create stringstream and set precision
+    std::stringstream ss;
+    ss.precision(3);
+    ss << 3.141592653589793 << std::fixed;
+    CHECK(ss.str() == "3.14");
+
+    // reset stringstream
+    ss.str(std::string());
+
+    // use stringstream for JSON serialization
+    json j_number = 3.14159265358979;
+    ss << j_number;
+
+    // check that precision has been overridden during serialization
+    CHECK(ss.str() == "3.14159265358979");
+
+    // check that precision has been restored
+    CHECK(ss.precision() == 3);
+}
+
+TEST(ObjectInspectionTest, RoundTrips)
 {
     for (const auto& s :
-{"3.141592653589793", "1000000000000000010E5"
-})
+            {"3.141592653589793", "1000000000000000010E5"
+            })
     {
-        SCOPED_TRACE(s);
         json j1 = json::parse(s);
         std::string s1 = j1.dump();
         json j2 = json::parse(s1);
         std::string s2 = j2.dump();
-        EXPECT_EQ(s1, s2);
+        CHECK(s1 == s2);
     }
 }
 
-// return the type of the object (explicit)
-TEST(JsonConvTypeExplicitTest, Null)
+
+
+
+TEST(ObjectInspectionReturnTheTypeOfTheObjectExplicitTest, Null)
 {
     json j = nullptr;
-    EXPECT_EQ(j.type(), json::value_t::null);
+    CHECK(j.type() == json::value_t::null);
 }
 
-TEST(JsonConvTypeExplicitTest, Object)
+TEST(ObjectInspectionReturnTheTypeOfTheObjectExplicitTest, Object)
 {
     json j = {{"foo", "bar"}};
-    EXPECT_EQ(j.type(), json::value_t::object);
+    CHECK(j.type() == json::value_t::object);
 }
 
-TEST(JsonConvTypeExplicitTest, Array)
+TEST(ObjectInspectionReturnTheTypeOfTheObjectExplicitTest, Array)
 {
     json j = {1, 2, 3, 4};
-    EXPECT_EQ(j.type(), json::value_t::array);
+    CHECK(j.type() == json::value_t::array);
 }
 
-TEST(JsonConvTypeExplicitTest, Boolean)
+TEST(ObjectInspectionReturnTheTypeOfTheObjectExplicitTest, Boolean)
 {
     json j = true;
-    EXPECT_EQ(j.type(), json::value_t::boolean);
+    CHECK(j.type() == json::value_t::boolean);
 }
 
-TEST(JsonConvTypeExplicitTest, String)
+TEST(ObjectInspectionReturnTheTypeOfTheObjectExplicitTest, String)
 {
     json j = "Hello world";
-    EXPECT_EQ(j.type(), json::value_t::string);
+    CHECK(j.type() == json::value_t::string);
 }
 
-TEST(JsonConvTypeExplicitTest, Integer)
+TEST(ObjectInspectionReturnTheTypeOfTheObjectExplicitTest, NumberInteger)
 {
     json j = 23;
-    EXPECT_EQ(j.type(), json::value_t::number_integer);
+    CHECK(j.type() == json::value_t::number_integer);
 }
 
-TEST(JsonConvTypeExplicitTest, Unsigned)
+TEST(ObjectInspectionReturnTheTypeOfTheObjectExplicitTest, NumberUnsigned)
 {
     json j = 23u;
-    EXPECT_EQ(j.type(), json::value_t::number_unsigned);
+    CHECK(j.type() == json::value_t::number_unsigned);
 }
 
-TEST(JsonConvTypeExplicitTest, Float)
+TEST(ObjectInspectionReturnTheTypeOfTheObjectExplicitTest, NumberFloatingPoint)
 {
     json j = 42.23;
-    EXPECT_EQ(j.type(), json::value_t::number_float);
+    CHECK(j.type() == json::value_t::number_float);
 }
 
-// return the type of the object (implicit)
-TEST(JsonConvTypeImplicitTest, Null)
+
+
+
+TEST(ObjectInspectionReturnTheTypeOfTheObjectImplicitTest, Null)
 {
     json j = nullptr;
     json::value_t t = j;
-    EXPECT_EQ(t, j.type());
+    CHECK(t == j.type());
 }
 
-TEST(JsonConvTypeImplicitTest, Object)
+TEST(ObjectInspectionReturnTheTypeOfTheObjectImplicitTest, Object)
 {
     json j = {{"foo", "bar"}};
     json::value_t t = j;
-    EXPECT_EQ(t, j.type());
+    CHECK(t == j.type());
 }
 
-TEST(JsonConvTypeImplicitTest, Array)
+TEST(ObjectInspectionReturnTheTypeOfTheObjectImplicitTest, Array)
 {
     json j = {1, 2, 3, 4};
     json::value_t t = j;
-    EXPECT_EQ(t, j.type());
+    CHECK(t == j.type());
 }
 
-TEST(JsonConvTypeImplicitTest, Boolean)
+TEST(ObjectInspectionReturnTheTypeOfTheObjectImplicitTest, Boolean)
 {
     json j = true;
     json::value_t t = j;
-    EXPECT_EQ(t, j.type());
+    CHECK(t == j.type());
 }
 
-TEST(JsonConvTypeImplicitTest, String)
+TEST(ObjectInspectionReturnTheTypeOfTheObjectImplicitTest, String)
 {
     json j = "Hello world";
     json::value_t t = j;
-    EXPECT_EQ(t, j.type());
+    CHECK(t == j.type());
 }
 
-TEST(JsonConvTypeImplicitTest, Integer)
+TEST(ObjectInspectionReturnTheTypeOfTheObjectImplicitTest, NumberInteger)
 {
     json j = 23;
     json::value_t t = j;
-    EXPECT_EQ(t, j.type());
+    CHECK(t == j.type());
 }
 
-TEST(JsonConvTypeImplicitTest, Unsigned)
+TEST(ObjectInspectionReturnTheTypeOfTheObjectImplicitTest, NumberUnsigned)
 {
     json j = 23u;
     json::value_t t = j;
-    EXPECT_EQ(t, j.type());
+    CHECK(t == j.type());
 }
 
-TEST(JsonConvTypeImplicitTest, Float)
+TEST(ObjectInspectionReturnTheTypeOfTheObjectImplicitTest, NumberFloatingPoint)
 {
     json j = 42.23;
     json::value_t t = j;
-    EXPECT_EQ(t, j.type());
+    CHECK(t == j.type());
 }
+
+TEST(ObjectInspectionReturnTheTypeOfTheObjectImplicitTest, Binary)
+{
+    json j = json::binary({});
+    json::value_t t = j;
+    CHECK(t == j.type());
+}
+

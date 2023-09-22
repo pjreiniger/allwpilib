@@ -1,89 +1,66 @@
-/*----------------------------------------------------------------------------*/
-/* Modifications Copyright (c) FIRST 2017. All Rights Reserved.               */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
-/*
-    __ _____ _____ _____
- __|  |   __|     |   | |  JSON for Modern C++ (test suite)
-|  |  |__   |  |  | | | |  version 2.1.1
-|_____|_____|_____|_|___|  https://github.com/nlohmann/json
+//     __ _____ _____ _____
+//  __|  |   __|     |   | |  JSON for Modern C++ (supporting code)
+// |  |  |__   |  |  | | | |  version 3.11.2
+// |_____|_____|_____|_|___|  https://github.com/nlohmann/json
+//
+// SPDX-FileCopyrightText: 2013-2022 Niels Lohmann <https://nlohmann.me>
+// SPDX-License-Identifier: MIT
 
-Licensed under the MIT License <http://opensource.org/licenses/MIT>.
-Copyright (c) 2013-2017 Niels Lohmann <http://nlohmann.me>.
-
-Permission is hereby  granted, free of charge, to any  person obtaining a copy
-of this software and associated  documentation files (the "Software"), to deal
-in the Software  without restriction, including without  limitation the rights
-to  use, copy,  modify, merge,  publish, distribute,  sublicense, and/or  sell
-copies  of  the Software,  and  to  permit persons  to  whom  the Software  is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE  IS PROVIDED "AS  IS", WITHOUT WARRANTY  OF ANY KIND,  EXPRESS OR
-IMPLIED,  INCLUDING BUT  NOT  LIMITED TO  THE  WARRANTIES OF  MERCHANTABILITY,
-FITNESS FOR  A PARTICULAR PURPOSE AND  NONINFRINGEMENT. IN NO EVENT  SHALL THE
-AUTHORS  OR COPYRIGHT  HOLDERS  BE  LIABLE FOR  ANY  CLAIM,  DAMAGES OR  OTHER
-LIABILITY, WHETHER IN AN ACTION OF  CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+#include "gtest/gtest.h"
 
 #include "unit-json.h"
-
-#include <algorithm>
-
-#include <gtest/gtest.h>
-
 using wpi::json;
 
-class JsonAlgorithmsTest : public ::testing::Test {
+class AlgorithmsTest : public ::testing::Test {
  protected:
     json j_array = {13, 29, 3, {{"one", 1}, {"two", 2}}, true, false, {1, 2, 3}, "foo", "baz"};
     json j_object = {{"one", 1}, {"two", 2}};
 };
 
-// non-modifying sequence operations
-TEST_F(JsonAlgorithmsTest, AllOf)
+
+class AlgorithmsNonModifyingSequenceOperationsTest : public AlgorithmsTest{};
+
+
+TEST_F(AlgorithmsNonModifyingSequenceOperationsTest, StdAllOf)
 {
-    EXPECT_TRUE(std::all_of(j_array.begin(), j_array.end(), [](const json & value)
+    CHECK(std::all_of(j_array.begin(), j_array.end(), [](const json & value)
     {
-        return value.size() > 0;
+        return !value.empty();
     }));
-    EXPECT_TRUE(std::all_of(j_object.begin(), j_object.end(), [](const json & value)
+    CHECK(std::all_of(j_object.begin(), j_object.end(), [](const json & value)
     {
         return value.type() == json::value_t::number_integer;
     }));
 }
 
-TEST_F(JsonAlgorithmsTest, AnyOf)
+TEST_F(AlgorithmsNonModifyingSequenceOperationsTest, StdAnyOf)
 {
-    EXPECT_TRUE(std::any_of(j_array.begin(), j_array.end(), [](const json & value)
+    CHECK(std::any_of(j_array.begin(), j_array.end(), [](const json & value)
     {
         return value.is_string() && value.get<std::string>() == "foo";
     }));
-    EXPECT_TRUE(std::any_of(j_object.begin(), j_object.end(), [](const json & value)
+    CHECK(std::any_of(j_object.begin(), j_object.end(), [](const json & value)
     {
         return value.get<int>() > 1;
     }));
 }
 
-TEST_F(JsonAlgorithmsTest, NoneOf)
+TEST_F(AlgorithmsNonModifyingSequenceOperationsTest, StdNoneOf)
 {
-    EXPECT_TRUE(std::none_of(j_array.begin(), j_array.end(), [](const json & value)
+    CHECK(std::none_of(j_array.begin(), j_array.end(), [](const json & value)
     {
-        return value.size() == 0;
+        return value.empty();
     }));
-    EXPECT_TRUE(std::none_of(j_object.begin(), j_object.end(), [](const json & value)
+    CHECK(std::none_of(j_object.begin(), j_object.end(), [](const json & value)
     {
         return value.get<int>() <= 0;
     }));
 }
 
-TEST_F(JsonAlgorithmsTest, ForEachReading)
+class AlgorithmsNonModifyingSequenceOperationsStdForEachTest : public AlgorithmsTest{};
+
+
+TEST_F(AlgorithmsNonModifyingSequenceOperationsStdForEachTest, Reading)
 {
     int sum = 0;
 
@@ -95,10 +72,10 @@ TEST_F(JsonAlgorithmsTest, ForEachReading)
         }
     });
 
-    EXPECT_EQ(sum, 45);
+    CHECK(sum == 45);
 }
 
-TEST_F(JsonAlgorithmsTest, ForEachWriting)
+TEST_F(AlgorithmsNonModifyingSequenceOperationsStdForEachTest, Writing)
 {
     auto add17 = [](json & value)
     {
@@ -110,202 +87,213 @@ TEST_F(JsonAlgorithmsTest, ForEachWriting)
 
     std::for_each(j_array.begin(), j_array.end(), add17);
 
-    EXPECT_EQ(j_array[6], json({1, 2, 3, 17}));
+    CHECK(j_array[6] == json({1, 2, 3, 17}));
 }
 
-TEST_F(JsonAlgorithmsTest, Count)
+TEST_F(AlgorithmsNonModifyingSequenceOperationsTest, StdCount)
 {
-    EXPECT_EQ(std::count(j_array.begin(), j_array.end(), json(true)), 1);
+    CHECK(std::count(j_array.begin(), j_array.end(), json(true)) == 1);
 }
 
-TEST_F(JsonAlgorithmsTest, CountIf)
+TEST_F(AlgorithmsNonModifyingSequenceOperationsTest, StdCountIf)
 {
-    auto count1 = std::count_if(j_array.begin(), j_array.end(), [](const json & value)
+    CHECK(std::count_if(j_array.begin(), j_array.end(), [](const json & value)
     {
         return (value.is_number());
-    });
-    EXPECT_EQ(count1, 3);
-    auto count2 = std::count_if(j_array.begin(), j_array.end(), [](const json&)
+    }) == 3);
+    CHECK(std::count_if(j_array.begin(), j_array.end(), [](const json&)
     {
         return true;
-    });
-    EXPECT_EQ(count2, 9);
+    }) == 9);
 }
 
-TEST_F(JsonAlgorithmsTest, Mismatch)
+TEST_F(AlgorithmsNonModifyingSequenceOperationsTest, StdMismatch)
 {
     json j_array2 = {13, 29, 3, {{"one", 1}, {"two", 2}, {"three", 3}}, true, false, {1, 2, 3}, "foo", "baz"};
     auto res = std::mismatch(j_array.begin(), j_array.end(), j_array2.begin());
-    EXPECT_EQ(*res.first, json({{"one", 1}, {"two", 2}}));
-    EXPECT_EQ(*res.second, json({{"one", 1}, {"two", 2}, {"three", 3}}));
+    CHECK(*res.first == json({{"one", 1}, {"two", 2}}));
+    CHECK(*res.second == json({{"one", 1}, {"two", 2}, {"three", 3}}));
 }
 
-TEST_F(JsonAlgorithmsTest, EqualOperatorEquals)
+class AlgorithmsNonModifyingSequenceOperationsStdEqualTest : public AlgorithmsTest{};
+
+
+TEST_F(AlgorithmsNonModifyingSequenceOperationsStdEqualTest, UsingOperatorEquals)
 {
-    EXPECT_TRUE(std::equal(j_array.begin(), j_array.end(), j_array.begin()));
-    EXPECT_TRUE(std::equal(j_object.begin(), j_object.end(), j_object.begin()));
-    EXPECT_FALSE(std::equal(j_array.begin(), j_array.end(), j_object.begin()));
+    CHECK(std::equal(j_array.begin(), j_array.end(), j_array.begin()));
+    CHECK(std::equal(j_object.begin(), j_object.end(), j_object.begin()));
+    CHECK(!std::equal(j_array.begin(), j_array.end(), j_object.begin()));
 }
 
-TEST_F(JsonAlgorithmsTest, EqualUserComparison)
+TEST_F(AlgorithmsNonModifyingSequenceOperationsStdEqualTest, UsingUserDefinedComparison)
 {
     // compare objects only by size of its elements
     json j_array2 = {13, 29, 3, {"Hello", "World"}, true, false, {{"one", 1}, {"two", 2}, {"three", 3}}, "foo", "baz"};
-    EXPECT_FALSE(std::equal(j_array.begin(), j_array.end(), j_array2.begin()));
-    EXPECT_TRUE(std::equal(j_array.begin(), j_array.end(), j_array2.begin(),
+    CHECK(!std::equal(j_array.begin(), j_array.end(), j_array2.begin()));
+    CHECK(std::equal(j_array.begin(), j_array.end(), j_array2.begin(),
                      [](const json & a, const json & b)
     {
         return (a.size() == b.size());
     }));
 }
 
-TEST_F(JsonAlgorithmsTest, Find)
+TEST_F(AlgorithmsNonModifyingSequenceOperationsTest, StdFind)
 {
     auto it = std::find(j_array.begin(), j_array.end(), json(false));
-    EXPECT_EQ(std::distance(j_array.begin(), it), 5);
+    CHECK(std::distance(j_array.begin(), it) == 5);
 }
 
-TEST_F(JsonAlgorithmsTest, FindIf)
+TEST_F(AlgorithmsNonModifyingSequenceOperationsTest, StdFindIf)
 {
     auto it = std::find_if(j_array.begin(), j_array.end(),
                            [](const json & value)
     {
         return value.is_boolean();
     });
-    EXPECT_EQ(std::distance(j_array.begin(), it), 4);
+    CHECK(std::distance(j_array.begin(), it) == 4);
 }
 
-TEST_F(JsonAlgorithmsTest, FindIfNot)
+TEST_F(AlgorithmsNonModifyingSequenceOperationsTest, StdFindIfNot)
 {
     auto it = std::find_if_not(j_array.begin(), j_array.end(),
                                [](const json & value)
     {
         return value.is_number();
     });
-    EXPECT_EQ(std::distance(j_array.begin(), it), 3);
+    CHECK(std::distance(j_array.begin(), it) == 3);
 }
 
-TEST_F(JsonAlgorithmsTest, AdjacentFind)
+TEST_F(AlgorithmsNonModifyingSequenceOperationsTest, StdAdjacentFind)
 {
-    EXPECT_EQ(std::adjacent_find(j_array.begin(), j_array.end()), j_array.end());
-    auto it = std::adjacent_find(j_array.begin(), j_array.end(),
+    CHECK(std::adjacent_find(j_array.begin(), j_array.end()) == j_array.end());
+    CHECK(std::adjacent_find(j_array.begin(), j_array.end(),
                              [](const json & v1, const json & v2)
     {
         return v1.type() == v2.type();
-    });
-    EXPECT_EQ(it, j_array.begin());
+    }) == j_array.begin());
 }
 
-// modifying sequence operations
-TEST_F(JsonAlgorithmsTest, Reverse)
+class AlgorithmsModifyingSequenceOperationsTest : public AlgorithmsTest{};
+
+
+TEST_F(AlgorithmsModifyingSequenceOperationsTest, StdReverse)
 {
     std::reverse(j_array.begin(), j_array.end());
-    EXPECT_EQ(j_array, json({"baz", "foo", {1, 2, 3}, false, true, {{"one", 1}, {"two", 2}}, 3, 29, 13}));
+    CHECK(j_array == json({"baz", "foo", {1, 2, 3}, false, true, {{"one", 1}, {"two", 2}}, 3, 29, 13}));
 }
 
-TEST_F(JsonAlgorithmsTest, Rotate)
+TEST_F(AlgorithmsModifyingSequenceOperationsTest, StdRotate)
 {
     std::rotate(j_array.begin(), j_array.begin() + 1, j_array.end());
-    EXPECT_EQ(j_array, json({29, 3, {{"one", 1}, {"two", 2}}, true, false, {1, 2, 3}, "foo", "baz", 13}));
+    CHECK(j_array == json({29, 3, {{"one", 1}, {"two", 2}}, true, false, {1, 2, 3}, "foo", "baz", 13}));
 }
 
-TEST_F(JsonAlgorithmsTest, Partition)
+TEST_F(AlgorithmsModifyingSequenceOperationsTest, StdPartition)
 {
     auto it = std::partition(j_array.begin(), j_array.end(), [](const json & v)
     {
         return v.is_string();
     });
-    EXPECT_EQ(std::distance(j_array.begin(), it), 2);
-    EXPECT_FALSE(it[2].is_string());
+    CHECK(std::distance(j_array.begin(), it) == 2);
+    CHECK(!it[2].is_string());
 }
 
-// sorting operations
-TEST_F(JsonAlgorithmsTest, SortOperatorEquals)
+class AlgorithmsSortingOperationsTest : public AlgorithmsTest{};
+
+
+class AlgorithmsSortingOperationsStdSortTest : public AlgorithmsTest{};
+
+
+TEST_F(AlgorithmsSortingOperationsStdSortTest, WithStandardComparison)
 {
     json j = {13, 29, 3, {{"one", 1}, {"two", 2}}, true, false, {1, 2, 3}, "foo", "baz", nullptr};
     std::sort(j.begin(), j.end());
-    EXPECT_EQ(j, json({nullptr, false, true, 3, 13, 29, {{"one", 1}, {"two", 2}}, {1, 2, 3}, "baz", "foo"}));
+    CHECK(j == json({nullptr, false, true, 3, 13, 29, {{"one", 1}, {"two", 2}}, {1, 2, 3}, "baz", "foo"}));
 }
 
-TEST_F(JsonAlgorithmsTest, SortUserComparison)
+TEST_F(AlgorithmsSortingOperationsStdSortTest, WithUserDefinedComparison)
 {
     json j = {3, {{"one", 1}, {"two", 2}}, {1, 2, 3}, nullptr};
     std::sort(j.begin(), j.end(), [](const json & a, const json & b)
     {
         return a.size() < b.size();
     });
-    EXPECT_EQ(j, json({nullptr, 3, {{"one", 1}, {"two", 2}}, {1, 2, 3}}));
+    CHECK(j == json({nullptr, 3, {{"one", 1}, {"two", 2}}, {1, 2, 3}}));
 }
 
-TEST_F(JsonAlgorithmsTest, SortObject)
+TEST_F(AlgorithmsSortingOperationsStdSortTest, SortingAnObject)
 {
     json j({{"one", 1}, {"two", 2}});
-    EXPECT_THROW_MSG(std::sort(j.begin(), j.end()), json::invalid_iterator,
-                     "[json.exception.invalid_iterator.209] cannot use offsets with object iterators");
+    CHECK_THROWS_WITH_AS(std::sort(j.begin(), j.end()), "[json.exception.invalid_iterator.209] cannot use offsets with object iterators", json::invalid_iterator&);
 }
 
-TEST_F(JsonAlgorithmsTest, PartialSort)
+TEST_F(AlgorithmsSortingOperationsTest, StdPartialSort)
 {
     json j = {13, 29, 3, {{"one", 1}, {"two", 2}}, true, false, {1, 2, 3}, "foo", "baz", nullptr};
     std::partial_sort(j.begin(), j.begin() + 4, j.end());
-    EXPECT_EQ(j, json({nullptr, false, true, 3, {{"one", 1}, {"two", 2}}, 29, {1, 2, 3}, "foo", "baz", 13}));
+    CHECK(j == json({nullptr, false, true, 3, {{"one", 1}, {"two", 2}}, 29, {1, 2, 3}, "foo", "baz", 13}));
 }
 
-// set operations
-TEST_F(JsonAlgorithmsTest, Merge)
+class AlgorithmsSetOperationsTest : public AlgorithmsTest{};
+
+
+TEST_F(AlgorithmsSetOperationsTest, StdMerge)
 {
-    json j1 = {2, 4, 6, 8};
-    json j2 = {1, 2, 3, 5, 7};
-    json j3;
+    {
+        json j1 = {2, 4, 6, 8};
+        json j2 = {1, 2, 3, 5, 7};
+        json j3;
 
-    std::merge(j1.begin(), j1.end(), j2.begin(), j2.end(), std::back_inserter(j3));
-    EXPECT_EQ(j3, json({1, 2, 2, 3, 4, 5, 6, 7, 8}));
+        std::merge(j1.begin(), j1.end(), j2.begin(), j2.end(), std::back_inserter(j3));
+        CHECK(j3 == json({1, 2, 2, 3, 4, 5, 6, 7, 8}));
+    }
 }
 
-TEST_F(JsonAlgorithmsTest, SetDifference)
+TEST_F(AlgorithmsSetOperationsTest, StdSetDifference)
 {
     json j1 = {1, 2, 3, 4, 5, 6, 7, 8};
     json j2 = {1, 2, 3, 5, 7};
     json j3;
 
     std::set_difference(j1.begin(), j1.end(), j2.begin(), j2.end(), std::back_inserter(j3));
-    EXPECT_EQ(j3, json({4, 6, 8}));
+    CHECK(j3 == json({4, 6, 8}));
 }
 
-TEST_F(JsonAlgorithmsTest, SetIntersection)
+TEST_F(AlgorithmsSetOperationsTest, StdSetIntersection)
 {
     json j1 = {1, 2, 3, 4, 5, 6, 7, 8};
     json j2 = {1, 2, 3, 5, 7};
     json j3;
 
     std::set_intersection(j1.begin(), j1.end(), j2.begin(), j2.end(), std::back_inserter(j3));
-    EXPECT_EQ(j3, json({1, 2, 3, 5, 7}));
+    CHECK(j3 == json({1, 2, 3, 5, 7}));
 }
 
-TEST_F(JsonAlgorithmsTest, SetUnion)
+TEST_F(AlgorithmsSetOperationsTest, StdSetUnion)
 {
     json j1 = {2, 4, 6, 8};
     json j2 = {1, 2, 3, 5, 7};
     json j3;
 
     std::set_union(j1.begin(), j1.end(), j2.begin(), j2.end(), std::back_inserter(j3));
-    EXPECT_EQ(j3, json({1, 2, 3, 4, 5, 6, 7, 8}));
+    CHECK(j3 == json({1, 2, 3, 4, 5, 6, 7, 8}));
 }
 
-TEST_F(JsonAlgorithmsTest, SetSymmetricDifference)
+TEST_F(AlgorithmsSetOperationsTest, StdSetSymmetricDifference)
 {
     json j1 = {2, 4, 6, 8};
     json j2 = {1, 2, 3, 5, 7};
     json j3;
 
     std::set_symmetric_difference(j1.begin(), j1.end(), j2.begin(), j2.end(), std::back_inserter(j3));
-    EXPECT_EQ(j3, json({1, 3, 4, 5, 6, 7, 8}));
+    CHECK(j3 == json({1, 3, 4, 5, 6, 7, 8}));
 }
 
-TEST_F(JsonAlgorithmsTest, HeapOperations)
+TEST_F(AlgorithmsTest, HeapOperations)
 {
     std::make_heap(j_array.begin(), j_array.end());
-    EXPECT_TRUE(std::is_heap(j_array.begin(), j_array.end()));
+    CHECK(std::is_heap(j_array.begin(), j_array.end()));
     std::sort_heap(j_array.begin(), j_array.end());
-    EXPECT_EQ(j_array, json({false, true, 3, 13, 29, {{"one", 1}, {"two", 2}}, {1, 2, 3}, "baz", "foo"}));
+    CHECK(j_array == json({false, true, 3, 13, 29, {{"one", 1}, {"two", 2}}, {1, 2, 3}, "baz", "foo"}));
 }
+
