@@ -370,11 +370,6 @@ TEST(DeserializationUnsuccessfulDeserializationTest, UserDefinedStringLiteral)
 
 class DeserializationContiguousContainersTest : public ::testing::Test {
  protected:
-    
-
-    
-
-    // these cases are required for 100% line coverage
 };
 
 

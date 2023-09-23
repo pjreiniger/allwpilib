@@ -11,11 +11,11 @@
 #include "wpi/json.h"
 #include <gmock/gmock.h>
 
-#if defined(__GNUC__)
+#if defined(__clang__)
+#pragma GCC diagnostic ignored "-Wunused-comparison"
+#elif defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#elif defined(__clang__)
-#pragma GCC diagnostic ignored "-Wunused-comparison"
 #elif _WIN32
 __pragma(warning(disable:4566))
 #endif

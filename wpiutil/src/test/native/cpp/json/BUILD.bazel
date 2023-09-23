@@ -1,26 +1,96 @@
-
+load("@rules_cc//cc:defs.bzl", "cc_test")
 
 [cc_test(
     name = filename[:-4],
-    srcs = [filename, "unit-json.h", "fifo_map.hpp"],
+    srcs = [
+        filename,
+        "fifo_map.hpp",
+        "unit-json.h",
+    ],
+    data = glob([
+        "test/data/json_nlohmann_tests/**",
+        "test/data/nst_json_testsuite2/**",
+    ]),
     deps = [
         "@gtest//:gtest_main",
         "//wpiutil/src/main/native:wpiutil.static",
         # "//wpiutil/src/main/native/thirdparty/json",
     ],
-    data = glob([
-        "test/data/json_nlohmann_tests/**",
-        "test/data/nst_json_testsuite2/**",
-        
-    ]),
 ) for filename in glob(["*.cpp"])]
 
-# cc_test(
-#     name = "json_tests",
-#     srcs = glob(["*.cpp", "*.hpp", "*.h"]),
-#     deps = [
-#         "@gtest//:gtest_main",
-#         "//wpiutil/src/main/native:wpiutil.static",
-#         # "//wpiutil/src/main/native/thirdparty/json",
-#     ],
-# )
+ALL_FILES = [
+        "fifo_map.hpp",
+        "unit-json.h",
+
+        "unit.cpp",
+        "unit-algorithms.cpp",
+        "unit-assert_macro.cpp",
+        "unit-bjdata.cpp",
+        "unit-bson.cpp",
+        "unit-byte_container_with_subtype.cpp",
+        "unit-capacity.cpp",
+        "unit-cbor.cpp",
+        "unit-class_const_iterator.cpp",
+        "unit-class_iterator.cpp",
+        "unit-class_lexer.cpp",
+        "unit-class_parser.cpp",
+
+
+
+        "unit-comparison.cpp",
+        "unit-concepts.cpp",
+        "unit-constructor1.cpp",
+        "unit-constructor2.cpp",
+        "unit-convenience.cpp",
+        "unit-conversions.cpp",
+        "unit-deserialization.cpp",
+        "unit-disabled_exceptions.cpp",
+        "unit-element_access1.cpp",
+        "unit-element_access2.cpp",
+
+        
+        "unit-hash.cpp",
+        "unit-inspection.cpp",
+        "unit-items.cpp",
+        "unit-iterators1.cpp",
+        "unit-iterators2.cpp",
+        "unit-json_patch.cpp",
+        "unit-json_pointer.cpp",
+        "unit-large_json.cpp",
+        "unit-merge_patch.cpp",
+        "unit-meta.cpp",
+        "unit-modifiers.cpp",
+        "unit-msgpack.cpp",
+        "unit-noexcept.cpp",
+        "unit-ordered_json.cpp",
+        "unit-ordered_map.cpp",
+        "unit-pointer_access.cpp",
+        "unit-readme.cpp",
+        "unit-reference_access.cpp",
+        "unit-regression1.cpp",
+        "unit-regression2.cpp",
+        "unit-serialization.cpp",
+        "unit-to_chars.cpp",
+        "unit-type_traits.cpp",
+        "unit-ubjson.cpp",
+        "unit-udl.cpp",
+        "unit-udt_macro.cpp",
+        "unit-unicode1.cpp",
+        "unit-unicode2.cpp",
+        "unit-unicode3.cpp",
+        "unit-unicode4.cpp",
+        "unit-unicode5.cpp",
+        "unit-user_defined_input.cpp",
+        "unit-windows_h.cpp",
+        "unit-wstring.cpp",
+    ]
+ALL_FILES = glob(["*.cpp", "*.hpp", "*.h"])
+cc_test(
+    name = "json_tests",
+    srcs = ALL_FILES,
+    deps = [
+        "@gtest//:gtest_main",
+        "//wpiutil/src/main/native:wpiutil.static",
+        # "//wpiutil/src/main/native/thirdparty/json",
+    ],
+)

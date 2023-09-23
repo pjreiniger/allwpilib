@@ -655,16 +655,6 @@ TEST_F(Iterators2ReverseIteratorArithmeticSubscriptOperatorTest, Value)
 #if JSON_HAS_RANGES
 
 class Iterators2RangesTest : public ::testing::Test {
- protected:
-    
-
-    // libstdc++ algorithms don't work with Clang 15 (04/2022)
-
-    
-
-
-    // libstdc++ views don't work with Clang 15 (04/2022)
-    // libc++ hides limited ranges implementation behind guard macro
 };
 
 
