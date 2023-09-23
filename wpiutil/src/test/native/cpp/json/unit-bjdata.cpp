@@ -3092,7 +3092,7 @@ TEST(BJDataWritingOptimizedValuesUnsignedIntegerTest, ArrayOfM2)
 
 
 
-TEST(UniversalBinaryJSONSpecificationExamples1Test, NullValue)
+TEST(BJDataJSONSpecificationExamples1Test, NullValue)
 {
     json j = {{"passcode", nullptr}};
     std::vector<uint8_t> v = {'{', 'i', 8, 'p', 'a', 's', 's', 'c', 'o', 'd', 'e', 'Z', '}'};
@@ -3100,7 +3100,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1Test, NullValue)
     CHECK(json::from_bjdata(v) == j);
 }
 
-TEST(UniversalBinaryJSONSpecificationExamples1Test, NoOpValue)
+TEST(BJDataJSONSpecificationExamples1Test, NoOpValue)
 {
     json j = {"foo", "bar", "baz"};
     std::vector<uint8_t> v = {'[', 'S', 'i', 3, 'f', 'o', 'o',
@@ -3116,7 +3116,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1Test, NoOpValue)
     CHECK(json::from_bjdata(v2) == j);
 }
 
-TEST(UniversalBinaryJSONSpecificationExamples1Test, BooleanTypes)
+TEST(BJDataJSONSpecificationExamples1Test, BooleanTypes)
 {
     json j = {{"authorized", true}, {"verified", false}};
     std::vector<uint8_t> v = {'{', 'i', 10, 'a', 'u', 't', 'h', 'o', 'r', 'i', 'z', 'e', 'd', 'T',
@@ -3126,7 +3126,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1Test, BooleanTypes)
     CHECK(json::from_bjdata(v) == j);
 }
 
-TEST(UniversalBinaryJSONSpecificationExamples1Test, NumericTypes)
+TEST(BJDataJSONSpecificationExamples1Test, NumericTypes)
 {
     json j =
     {
@@ -3156,7 +3156,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1Test, NumericTypes)
     CHECK(json::from_bjdata(v) == j);
 }
 
-TEST(UniversalBinaryJSONSpecificationExamples1Test, CharType)
+TEST(BJDataJSONSpecificationExamples1Test, CharType)
 {
     json j = {{"rolecode", "a"}, {"delim", ";"}};
     std::vector<uint8_t> v = {'{', 'i', 5, 'd', 'e', 'l', 'i', 'm', 'C', ';', 'i', 8, 'r', 'o', 'l', 'e', 'c', 'o', 'd', 'e', 'C', 'a', '}'};
@@ -3167,7 +3167,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1Test, CharType)
 
 
 
-TEST(UniversalBinaryJSONSpecificationExamples1StringTypeTest, English)
+TEST(BJDataJSONSpecificationExamples1StringTypeTest, English)
 {
     json j = "hello";
     std::vector<uint8_t> v = {'S', 'i', 5, 'h', 'e', 'l', 'l', 'o'};
@@ -3175,7 +3175,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1StringTypeTest, English)
     CHECK(json::from_bjdata(v) == j);
 }
 
-TEST(UniversalBinaryJSONSpecificationExamples1StringTypeTest, Russian)
+TEST(BJDataJSONSpecificationExamples1StringTypeTest, Russian)
 {
     json j = "привет";
     std::vector<uint8_t> v = {'S', 'i', 12, 0xD0, 0xBF, 0xD1, 0x80, 0xD0, 0xB8, 0xD0, 0xB2, 0xD0, 0xB5, 0xD1, 0x82};
@@ -3183,7 +3183,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1StringTypeTest, Russian)
     CHECK(json::from_bjdata(v) == j);
 }
 
-TEST(UniversalBinaryJSONSpecificationExamples1StringTypeTest, Russian2)
+TEST(BJDataJSONSpecificationExamples1StringTypeTest, Russian2)
 {
     json j = "مرحبا";
     std::vector<uint8_t> v = {'S', 'i', 10, 0xD9, 0x85, 0xD8, 0xB1, 0xD8, 0xAD, 0xD8, 0xA8, 0xD8, 0xA7};
@@ -3194,7 +3194,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1StringTypeTest, Russian2)
 
 
 
-TEST(UniversalBinaryJSONSpecificationExamples1ArrayTypeTest, SizeFalseTypeFalse)
+TEST(BJDataJSONSpecificationExamples1ArrayTypeTest, SizeFalseTypeFalse)
 {
     // note the float has been replaced by a double
     json j = {nullptr, true, false, 4782345193, 153.132, "ham"};
@@ -3203,7 +3203,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1ArrayTypeTest, SizeFalseTypeFalse)
     CHECK(json::from_bjdata(v) == j);
 }
 
-TEST(UniversalBinaryJSONSpecificationExamples1ArrayTypeTest, SizeTrueTypeFalse)
+TEST(BJDataJSONSpecificationExamples1ArrayTypeTest, SizeTrueTypeFalse)
 {
     // note the float has been replaced by a double
     json j = {nullptr, true, false, 4782345193, 153.132, "ham"};
@@ -3212,7 +3212,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1ArrayTypeTest, SizeTrueTypeFalse)
     CHECK(json::from_bjdata(v) == j);
 }
 
-TEST(UniversalBinaryJSONSpecificationExamples1ArrayTypeTest, SizeTrueTypeTrue)
+TEST(BJDataJSONSpecificationExamples1ArrayTypeTest, SizeTrueTypeTrue)
 {
     // note the float has been replaced by a double
     json j = {nullptr, true, false, 4782345193, 153.132, "ham"};
@@ -3224,7 +3224,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1ArrayTypeTest, SizeTrueTypeTrue)
 
 
 
-TEST(UniversalBinaryJSONSpecificationExamples1ObjectTypeTest, SizeFalseTypeFalse)
+TEST(BJDataJSONSpecificationExamples1ObjectTypeTest, SizeFalseTypeFalse)
 {
     json j =
     {
@@ -3248,7 +3248,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1ObjectTypeTest, SizeFalseTypeFalse
     CHECK(json::from_bjdata(v) == j);
 }
 
-TEST(UniversalBinaryJSONSpecificationExamples1ObjectTypeTest, SizeTrueTypeFalse)
+TEST(BJDataJSONSpecificationExamples1ObjectTypeTest, SizeTrueTypeFalse)
 {
     json j =
     {
@@ -3271,7 +3271,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1ObjectTypeTest, SizeTrueTypeFalse)
     CHECK(json::from_bjdata(v) == j);
 }
 
-TEST(UniversalBinaryJSONSpecificationExamples1ObjectTypeTest, SizeTrueTypeTrue)
+TEST(BJDataJSONSpecificationExamples1ObjectTypeTest, SizeTrueTypeTrue)
 {
     json j =
     {
@@ -3300,7 +3300,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1ObjectTypeTest, SizeTrueTypeTrue)
 
 
 
-TEST(UniversalBinaryJSONSpecificationExamples1OptimizedFormatArrayExampleTest, NoOptimization)
+TEST(BJDataJSONSpecificationExamples1OptimizedFormatArrayExampleTest, NoOptimization)
 {
     // note the floats have been replaced by doubles
     json j = {29.97, 31.13, 67.0, 2.113, 23.888};
@@ -3316,7 +3316,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1OptimizedFormatArrayExampleTest, N
     CHECK(json::from_bjdata(v) == j);
 }
 
-TEST(UniversalBinaryJSONSpecificationExamples1OptimizedFormatArrayExampleTest, OptimizedWithCount)
+TEST(BJDataJSONSpecificationExamples1OptimizedFormatArrayExampleTest, OptimizedWithCount)
 {
     // note the floats have been replaced by doubles
     json j = {29.97, 31.13, 67.0, 2.113, 23.888};
@@ -3331,7 +3331,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1OptimizedFormatArrayExampleTest, O
     CHECK(json::from_bjdata(v) == j);
 }
 
-TEST(UniversalBinaryJSONSpecificationExamples1OptimizedFormatArrayExampleTest, OptimizedWithTypeCount)
+TEST(BJDataJSONSpecificationExamples1OptimizedFormatArrayExampleTest, OptimizedWithTypeCount)
 {
     // note the floats have been replaced by doubles
     json j = {29.97, 31.13, 67.0, 2.113, 23.888};
@@ -3349,7 +3349,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1OptimizedFormatArrayExampleTest, O
 
 
 
-TEST(UniversalBinaryJSONSpecificationExamples1OptimizedFormatObjectExampleTest, NoOptimization)
+TEST(BJDataJSONSpecificationExamples1OptimizedFormatObjectExampleTest, NoOptimization)
 {
     // note the floats have been replaced by doubles
     json j = { {"lat", 29.976}, {"long", 31.131}, {"alt", 67.0} };
@@ -3363,7 +3363,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1OptimizedFormatObjectExampleTest, 
     CHECK(json::from_bjdata(v) == j);
 }
 
-TEST(UniversalBinaryJSONSpecificationExamples1OptimizedFormatObjectExampleTest, OptimizedWithCount)
+TEST(BJDataJSONSpecificationExamples1OptimizedFormatObjectExampleTest, OptimizedWithCount)
 {
     // note the floats have been replaced by doubles
     json j = { {"lat", 29.976}, {"long", 31.131}, {"alt", 67.0} };
@@ -3376,7 +3376,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1OptimizedFormatObjectExampleTest, 
     CHECK(json::from_bjdata(v) == j);
 }
 
-TEST(UniversalBinaryJSONSpecificationExamples1OptimizedFormatObjectExampleTest, OptimizedWithTypeCount)
+TEST(BJDataJSONSpecificationExamples1OptimizedFormatObjectExampleTest, OptimizedWithTypeCount)
 {
     // note the floats have been replaced by doubles
     json j = { {"lat", 29.976}, {"long", 31.131}, {"alt", 67.0} };
@@ -3392,7 +3392,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1OptimizedFormatObjectExampleTest, 
 
 
 
-TEST(UniversalBinaryJSONSpecificationExamples1OptimizedFormatSpecialCasesNullNoOpAndBooleanTest, Array)
+TEST(BJDataJSONSpecificationExamples1OptimizedFormatSpecialCasesNullNoOpAndBooleanTest, Array)
 {
     json _;
     std::vector<uint8_t> v = {'[', '$', 'N', '#', 'I', 0x00, 0x02};
@@ -3400,7 +3400,7 @@ TEST(UniversalBinaryJSONSpecificationExamples1OptimizedFormatSpecialCasesNullNoO
     CHECK(json::from_bjdata(v, true, false).is_discarded());
 }
 
-TEST(UniversalBinaryJSONSpecificationExamples1OptimizedFormatSpecialCasesNullNoOpAndBooleanTest, Object)
+TEST(BJDataJSONSpecificationExamples1OptimizedFormatSpecialCasesNullNoOpAndBooleanTest, Object)
 {
     json _;
     std::vector<uint8_t> v = {'{', '$', 'Z', '#', 'i', 3, 'i', 4, 'n', 'a', 'm', 'e', 'i', 8, 'p', 'a', 's', 's', 'w', 'o', 'r', 'd', 'i', 5, 'e', 'm', 'a', 'i', 'l'};

@@ -17,6 +17,7 @@ using json = wpi::json;
 /////////////////////////////////////////////////////////////////////
 // for #2824
 /////////////////////////////////////////////////////////////////////
+namespace {
 
 class sax_no_exception : public wpi::detail::json_sax_dom_parser<json>
 {
@@ -34,6 +35,7 @@ class sax_no_exception : public wpi::detail::json_sax_dom_parser<json>
 
 std::string* sax_no_exception::error_string = nullptr;
 
+}
 
 
 

@@ -403,7 +403,7 @@ TEST(ConstructorsCreateAStringExplicitTest, FilledString)
 
 class ConstructorsCreateAStringImplicitTest : public ::testing::Test {
  protected:
-    ConstructorsCreateAStringImplicitTest() : s_reference({"Hello world"}), j_reference(s_reference) {}
+    ConstructorsCreateAStringImplicitTest() : s_reference("Hello world"), j_reference(s_reference) {}
 
     // reference string
     json::string_t s_reference;

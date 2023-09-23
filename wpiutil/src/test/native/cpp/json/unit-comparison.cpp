@@ -115,29 +115,6 @@ class LexicographicalComparisonOperatorsTypesTest : public LexicographicalCompar
     // JSON_HAS_CPP_20 (do not remove; see note at top of file)
 };
 
-
-TEST_F(LexicographicalComparisonOperatorsTypesTest, ComparisonLess)
-{
-    REQUIRE(expected_lt.size() == j_types.size());
-    for (size_t i = 0; i < j_types.size(); ++i)
-    {
-        REQUIRE(expected_lt[i].size() == j_types.size());
-        for (size_t j = 0; j < j_types.size(); ++j)
-        {
-            CAPTURE(i)
-            CAPTURE(j)
-            // check precomputed values
-#if JSON_HAS_THREE_WAY_COMPARISON
-            // JSON_HAS_CPP_20 (do not remove; see note at top of file)
-            CHECK((j_types[i] < j_types[j]) == expected_lt[i][j]);
-#else
-            CHECK(operator<(j_types[i], j_types[j]) == expected_lt[i][j]);
-#endif
-            CHECK(f(j_types[i], j_types[j]) == expected_lt[i][j]);
-        }
-    }
-}
-
 #if JSON_HAS_THREE_WAY_COMPARISON
 
 TEST_F(LexicographicalComparisonOperatorsTypesTest, Comparison3Way)

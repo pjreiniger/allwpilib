@@ -158,6 +158,7 @@ struct adl_serializer<NonDefaultConstructible>
 // for #2824
 /////////////////////////////////////////////////////////////////////
 
+namespace {
 class sax_no_exception : public wpi::detail::json_sax_dom_parser<json>
 {
   public:
@@ -175,6 +176,7 @@ class sax_no_exception : public wpi::detail::json_sax_dom_parser<json>
 };
 
 std::string* sax_no_exception::error_string = nullptr;
+}
 
 /////////////////////////////////////////////////////////////////////
 // for #2982
