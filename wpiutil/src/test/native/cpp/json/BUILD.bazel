@@ -14,3 +14,13 @@
         
     ]),
 ) for filename in glob(["*.cpp"])]
+
+# cc_test(
+#     name = "json_tests",
+#     srcs = glob(["*.cpp", "*.hpp", "*.h"]),
+#     deps = [
+#         "@gtest//:gtest_main",
+#         "//wpiutil/src/main/native:wpiutil.static",
+#         # "//wpiutil/src/main/native/thirdparty/json",
+#     ],
+# )

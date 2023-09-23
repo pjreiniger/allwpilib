@@ -16,6 +16,8 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #elif defined(__clang__)
 #pragma GCC diagnostic ignored "-Wunused-comparison"
+#elif _WIN32
+__pragma(warning(disable:4566))
 #endif
 
 // Alias CHECK test macros with googletest macros
