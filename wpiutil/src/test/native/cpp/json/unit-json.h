@@ -15,6 +15,7 @@
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #pragma GCC diagnostic ignored "-Wunused-comparison"
+#pragma GCC diagnostic ignored "-Wunused-value"
 #elif defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
