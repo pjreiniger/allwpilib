@@ -12,6 +12,8 @@
 #include <gmock/gmock.h>
 
 #if defined(__clang__)
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #pragma GCC diagnostic ignored "-Wunused-comparison"
 #elif defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wsign-compare"
