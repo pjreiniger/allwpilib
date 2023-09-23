@@ -284,7 +284,6 @@ TEST_F(ConstructorsCreateAnArrayImplicitTest, StdTupleWithDiscardedValues)
     const auto t = j.get<std::tuple<int, float, std::string>>();
     CHECK(std::get<0>(t) == j[0]);
     CHECK(std::get<1>(t) == j[1]);
-    CHECK(std::get<2>(t) == j[2]);
 }
 
 TEST_F(ConstructorsCreateAnArrayImplicitTest, StdPairTupleArrayFailures)

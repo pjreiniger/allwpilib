@@ -21,6 +21,7 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #elif _WIN32
 __pragma(warning(disable:4566))
+__pragma(warning(disable:4996))
 #endif
 
 // Alias CHECK test macros with googletest macros
