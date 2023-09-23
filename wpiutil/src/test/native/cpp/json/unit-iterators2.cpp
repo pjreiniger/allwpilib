@@ -654,8 +654,7 @@ TEST_F(Iterators2ReverseIteratorArithmeticSubscriptOperatorTest, Value)
 
 #if JSON_HAS_RANGES
 
-class Iterators2RangesTest : public ::testing::Test {
-};
+
 
 
 TEST(Iterators2RangesTest, Concepts)
@@ -676,10 +675,10 @@ TEST(Iterators2RangesTest, Concepts)
 
 #if !DOCTEST_CLANG || (DOCTEST_CLANG && defined(__GLIBCXX__))
 
-class Iterators2RangesAlgorithmsTest : public Iterators2RangesTest{};
 
 
-TEST_F(Iterators2RangesAlgorithmsTest, Copy)
+
+TEST(Iterators2RangesAlgorithmsTest, Copy)
 {
     json j{"foo", "bar"};
     auto j_copied = json::array();
@@ -689,7 +688,7 @@ TEST_F(Iterators2RangesAlgorithmsTest, Copy)
     CHECK(j == j_copied);
 }
 
-TEST_F(Iterators2RangesAlgorithmsTest, FindIf)
+TEST(Iterators2RangesAlgorithmsTest, FindIf)
 {
     json j{1, 3, 2, 4};
     auto j_even = json::array();
@@ -715,10 +714,10 @@ TEST_F(Iterators2RangesAlgorithmsTest, FindIf)
 
 #if !(DOCTEST_CLANG && (defined(__GLIBCXX__) || defined(_LIBCPP_HAS_NO_INCOMPLETE_RANGES)))
 
-class Iterators2RangesViewsTest : public Iterators2RangesTest{};
 
 
-TEST_F(Iterators2RangesViewsTest, Reverse)
+
+TEST(Iterators2RangesViewsTest, Reverse)
 {
     json j{1, 2, 3, 4, 5};
     json j_expected{5, 4, 3, 2, 1};
@@ -727,7 +726,7 @@ TEST_F(Iterators2RangesViewsTest, Reverse)
     CHECK(reversed == j_expected);
 }
 
-TEST_F(Iterators2RangesViewsTest, Transform)
+TEST(Iterators2RangesViewsTest, Transform)
 {
     json j
     {

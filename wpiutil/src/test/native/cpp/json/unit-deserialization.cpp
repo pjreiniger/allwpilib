@@ -368,9 +368,7 @@ TEST(DeserializationUnsuccessfulDeserializationTest, UserDefinedStringLiteral)
     CHECK_THROWS_WITH_AS("[\"foo\",1,2,3,false,{\"one\":1}"_json, "[json.exception.parse_error.101] parse error at line 1, column 29: syntax error while parsing array - unexpected end of input; expected ']'", json::parse_error&);
 }
 
-class DeserializationContiguousContainersTest : public ::testing::Test {
- protected:
-};
+
 
 
 
@@ -578,10 +576,10 @@ TEST(DeserializationContiguousContainersViaIteratorRangeTest, IteratorInputAdapt
     CHECK(std::string(first, last) == str2);
 }
 
-class DeserializationContiguousContainersErrorCasesTest : public DeserializationContiguousContainersTest{};
 
 
-TEST_F(DeserializationContiguousContainersErrorCasesTest, Case1)
+
+TEST(DeserializationContiguousContainersErrorCasesTest, Case1)
 {
     std::array<std::uint8_t, 9> v = {{'\"', 'a', 'a', 'a', 'a', 'a', 'a', '\\', 'u'}};
     json _;
@@ -598,7 +596,7 @@ TEST_F(DeserializationContiguousContainersErrorCasesTest, Case1)
     CHECK(l.events == std::vector<std::string>({"parse_error(10)"}));
 }
 
-TEST_F(DeserializationContiguousContainersErrorCasesTest, Case2)
+TEST(DeserializationContiguousContainersErrorCasesTest, Case2)
 {
     std::array<std::uint8_t, 10> v = {{'\"', 'a', 'a', 'a', 'a', 'a', 'a', '\\', 'u', '1'}};
     json _;
@@ -615,7 +613,7 @@ TEST_F(DeserializationContiguousContainersErrorCasesTest, Case2)
     CHECK(l.events == std::vector<std::string>({"parse_error(11)"}));
 }
 
-TEST_F(DeserializationContiguousContainersErrorCasesTest, Case3)
+TEST(DeserializationContiguousContainersErrorCasesTest, Case3)
 {
     std::array<std::uint8_t, 17> v = {{'\"', 'a', 'a', 'a', 'a', 'a', 'a', '\\', 'u', '1', '1', '1', '1', '1', '1', '1', '1'}};
     json _;
@@ -632,7 +630,7 @@ TEST_F(DeserializationContiguousContainersErrorCasesTest, Case3)
     CHECK(l.events == std::vector<std::string>({"parse_error(18)"}));
 }
 
-TEST_F(DeserializationContiguousContainersErrorCasesTest, Case4)
+TEST(DeserializationContiguousContainersErrorCasesTest, Case4)
 {
     std::array<std::uint8_t, 17> v = {{'\"', 'a', 'a', 'a', 'a', 'a', 'a', 'u', '1', '1', '1', '1', '1', '1', '1', '1', '\\'}};
     json _;
@@ -649,7 +647,7 @@ TEST_F(DeserializationContiguousContainersErrorCasesTest, Case4)
     CHECK(l.events == std::vector<std::string>({"parse_error(18)"}));
 }
 
-TEST_F(DeserializationContiguousContainersErrorCasesTest, Case5)
+TEST(DeserializationContiguousContainersErrorCasesTest, Case5)
 {
     std::array<std::uint8_t, 3> v = {{'\"', 0x7F, 0xC1}};
     json _;
@@ -666,7 +664,7 @@ TEST_F(DeserializationContiguousContainersErrorCasesTest, Case5)
     CHECK(l.events == std::vector<std::string>({"parse_error(3)"}));
 }
 
-TEST_F(DeserializationContiguousContainersErrorCasesTest, Case6)
+TEST(DeserializationContiguousContainersErrorCasesTest, Case6)
 {
     std::array<std::uint8_t, 4> v = {{'\"', 0x7F, 0xDF, 0x7F}};
     json _;
@@ -683,7 +681,7 @@ TEST_F(DeserializationContiguousContainersErrorCasesTest, Case6)
     CHECK(l.events == std::vector<std::string>({"parse_error(4)"}));
 }
 
-TEST_F(DeserializationContiguousContainersErrorCasesTest, Case7)
+TEST(DeserializationContiguousContainersErrorCasesTest, Case7)
 {
     std::array<std::uint8_t, 4> v = {{'\"', 0x7F, 0xDF, 0xC0}};
     json _;
@@ -700,7 +698,7 @@ TEST_F(DeserializationContiguousContainersErrorCasesTest, Case7)
     CHECK(l.events == std::vector<std::string>({"parse_error(4)"}));
 }
 
-TEST_F(DeserializationContiguousContainersErrorCasesTest, Case8)
+TEST(DeserializationContiguousContainersErrorCasesTest, Case8)
 {
     std::array<std::uint8_t, 4> v = {{'\"', 0x7F, 0xE0, 0x9F}};
     json _;
@@ -717,7 +715,7 @@ TEST_F(DeserializationContiguousContainersErrorCasesTest, Case8)
     CHECK(l.events == std::vector<std::string>({"parse_error(4)"}));
 }
 
-TEST_F(DeserializationContiguousContainersErrorCasesTest, Case9)
+TEST(DeserializationContiguousContainersErrorCasesTest, Case9)
 {
     std::array<std::uint8_t, 4> v = {{'\"', 0x7F, 0xEF, 0xC0}};
     json _;
@@ -734,7 +732,7 @@ TEST_F(DeserializationContiguousContainersErrorCasesTest, Case9)
     CHECK(l.events == std::vector<std::string>({"parse_error(4)"}));
 }
 
-TEST_F(DeserializationContiguousContainersErrorCasesTest, Case10)
+TEST(DeserializationContiguousContainersErrorCasesTest, Case10)
 {
     std::array<std::uint8_t, 4> v = {{'\"', 0x7F, 0xED, 0x7F}};
     json _;
@@ -751,7 +749,7 @@ TEST_F(DeserializationContiguousContainersErrorCasesTest, Case10)
     CHECK(l.events == std::vector<std::string>({"parse_error(4)"}));
 }
 
-TEST_F(DeserializationContiguousContainersErrorCasesTest, Case11)
+TEST(DeserializationContiguousContainersErrorCasesTest, Case11)
 {
     std::array<std::uint8_t, 4> v = {{'\"', 0x7F, 0xF0, 0x8F}};
     json _;
@@ -768,7 +766,7 @@ TEST_F(DeserializationContiguousContainersErrorCasesTest, Case11)
     CHECK(l.events == std::vector<std::string>({"parse_error(4)"}));
 }
 
-TEST_F(DeserializationContiguousContainersErrorCasesTest, Case12)
+TEST(DeserializationContiguousContainersErrorCasesTest, Case12)
 {
     std::array<std::uint8_t, 4> v = {{'\"', 0x7F, 0xF0, 0xC0}};
     json _;
@@ -785,7 +783,7 @@ TEST_F(DeserializationContiguousContainersErrorCasesTest, Case12)
     CHECK(l.events == std::vector<std::string>({"parse_error(4)"}));
 }
 
-TEST_F(DeserializationContiguousContainersErrorCasesTest, Case13)
+TEST(DeserializationContiguousContainersErrorCasesTest, Case13)
 {
     std::array<std::uint8_t, 4> v = {{'\"', 0x7F, 0xF3, 0x7F}};
     json _;
@@ -802,7 +800,7 @@ TEST_F(DeserializationContiguousContainersErrorCasesTest, Case13)
     CHECK(l.events == std::vector<std::string>({"parse_error(4)"}));
 }
 
-TEST_F(DeserializationContiguousContainersErrorCasesTest, Case14)
+TEST(DeserializationContiguousContainersErrorCasesTest, Case14)
 {
     std::array<std::uint8_t, 4> v = {{'\"', 0x7F, 0xF3, 0xC0}};
     json _;
@@ -819,7 +817,7 @@ TEST_F(DeserializationContiguousContainersErrorCasesTest, Case14)
     CHECK(l.events == std::vector<std::string>({"parse_error(4)"}));
 }
 
-TEST_F(DeserializationContiguousContainersErrorCasesTest, Case15)
+TEST(DeserializationContiguousContainersErrorCasesTest, Case15)
 {
     std::array<std::uint8_t, 4> v = {{'\"', 0x7F, 0xF4, 0x7F}};
     json _;
@@ -836,7 +834,7 @@ TEST_F(DeserializationContiguousContainersErrorCasesTest, Case15)
     CHECK(l.events == std::vector<std::string>({"parse_error(4)"}));
 }
 
-TEST_F(DeserializationContiguousContainersErrorCasesTest, Case16)
+TEST(DeserializationContiguousContainersErrorCasesTest, Case16)
 {
     std::array<std::uint8_t, 6> v = {{'{', '\"', '\"', ':', '1', '1'}};
     json _;
