@@ -5232,6 +5232,107 @@ inline void swap(wpi::WPI_BASIC_JSON_TPL& j1, wpi::WPI_BASIC_JSON_TPL& j2) noexc
     using wpi::literals::json_literals::operator "" _json_pointer; //NOLINT(misc-unused-using-decls,google-global-names-in-headers)
 #endif
 
+
+// Specializations
+WPI_JSON_NAMESPACE_BEGIN
+
+#define BASIC_JSON_SPECIALIZATION basic_json<std::map, std::vector, std::string, bool, std::int64_t, std::uint64_t, double, std::allocator, adl_serializer, std::vector<std::uint8_t>>
+
+// json.h
+extern template class BASIC_JSON_SPECIALIZATION;
+extern template class json_sax<BASIC_JSON_SPECIALIZATION>;
+
+// json_pointer.h
+extern template class json_pointer<std::string>;
+
+namespace detail
+{
+////////////////////////
+// detail/conversions
+////////////////////////
+    
+// detail/conversions/from_json.h
+extern template void from_json(const BASIC_JSON_SPECIALIZATION& j, std::nullptr_t& n);
+extern template void from_json(const BASIC_JSON_SPECIALIZATION& j, bool& n);
+extern template void from_json(const BASIC_JSON_SPECIALIZATION& j, std::string& n);
+extern template void from_json(const BASIC_JSON_SPECIALIZATION& j, double& n);
+extern template void from_json(const BASIC_JSON_SPECIALIZATION& j, std::int64_t& n);
+extern template void from_json(const BASIC_JSON_SPECIALIZATION& j, std::uint64_t& n);
+extern template void from_json(const BASIC_JSON_SPECIALIZATION& j, std::vector<uint8_t>& n);
+
+// detail/conversions/to_chars.h
+namespace dtoa_impl {
+extern template boundaries compute_boundaries(float value);
+extern template boundaries compute_boundaries(double value);
+
+extern template void grisu2(char* buf, int& len, int& decimal_exponent, float value);
+extern template void grisu2(char* buf, int& len, int& decimal_exponent, double value);
+}
+extern template char* to_chars(char* first, const char* last, float value);
+extern template char* to_chars(char* first, const char* last, double value);
+
+// detail/conversions/to_json.h
+extern template void external_constructor<value_t::boolean>::construct(BASIC_JSON_SPECIALIZATION& j, const bool);
+extern template void external_constructor<value_t::string>::construct(BASIC_JSON_SPECIALIZATION& j, const std::string&);
+extern template void external_constructor<value_t::string>::construct(BASIC_JSON_SPECIALIZATION& j, std::string&&);
+extern template void external_constructor<value_t::binary>::construct(BASIC_JSON_SPECIALIZATION& j, const BASIC_JSON_SPECIALIZATION::binary_t&);
+extern template void external_constructor<value_t::binary>::construct(BASIC_JSON_SPECIALIZATION& j, BASIC_JSON_SPECIALIZATION::binary_t&&);
+extern template void external_constructor<value_t::number_float>::construct(BASIC_JSON_SPECIALIZATION& j, double);
+extern template void external_constructor<value_t::number_unsigned>::construct(BASIC_JSON_SPECIALIZATION& j, std::uint64_t);
+extern template void external_constructor<value_t::number_integer>::construct(BASIC_JSON_SPECIALIZATION& j, std::int64_t);
+extern template void external_constructor<value_t::array>::construct(BASIC_JSON_SPECIALIZATION& j, const std::vector<BASIC_JSON_SPECIALIZATION>&);
+extern template void external_constructor<value_t::array>::construct(BASIC_JSON_SPECIALIZATION& j, std::vector<BASIC_JSON_SPECIALIZATION>&&);
+extern template void external_constructor<value_t::object>::construct(BASIC_JSON_SPECIALIZATION& j, const BASIC_JSON_SPECIALIZATION::object_t&);
+extern template void external_constructor<value_t::object>::construct(BASIC_JSON_SPECIALIZATION& j, BASIC_JSON_SPECIALIZATION::object_t&&);
+
+extern template void to_json(BASIC_JSON_SPECIALIZATION& j, BASIC_JSON_SPECIALIZATION::string_t&&);
+extern template void to_json(BASIC_JSON_SPECIALIZATION& j, const BASIC_JSON_SPECIALIZATION::binary_t&);
+extern template void to_json(BASIC_JSON_SPECIALIZATION& j, BASIC_JSON_SPECIALIZATION::array_t&&);
+extern template void to_json(BASIC_JSON_SPECIALIZATION& j, BASIC_JSON_SPECIALIZATION::object_t&&);
+
+
+////////////////////////
+// detail/input
+////////////////////////
+// detail/input/binary_reader.h
+extern template class binary_reader<BASIC_JSON_SPECIALIZATION, file_input_adapter, json_sax_dom_parser<BASIC_JSON_SPECIALIZATION>>;
+extern template class binary_reader<BASIC_JSON_SPECIALIZATION, file_input_adapter, json_sax_dom_callback_parser<BASIC_JSON_SPECIALIZATION>>;
+extern template class binary_reader<BASIC_JSON_SPECIALIZATION, file_input_adapter, json_sax_acceptor<BASIC_JSON_SPECIALIZATION>>;
+
+extern template class binary_reader<BASIC_JSON_SPECIALIZATION, input_stream_adapter, json_sax_dom_parser<BASIC_JSON_SPECIALIZATION>>;
+extern template class binary_reader<BASIC_JSON_SPECIALIZATION, input_stream_adapter, json_sax_dom_callback_parser<BASIC_JSON_SPECIALIZATION>>;
+extern template class binary_reader<BASIC_JSON_SPECIALIZATION, input_stream_adapter, json_sax_acceptor<BASIC_JSON_SPECIALIZATION>>;
+
+
+// detail/input/json_sax.h
+extern template class json_sax_dom_parser<BASIC_JSON_SPECIALIZATION>;
+extern template class json_sax_dom_callback_parser<BASIC_JSON_SPECIALIZATION>;
+extern template class json_sax_acceptor<BASIC_JSON_SPECIALIZATION>;
+
+
+////////////////////////
+// detail/output
+////////////////////////
+// detail/output/binary_writer.h
+extern template class binary_writer<BASIC_JSON_SPECIALIZATION, char>;
+extern template class binary_writer<BASIC_JSON_SPECIALIZATION, std::uint8_t>;
+
+// detail/output/serializer.h
+extern template class serializer<BASIC_JSON_SPECIALIZATION>;
+
+////////////////////////
+// detail
+////////////////////////
+// detail/hash.h
+extern template std::size_t hash(const BASIC_JSON_SPECIALIZATION& j);
+}
+
+#undef BASIC_JSON_SPECIALIZATION
+
+WPI_JSON_NAMESPACE_END
+
 #include <wpi/detail/macro_unscope.h>
+
+
 
 #endif  // INCLUDE_WPI_JSON_HPP_
