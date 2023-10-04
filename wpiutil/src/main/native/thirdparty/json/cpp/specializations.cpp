@@ -11,7 +11,9 @@ WPI_JSON_NAMESPACE_BEGIN
 
 // json.h
 template class BASIC_JSON_SPECIALIZATION;
-template class json_sax<BASIC_JSON_SPECIALIZATION>;
+
+// detail/json_sax.h
+template struct json_sax<BASIC_JSON_SPECIALIZATION>;
 
 // json_pointer.h
 template class json_pointer<std::string>;
