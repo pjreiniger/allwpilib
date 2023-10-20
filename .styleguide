@@ -33,6 +33,7 @@ includeOtherLibs {
   ^cscore
   ^fmt/
   ^gtest/
+  ^google/
   ^hal/
   ^imgui
   ^implot
