@@ -895,12 +895,16 @@ void NetworkTablesModel::Update() {
                    entry->info.type_str == "proto:FileDescriptorProto") {
           // protobuf descriptor handling
           auto filename = wpi::drop_front(entry->info.name, 15);
-          m_protoDb.Add(filename, entry->value.GetRaw());
-          // loop over all protobuf entries and update (conservatively)
-          for (auto&& entryPair : m_entries) {
-            auto ts = entryPair.second->info.type_str;
-            if (wpi::starts_with(ts, "proto:")) {
-              entryPair.second->UpdateFromValue(*this);
+          if (!m_protoDb.Add(filename, entry->value.GetRaw())) {
+            fmt::print("could not decode protobuf '{}' filename '{}'\n",
+                       entry->info.name, filename);
+          } else {
+            // loop over all protobuf entries and update (conservatively)
+            for (auto&& entryPair : m_entries) {
+              auto& ts = entryPair.second->info.type_str;
+              if (wpi::starts_with(ts, "proto:")) {
+                entryPair.second->UpdateFromValue(*this);
+              }
             }
           }
         }
@@ -1085,24 +1089,60 @@ static bool SimplifyTypeString(std::string_view* ts) {
   return false;
 }
 
+static std::string_view GetTypeString(NT_Type type) {
+  switch (type) {
+    case NT_BOOLEAN:
+      return "boolean";
+    case NT_INTEGER:
+      return "int";
+    case NT_FLOAT:
+      return "float";
+    case NT_DOUBLE:
+      return "double";
+    case NT_STRING:
+      return "string";
+    case NT_BOOLEAN_ARRAY:
+      return "boolean[]";
+    case NT_INTEGER_ARRAY:
+      return "int[]";
+    case NT_FLOAT_ARRAY:
+      return "float[]";
+    case NT_DOUBLE_ARRAY:
+      return "double[]";
+    case NT_STRING_ARRAY:
+      return "string[]";
+    case NT_RAW:
+      return "raw";
+    case NT_RPC:
+      return "rpc";
+    default:
+      return "other";
+  }
+}
+
 static void EmitEntryValueReadonly(const NetworkTablesModel::ValueSource& entry,
-                                   const char* typeStr,
+                                   const char* overrideTypeStr,
                                    NetworkTablesFlags flags) {
   auto& val = entry.value;
   if (!val) {
     return;
   }
 
+  std::string_view typeStr =
+      overrideTypeStr ? overrideTypeStr : GetTypeString(val.type());
+  ImGui::SetNextItemWidth(-1 * (ImGui::CalcTextSize(typeStr.data()).x +
+                                ImGui::GetStyle().FramePadding.x));
+
   switch (val.type()) {
     case NT_BOOLEAN:
-      ImGui::LabelText(typeStr ? typeStr : "boolean", "%s",
+      ImGui::LabelText(typeStr.data(), "%s",
                        val.GetBoolean() ? "true" : "false");
       break;
     case NT_INTEGER:
-      ImGui::LabelText(typeStr ? typeStr : "int", "%" PRId64, val.GetInteger());
+      ImGui::LabelText(typeStr.data(), "%" PRId64, val.GetInteger());
       break;
     case NT_FLOAT:
-      ImGui::LabelText(typeStr ? typeStr : "double", "%.6f", val.GetFloat());
+      ImGui::LabelText(typeStr.data(), "%.6f", val.GetFloat());
       break;
     case NT_DOUBLE: {
       unsigned char precision = (flags & NetworkTablesFlags_Precision) >>
@@ -1111,8 +1151,7 @@ static void EmitEntryValueReadonly(const NetworkTablesModel::ValueSource& entry,
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
-      ImGui::LabelText(typeStr ? typeStr : "double",
-                       fmt::format("%.{}f", precision).c_str(),
+      ImGui::LabelText(typeStr.data(), fmt::format("%.{}f", precision).c_str(),
                        val.GetDouble());
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
@@ -1120,33 +1159,32 @@ static void EmitEntryValueReadonly(const NetworkTablesModel::ValueSource& entry,
       break;
     }
     case NT_STRING: {
-      ImGui::LabelText(typeStr ? typeStr : "string", "%s",
-                       entry.valueStr.c_str());
+      ImGui::LabelText(typeStr.data(), "%s", entry.valueStr.c_str());
       break;
     }
     case NT_BOOLEAN_ARRAY:
-      ImGui::LabelText(typeStr ? typeStr : "boolean[]", "[]");
+      ImGui::LabelText(typeStr.data(), "[]");
       break;
     case NT_INTEGER_ARRAY:
-      ImGui::LabelText(typeStr ? typeStr : "int[]", "[]");
+      ImGui::LabelText(typeStr.data(), "[]");
       break;
     case NT_FLOAT_ARRAY:
-      ImGui::LabelText(typeStr ? typeStr : "float[]", "[]");
+      ImGui::LabelText(typeStr.data(), "[]");
       break;
     case NT_DOUBLE_ARRAY:
-      ImGui::LabelText(typeStr ? typeStr : "double[]", "[]");
+      ImGui::LabelText(typeStr.data(), "[]");
       break;
     case NT_STRING_ARRAY:
-      ImGui::LabelText(typeStr ? typeStr : "string[]", "[]");
+      ImGui::LabelText(typeStr.data(), "[]");
       break;
     case NT_RAW: {
-      std::string_view ts = typeStr ? typeStr : "raw";
+      std::string_view ts = typeStr;
       bool partial = SimplifyTypeString(&ts);
       ImGui::LabelText(val.GetRaw().empty() ? "[]" : "[...]", "%s", ts.data());
       if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
         if (partial) {
-          ImGui::TextUnformatted(typeStr);
+          ImGui::TextUnformatted(typeStr.data());
         }
         ImGui::Text("%u bytes", static_cast<unsigned int>(val.GetRaw().size()));
         ImGui::EndTooltip();
@@ -1154,7 +1192,7 @@ static void EmitEntryValueReadonly(const NetworkTablesModel::ValueSource& entry,
       break;
     }
     default:
-      ImGui::LabelText(typeStr ? typeStr : "other", "?");
+      ImGui::LabelText(typeStr.data(), "?");
       break;
   }
 }
@@ -1316,14 +1354,18 @@ static void EmitEntryValueEditable(NetworkTablesModel* model,
     return;
   }
 
-  const char* typeStr =
-      entry.info.type_str.empty() ? nullptr : entry.info.type_str.c_str();
+  std::string_view typeStr = entry.info.type_str.empty()
+                                 ? entry.info.type_str
+                                 : GetTypeString(val.type());
+  ImGui::SetNextItemWidth(-1 * (ImGui::CalcTextSize(typeStr.data()).x +
+                                ImGui::GetStyle().FramePadding.x));
+
   ImGui::PushID(entry.info.name.c_str());
   switch (val.type()) {
     case NT_BOOLEAN: {
       static const char* boolOptions[] = {"false", "true"};
       int v = val.GetBoolean() ? 1 : 0;
-      if (ImGui::Combo(typeStr ? typeStr : "boolean", &v, boolOptions, 2)) {
+      if (ImGui::Combo(typeStr.data(), &v, boolOptions, 2)) {
         if (entry.publisher == 0) {
           entry.publisher =
               nt::Publish(entry.info.topic, NT_BOOLEAN, "boolean");
@@ -1334,8 +1376,8 @@ static void EmitEntryValueEditable(NetworkTablesModel* model,
     }
     case NT_INTEGER: {
       int64_t v = val.GetInteger();
-      if (ImGui::InputScalar(typeStr ? typeStr : "int", ImGuiDataType_S64, &v,
-                             nullptr, nullptr, nullptr,
+      if (ImGui::InputScalar(typeStr.data(), ImGuiDataType_S64, &v, nullptr,
+                             nullptr, nullptr,
                              ImGuiInputTextFlags_EnterReturnsTrue)) {
         if (entry.publisher == 0) {
           entry.publisher = nt::Publish(entry.info.topic, NT_INTEGER, "int");
@@ -1346,7 +1388,7 @@ static void EmitEntryValueEditable(NetworkTablesModel* model,
     }
     case NT_FLOAT: {
       float v = val.GetFloat();
-      if (ImGui::InputFloat(typeStr ? typeStr : "float", &v, 0, 0, "%.6f",
+      if (ImGui::InputFloat(typeStr.data(), &v, 0, 0, "%.6f",
                             ImGuiInputTextFlags_EnterReturnsTrue)) {
         if (entry.publisher == 0) {
           entry.publisher = nt::Publish(entry.info.topic, NT_FLOAT, "float");
@@ -1363,7 +1405,7 @@ static void EmitEntryValueEditable(NetworkTablesModel* model,
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
-      if (ImGui::InputDouble(typeStr ? typeStr : "double", &v, 0, 0,
+      if (ImGui::InputDouble(typeStr.data(), &v, 0, 0,
                              fmt::format("%.{}f", precision).c_str(),
                              ImGuiInputTextFlags_EnterReturnsTrue)) {
         if (entry.publisher == 0) {
@@ -1378,7 +1420,7 @@ static void EmitEntryValueEditable(NetworkTablesModel* model,
     }
     case NT_STRING: {
       char* v = GetTextBuffer(entry.valueStr);
-      if (ImGui::InputText(typeStr ? typeStr : "string", v, kTextBufferSize,
+      if (ImGui::InputText(typeStr.data(), v, kTextBufferSize,
                            ImGuiInputTextFlags_EnterReturnsTrue)) {
         if (v[0] == '"') {
           if (entry.publisher == 0) {
@@ -1393,7 +1435,7 @@ static void EmitEntryValueEditable(NetworkTablesModel* model,
       break;
     }
     case NT_BOOLEAN_ARRAY:
-      ImGui::LabelText("boolean[]", "[]");
+      ImGui::LabelText(typeStr.data(), "[]");
       if (ImGui::BeginPopupContextItem("boolean[]")) {
         if (ImGui::Selectable("Edit Array")) {
           gArrayEditor =
@@ -1406,7 +1448,7 @@ static void EmitEntryValueEditable(NetworkTablesModel* model,
       }
       break;
     case NT_INTEGER_ARRAY:
-      ImGui::LabelText("int[]", "[]");
+      ImGui::LabelText(typeStr.data(), "[]");
       if (ImGui::BeginPopupContextItem("int[]")) {
         if (ImGui::Selectable("Edit Array")) {
           gArrayEditor =
@@ -1419,7 +1461,7 @@ static void EmitEntryValueEditable(NetworkTablesModel* model,
       }
       break;
     case NT_FLOAT_ARRAY:
-      ImGui::LabelText("float[]", "[]");
+      ImGui::LabelText(typeStr.data(), "[]");
       if (ImGui::BeginPopupContextItem("float[]")) {
         if (ImGui::Selectable("Edit Array")) {
           gArrayEditor =
@@ -1431,7 +1473,7 @@ static void EmitEntryValueEditable(NetworkTablesModel* model,
       }
       break;
     case NT_DOUBLE_ARRAY:
-      ImGui::LabelText("double[]", "[]");
+      ImGui::LabelText(typeStr.data(), "[]");
       if (ImGui::BeginPopupContextItem("double[]")) {
         if (ImGui::Selectable("Edit Array")) {
           gArrayEditor =
@@ -1443,7 +1485,7 @@ static void EmitEntryValueEditable(NetworkTablesModel* model,
       }
       break;
     case NT_STRING_ARRAY:
-      ImGui::LabelText("string[]", "[]");
+      ImGui::LabelText(typeStr.data(), "[]");
       if (ImGui::BeginPopupContextItem("string[]")) {
         if (ImGui::Selectable("Edit Array")) {
           gArrayEditor =
@@ -1456,13 +1498,13 @@ static void EmitEntryValueEditable(NetworkTablesModel* model,
       }
       break;
     case NT_RAW: {
-      std::string_view ts = typeStr ? typeStr : "raw";
+      std::string_view ts = typeStr;
       bool partial = SimplifyTypeString(&ts);
       ImGui::LabelText(val.GetRaw().empty() ? "[]" : "[...]", "%s", ts.data());
       if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
         if (partial) {
-          ImGui::TextUnformatted(typeStr);
+          ImGui::TextUnformatted(typeStr.data());
         }
         ImGui::Text("%u bytes", static_cast<unsigned int>(val.GetRaw().size()));
         ImGui::EndTooltip();
@@ -1470,10 +1512,10 @@ static void EmitEntryValueEditable(NetworkTablesModel* model,
       break;
     }
     case NT_RPC:
-      ImGui::LabelText(typeStr ? typeStr : "rpc", "[...]");
+      ImGui::LabelText(typeStr.data(), "[...]");
       break;
     default:
-      ImGui::LabelText(typeStr ? typeStr : "other", "?");
+      ImGui::LabelText(typeStr.data(), "?");
       break;
   }
   ImGui::PopID();
@@ -1667,6 +1709,9 @@ static void EmitEntry(NetworkTablesModel* model,
     }
     // make it look like a normal label w/type
     ImGui::SetCursorPos(pos);
+    ImGui::SetNextItemWidth(
+        -1 * (ImGui::CalcTextSize(entry.info.type_str.c_str()).x +
+              ImGui::GetStyle().FramePadding.x));
     ImGui::LabelText(entry.info.type_str.c_str(), "%s", "");
     if ((entry.value.IsBooleanArray() || entry.value.IsFloatArray() ||
          entry.value.IsDoubleArray() || entry.value.IsIntegerArray() ||
