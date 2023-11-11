@@ -5,8 +5,6 @@
 #pragma once
 
 #include <wpi/SymbolExports.h>
-#include <wpi/protobuf/Protobuf.h>
-#include <wpi/struct/Struct.h>
 
 #include "frc/geometry/Rotation3d.h"
 #include "units/angle.h"

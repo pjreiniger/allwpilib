@@ -9,8 +9,6 @@
 
 #include <wpi/SymbolExports.h>
 #include <wpi/json_fwd.h>
-#include <wpi/protobuf/Protobuf.h>
-#include <wpi/struct/Struct.h>
 
 #include "frc/geometry/Rotation2d.h"
 #include "units/length.h"

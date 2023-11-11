@@ -6,8 +6,6 @@
 
 #include <wpi/SymbolExports.h>
 #include <wpi/json_fwd.h>
-#include <wpi/protobuf/Protobuf.h>
-#include <wpi/struct/Struct.h>
 
 #include "frc/geometry/Pose2d.h"
 #include "frc/geometry/Rotation3d.h"

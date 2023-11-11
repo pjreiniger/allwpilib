@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import org.junit.jupiter.api.Test;
 
-public class Translation2dSerdeTest {
+class Translation2dSerdeTest {
   private static final Translation2d DATA = new Translation2d(1.91, 2.29);
   private static final byte[] STRUCT_BUFFER =
       new byte[] {-113, -62, -11, 40, 92, -113, -2, 63, 82, -72, 30, -123, -21, 81, 2, 64};

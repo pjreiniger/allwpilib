@@ -15,7 +15,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import org.junit.jupiter.api.Test;
 
-public class Pose2dSerdeTest {
+class Pose2dSerdeTest {
   private static final Pose2d DATA =
       new Pose2d(new Translation2d(1.91, 2.29), Rotation2d.fromDegrees(35.04));
   private static final byte[] STRUCT_BUFFER =

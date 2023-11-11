@@ -16,7 +16,7 @@ import java.nio.ByteOrder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class Pose3dSerdeTest {
+class Pose3dSerdeTest {
   private static final Pose3d DATA =
       new Pose3d(1.91, 2.29, 17.4, new Rotation3d(35.4, 12.34, 56.78));
   private static final byte[] STRUCT_BUFFER =

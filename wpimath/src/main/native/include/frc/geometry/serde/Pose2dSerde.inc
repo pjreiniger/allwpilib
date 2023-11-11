@@ -4,6 +4,11 @@
 
 #pragma once
 
+#include <wpi/protobuf/Protobuf.h>
+#include <wpi/struct/Struct.h>
+
+#include "frc/geometry/Pose2d.h"
+
 template <>
 struct wpi::Struct<frc::Pose2d> {
   static constexpr std::string_view kTypeString = "struct:Pose2d";

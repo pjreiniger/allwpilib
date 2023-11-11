@@ -5,8 +5,6 @@
 #pragma once
 
 #include <wpi/SymbolExports.h>
-#include <wpi/protobuf/Protobuf.h>
-#include <wpi/struct/Struct.h>
 
 #include "frc/geometry/Translation3d.h"
 

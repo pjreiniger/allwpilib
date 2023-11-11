@@ -4,6 +4,11 @@
 
 #pragma once
 
+#include <wpi/protobuf/Protobuf.h>
+#include <wpi/struct/Struct.h>
+
+#include "frc/geometry/Transform3d.h"
+
 template <>
 struct wpi::Struct<frc::Transform3d> {
   static constexpr std::string_view kTypeString = "struct:Transform3d";

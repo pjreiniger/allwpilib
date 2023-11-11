@@ -4,6 +4,11 @@
 
 #pragma once
 
+#include <wpi/protobuf/Protobuf.h>
+#include <wpi/struct/Struct.h>
+
+#include "frc/geometry/Quaternion.h"
+
 template <>
 struct wpi::Struct<frc::Quaternion> {
   static constexpr std::string_view kTypeString = "struct:Quaternion";

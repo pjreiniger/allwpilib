@@ -14,7 +14,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import org.junit.jupiter.api.Test;
 
-public class Rotation3dSerdeTest {
+class Rotation3dSerdeTest {
   private static final Rotation3d DATA = new Rotation3d(1.91, 2.29, 35.04);
   private static final byte[] STRUCT_BUFFER =
       new byte[] {

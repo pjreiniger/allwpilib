@@ -16,7 +16,7 @@ import java.nio.ByteOrder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class Transform3dSerdeTest {
+class Transform3dSerdeTest {
   private static final Transform3d DATA =
       new Transform3d(new Translation3d(1.91, 2.29, 1.74), new Rotation3d(1.1, 2.2, 3.3));
   private static final byte[] STRUCT_BUFFER =

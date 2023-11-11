@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import org.junit.jupiter.api.Test;
 
-public class Twist3dSerdeTest {
+class Twist3dSerdeTest {
   private static final Twist3d DATA = new Twist3d(1.91, 2.29, 1.74, 0.3504, 0.0191, 0.0229);
   private static final byte[] STRUCT_BUFFER =
       new byte[] {
