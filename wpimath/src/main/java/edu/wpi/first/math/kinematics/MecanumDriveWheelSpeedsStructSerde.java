@@ -39,9 +39,9 @@ public class MecanumDriveWheelSpeedsStructSerde implements Struct<MecanumDriveWh
 
   @Override
   public void pack(ByteBuffer bb, MecanumDriveWheelSpeeds value) {
-    bb.putDouble(value.getFrontLeftMps());
-    bb.putDouble(value.getFrontRightMps());
-    bb.putDouble(value.getRearLeftMps());
-    bb.putDouble(value.getRearRightMps());
+    bb.putDouble(value.frontLeftMetersPerSecond);
+    bb.putDouble(value.frontRightMetersPerSecond);
+    bb.putDouble(value.rearLeftMetersPerSecond);
+    bb.putDouble(value.rearRightMetersPerSecond);
   }
 }

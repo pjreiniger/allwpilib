@@ -16,7 +16,7 @@ import java.util.Arrays;
 
 public class DifferentialDriveWheelVoltagesSerdeTest {
   private static final DifferentialDriveWheelVoltages DATA = new DifferentialDriveWheelVoltages(1.91, 2.29);
-  private static final byte[] STRUCT_BUFFER = new byte[]{63, -2, -113, 92, 40, -11, -62, -113, 64, 2, 81, -21, -123, 30, -72, 82};
+  private static final byte[] STRUCT_BUFFER = new byte[]{-113, -62, -11, 40, 92, -113, -2, 63, 82, -72, 30, -123, -21, 81, 2, 64};
 
   @Test
   void testStructPack() {
@@ -37,8 +37,8 @@ public class DifferentialDriveWheelVoltagesSerdeTest {
     buffer.order(ByteOrder.LITTLE_ENDIAN);
 
     DifferentialDriveWheelVoltages data = DifferentialDriveWheelVoltages.struct.unpack(buffer);
-    assertEquals(DATA.getLeft(), data.getLeft());
-    assertEquals(DATA.getRight(), data.getRight());
+    assertEquals(DATA.left, data.left);
+    assertEquals(DATA.right, data.right);
   }
 
   @Test
@@ -46,18 +46,18 @@ public class DifferentialDriveWheelVoltagesSerdeTest {
     ProtobufDifferentialDriveWheelVoltages proto = DifferentialDriveWheelVoltages.proto.createMessage();
     DifferentialDriveWheelVoltages.proto.pack(proto, DATA);
 
-    assertEquals(DATA.getLeft(), proto.getLeft());
-    assertEquals(DATA.getRight(), proto.getRight());
+    assertEquals(DATA.left, proto.getLeft());
+    assertEquals(DATA.right, proto.getRight());
   }
 
   @Test
   void testProtoUnpack() {
     ProtobufDifferentialDriveWheelVoltages proto = DifferentialDriveWheelVoltages.proto.createMessage();
-    proto.setLeft(DATA.getLeft());
-    proto.setRight(DATA.getRight());
+    proto.setLeft(DATA.left);
+    proto.setRight(DATA.right);
 
     DifferentialDriveWheelVoltages data = DifferentialDriveWheelVoltages.proto.unpack(proto);
-    assertEquals(DATA.getLeft(), data.getLeft());
-    assertEquals(DATA.getRight(), data.getRight());
+    assertEquals(DATA.left, data.left);
+    assertEquals(DATA.right, data.right);
   }
 }

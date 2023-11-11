@@ -18,6 +18,9 @@ public class MecanumDriveMotorVoltages {
   /** Voltage of the rear right motor. */
   public double rearRightVoltage;
 
+  public static final MecanumDriveMotorVoltagesProtoSerde proto = new MecanumDriveMotorVoltagesProtoSerde();
+  public static final MecanumDriveMotorVoltagesStructSerde struct = new MecanumDriveMotorVoltagesStructSerde();
+
   /** Constructs a MecanumDriveMotorVoltages with zeros for all member fields. */
   public MecanumDriveMotorVoltages() {}
 

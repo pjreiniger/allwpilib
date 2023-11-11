@@ -15,8 +15,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 
 public class ChassisSpeedsSerdeTest {
-  private static final ChassisSpeeds DATA = new ChassisSpeeds(1.91, 2.29);
-  private static final byte[] STRUCT_BUFFER = new byte[]{63, -2, -113, 92, 40, -11, -62, -113, 64, 2, 81, -21, -123, 30, -72, 82};
+  private static final ChassisSpeeds DATA = new ChassisSpeeds(1.91, 2.29, 3.504);
+  private static final byte[] STRUCT_BUFFER = new byte[]{-113, -62, -11, 40, 92, -113, -2, 63, 82, -72, 30, -123, -21, 81, 2, 64, -43, 120, -23, 38, 49, 8, 12, 64};
 
   @Test
   void testStructPack() {
@@ -37,9 +37,9 @@ public class ChassisSpeedsSerdeTest {
     buffer.order(ByteOrder.LITTLE_ENDIAN);
 
     ChassisSpeeds data = ChassisSpeeds.struct.unpack(buffer);
-    assertEquals(DATA.getVxMps(), data.getVxMps());
-    assertEquals(DATA.getVyMps(), data.getVyMps());
-    assertEquals(DATA.getOmegaRps(), data.getOmegaRps());
+    assertEquals(DATA.vxMetersPerSecond, data.vxMetersPerSecond);
+    assertEquals(DATA.vyMetersPerSecond, data.vyMetersPerSecond);
+    assertEquals(DATA.omegaRadiansPerSecond, data.omegaRadiansPerSecond);
   }
 
   @Test
@@ -47,21 +47,21 @@ public class ChassisSpeedsSerdeTest {
     ProtobufChassisSpeeds proto = ChassisSpeeds.proto.createMessage();
     ChassisSpeeds.proto.pack(proto, DATA);
 
-    assertEquals(DATA.getVxMps(), proto.getVxMps());
-    assertEquals(DATA.getVyMps(), proto.getVyMps());
-    assertEquals(DATA.getOmegaRps(), proto.getOmegaRps());
+    assertEquals(DATA.vxMetersPerSecond, proto.getVxMps());
+    assertEquals(DATA.vyMetersPerSecond, proto.getVyMps());
+    assertEquals(DATA.omegaRadiansPerSecond, proto.getOmegaRps());
   }
 
   @Test
   void testProtoUnpack() {
     ProtobufChassisSpeeds proto = ChassisSpeeds.proto.createMessage();
-    proto.setVxMps(DATA.getVxMps());
-    proto.setVyMps(DATA.getVyMps());
-    proto.setOmegaRps(DATA.getOmegaRps());
+    proto.setVxMps(DATA.vxMetersPerSecond);
+    proto.setVyMps(DATA.vyMetersPerSecond);
+    proto.setOmegaRps(DATA.omegaRadiansPerSecond);
 
     ChassisSpeeds data = ChassisSpeeds.proto.unpack(proto);
-    assertEquals(DATA.getVxMps(), data.getVxMps());
-    assertEquals(DATA.getVyMps(), data.getVyMps());
-    assertEquals(DATA.getOmegaRps(), data.getOmegaRps());
+    assertEquals(DATA.vxMetersPerSecond, data.vxMetersPerSecond);
+    assertEquals(DATA.vyMetersPerSecond, data.vyMetersPerSecond);
+    assertEquals(DATA.omegaRadiansPerSecond, data.omegaRadiansPerSecond);
   }
 }

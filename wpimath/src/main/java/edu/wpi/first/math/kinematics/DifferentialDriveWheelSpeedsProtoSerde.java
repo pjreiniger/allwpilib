@@ -31,8 +31,8 @@ public class DifferentialDriveWheelSpeedsProtoSerde implements Protobuf<Differen
 
   @Override
   public void pack(ProtobufDifferentialDriveWheelSpeeds msg, DifferentialDriveWheelSpeeds value) {
-    msg.setLeftMps(value.getLeftMps());
-    msg.setRightMps(value.getRightMps());
+    msg.setLeftMps(value.leftMetersPerSecond);
+    msg.setRightMps(value.rightMetersPerSecond);
 
   }
 }

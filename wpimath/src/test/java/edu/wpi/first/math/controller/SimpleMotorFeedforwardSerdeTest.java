@@ -16,7 +16,7 @@ import java.util.Arrays;
 
 public class SimpleMotorFeedforwardSerdeTest {
   private static final SimpleMotorFeedforward DATA = new SimpleMotorFeedforward(1.91, 2.29);
-  private static final byte[] STRUCT_BUFFER = new byte[]{63, -2, -113, 92, 40, -11, -62, -113, 64, 2, 81, -21, -123, 30, -72, 82};
+  private static final byte[] STRUCT_BUFFER = new byte[]{-113, -62, -11, 40, 92, -113, -2, 63, 82, -72, 30, -123, -21, 81, 2, 64, 0, 0, 0, 0, 0, 0, 0, 0};
 
   @Test
   void testStructPack() {
@@ -37,9 +37,9 @@ public class SimpleMotorFeedforwardSerdeTest {
     buffer.order(ByteOrder.LITTLE_ENDIAN);
 
     SimpleMotorFeedforward data = SimpleMotorFeedforward.struct.unpack(buffer);
-    assertEquals(DATA.getKs(), data.getKs());
-    assertEquals(DATA.getKv(), data.getKv());
-    assertEquals(DATA.getKa(), data.getKa());
+    assertEquals(DATA.ks, data.ks);
+    assertEquals(DATA.kv, data.kv);
+    assertEquals(DATA.ka, data.ka);
   }
 
   @Test
@@ -47,21 +47,21 @@ public class SimpleMotorFeedforwardSerdeTest {
     ProtobufSimpleMotorFeedforward proto = SimpleMotorFeedforward.proto.createMessage();
     SimpleMotorFeedforward.proto.pack(proto, DATA);
 
-    assertEquals(DATA.getKs(), proto.getKs());
-    assertEquals(DATA.getKv(), proto.getKv());
-    assertEquals(DATA.getKa(), proto.getKa());
+    assertEquals(DATA.ks, proto.getKs());
+    assertEquals(DATA.kv, proto.getKv());
+    assertEquals(DATA.ka, proto.getKa());
   }
 
   @Test
   void testProtoUnpack() {
     ProtobufSimpleMotorFeedforward proto = SimpleMotorFeedforward.proto.createMessage();
-    proto.setKs(DATA.getKs());
-    proto.setKv(DATA.getKv());
-    proto.setKa(DATA.getKa());
+    proto.setKs(DATA.ks);
+    proto.setKv(DATA.kv);
+    proto.setKa(DATA.ka);
 
     SimpleMotorFeedforward data = SimpleMotorFeedforward.proto.unpack(proto);
-    assertEquals(DATA.getKs(), data.getKs());
-    assertEquals(DATA.getKv(), data.getKv());
-    assertEquals(DATA.getKa(), data.getKa());
+    assertEquals(DATA.ks, data.ks);
+    assertEquals(DATA.kv, data.kv);
+    assertEquals(DATA.ka, data.ka);
   }
 }

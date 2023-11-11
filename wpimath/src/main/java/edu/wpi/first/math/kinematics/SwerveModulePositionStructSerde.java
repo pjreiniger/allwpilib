@@ -4,6 +4,7 @@
 
 package edu.wpi.first.math.kinematics;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.util.struct.Struct;
 import java.nio.ByteBuffer;
 
@@ -42,7 +43,7 @@ public class SwerveModulePositionStructSerde implements Struct<SwerveModulePosit
 
   @Override
   public void pack(ByteBuffer bb, SwerveModulePosition value) {
-    bb.putDouble(value.getDistance());
-    Rotation2d.struct.pack(bb, value.getAngle());
+    bb.putDouble(value.distanceMeters);
+    Rotation2d.struct.pack(bb, value.angle);
   }
 }

@@ -15,8 +15,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 
 public class DifferentialDriveKinematicsSerdeTest {
-  private static final DifferentialDriveKinematics DATA = new DifferentialDriveKinematics(1.91, 2.29);
-  private static final byte[] STRUCT_BUFFER = new byte[]{63, -2, -113, 92, 40, -11, -62, -113, 64, 2, 81, -21, -123, 30, -72, 82};
+  private static final DifferentialDriveKinematics DATA = new DifferentialDriveKinematics(1.91);
+  private static final byte[] STRUCT_BUFFER = new byte[]{-113, -62, -11, 40, 92, -113, -2, 63};
 
   @Test
   void testStructPack() {
@@ -37,7 +37,7 @@ public class DifferentialDriveKinematicsSerdeTest {
     buffer.order(ByteOrder.LITTLE_ENDIAN);
 
     DifferentialDriveKinematics data = DifferentialDriveKinematics.struct.unpack(buffer);
-    assertEquals(DATA.getTrackWidthMeters(), data.getTrackWidthMeters());
+    assertEquals(DATA.trackWidthMeters, data.trackWidthMeters);
   }
 
   @Test
@@ -45,15 +45,15 @@ public class DifferentialDriveKinematicsSerdeTest {
     ProtobufDifferentialDriveKinematics proto = DifferentialDriveKinematics.proto.createMessage();
     DifferentialDriveKinematics.proto.pack(proto, DATA);
 
-    assertEquals(DATA.getTrackWidthMeters(), proto.getTrackWidthMeters());
+    assertEquals(DATA.trackWidthMeters, proto.getTrackWidthMeters());
   }
 
   @Test
   void testProtoUnpack() {
     ProtobufDifferentialDriveKinematics proto = DifferentialDriveKinematics.proto.createMessage();
-    proto.setTrackWidthMeters(DATA.getTrackWidthMeters());
+    proto.setTrackWidthMeters(DATA.trackWidthMeters);
 
     DifferentialDriveKinematics data = DifferentialDriveKinematics.proto.unpack(proto);
-    assertEquals(DATA.getTrackWidthMeters(), data.getTrackWidthMeters());
+    assertEquals(DATA.trackWidthMeters, data.trackWidthMeters);
   }
 }

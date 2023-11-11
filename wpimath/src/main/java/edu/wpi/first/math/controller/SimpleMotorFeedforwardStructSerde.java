@@ -38,8 +38,8 @@ public class SimpleMotorFeedforwardStructSerde implements Struct<SimpleMotorFeed
 
   @Override
   public void pack(ByteBuffer bb, SimpleMotorFeedforward value) {
-    bb.putDouble(value.getKs());
-    bb.putDouble(value.getKv());
-    bb.putDouble(value.getKa());
+    bb.putDouble(value.ks);
+    bb.putDouble(value.kv);
+    bb.putDouble(value.ka);
   }
 }

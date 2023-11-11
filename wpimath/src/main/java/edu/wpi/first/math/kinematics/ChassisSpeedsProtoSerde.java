@@ -31,9 +31,9 @@ public class ChassisSpeedsProtoSerde implements Protobuf<ChassisSpeeds, Protobuf
 
   @Override
   public void pack(ProtobufChassisSpeeds msg, ChassisSpeeds value) {
-    msg.setVxMps(value.getVxMps());
-    msg.setVyMps(value.getVyMps());
-    msg.setOmegaRps(value.getOmegaRps());
+    msg.setVxMps(value.vxMetersPerSecond);
+    msg.setVyMps(value.vyMetersPerSecond);
+    msg.setOmegaRps(value.omegaRadiansPerSecond);
 
   }
 }

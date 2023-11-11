@@ -39,9 +39,9 @@ public class DifferentialDriveFeedforwardStructSerde implements Struct<Different
 
   @Override
   public void pack(ByteBuffer bb, DifferentialDriveFeedforward value) {
-    bb.putDouble(value.getKvLinear());
-    bb.putDouble(value.getKaLinear());
-    bb.putDouble(value.getKvAngular());
-    bb.putDouble(value.getKaAngular());
+//    bb.putDouble(value.getKvLinear());
+//    bb.putDouble(value.getKaLinear());
+//    bb.putDouble(value.getKvAngular());
+//    bb.putDouble(value.getKaAngular());
   }
 }

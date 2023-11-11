@@ -39,9 +39,9 @@ public class ElevatorFeedforwardStructSerde implements Struct<ElevatorFeedforwar
 
   @Override
   public void pack(ByteBuffer bb, ElevatorFeedforward value) {
-    bb.putDouble(value.getKs());
-    bb.putDouble(value.getKg());
-    bb.putDouble(value.getKv());
-    bb.putDouble(value.getKa());
+    bb.putDouble(value.ks);
+    bb.putDouble(value.kg);
+    bb.putDouble(value.kv);
+    bb.putDouble(value.ka);
   }
 }

@@ -31,10 +31,10 @@ public class DifferentialDriveFeedforwardProtoSerde implements Protobuf<Differen
 
   @Override
   public void pack(ProtobufDifferentialDriveFeedforward msg, DifferentialDriveFeedforward value) {
-    msg.setKvLinear(value.getKvLinear());
-    msg.setKaLinear(value.getKaLinear());
-    msg.setKvAngular(value.getKvAngular());
-    msg.setKaAngular(value.getKaAngular());
+//    msg.setKvLinear(value.());
+//    msg.setKaLinear(value.getKaLinear());
+//    msg.setKvAngular(value.getKvAngular());
+//    msg.setKaAngular(value.getKaAngular());
 
   }
 }

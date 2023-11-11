@@ -31,7 +31,7 @@ public class DifferentialDriveKinematicsProtoSerde implements Protobuf<Different
 
   @Override
   public void pack(ProtobufDifferentialDriveKinematics msg, DifferentialDriveKinematics value) {
-    msg.setTrackWidthMeters(value.getTrackWidth());
+    msg.setTrackWidthMeters(value.trackWidthMeters);
 
   }
 }

@@ -31,10 +31,10 @@ public class MecanumDriveMotorVoltagesProtoSerde implements Protobuf<MecanumDriv
 
   @Override
   public void pack(ProtobufMecanumDriveMotorVoltages msg, MecanumDriveMotorVoltages value) {
-    msg.setFrontLeftVolts(value.getFrontLeftVolts());
-    msg.setFrontRightVolts(value.getFrontRightVolts());
-    msg.setRearLeftVolts(value.getRearLeftVolts());
-    msg.setRearRightVolts(value.getRearRightVolts());
+    msg.setFrontLeftVolts(value.frontLeftVoltage);
+    msg.setFrontRightVolts(value.frontRightVoltage);
+    msg.setRearLeftVolts(value.rearLeftVoltage);
+    msg.setRearRightVolts(value.rearRightVoltage);
 
   }
 }

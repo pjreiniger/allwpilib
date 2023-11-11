@@ -19,10 +19,10 @@ public class SwerveDriveKinematicsProtoSerde implements Protobuf<SwerveDriveKine
     return ProtobufSwerveDriveKinematics.getDescriptor();
   }
 
-  @Override
-  public Protobuf<?, ?>[] getNested() {
-    return new Protobuf<?, ?>[] {RepeatedCompositeFieldContainer.proto};
-  }
+//  @Override
+//  public Protobuf<?, ?>[] getNested() {
+//    return new Protobuf<?, ?>[] {RepeatedCompositeFieldContainer.proto};
+//  }
 
   @Override
   public ProtobufSwerveDriveKinematics createMessage() {
@@ -31,13 +31,14 @@ public class SwerveDriveKinematicsProtoSerde implements Protobuf<SwerveDriveKine
 
   @Override
   public SwerveDriveKinematics unpack(ProtobufSwerveDriveKinematics msg) {
-    return new SwerveDriveKinematics(
-        RepeatedCompositeFieldContainer.proto.unpack(msg.getModules()));
+//    return new SwerveDriveKinematics(
+//        RepeatedCompositeFieldContainer.proto.unpack(msg.getModules()));
+    return null;
   }
 
   @Override
   public void pack(ProtobufSwerveDriveKinematics msg, SwerveDriveKinematics value) {
-    RepeatedCompositeFieldContainer.proto.pack(msg.getMutableModules(), value.getModules());
+//    RepeatedCompositeFieldContainer.proto.pack(msg.getMutableModules(), value.getModules());
 
   }
 }

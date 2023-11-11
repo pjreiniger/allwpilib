@@ -31,9 +31,9 @@ public class SimpleMotorFeedforwardProtoSerde implements Protobuf<SimpleMotorFee
 
   @Override
   public void pack(ProtobufSimpleMotorFeedforward msg, SimpleMotorFeedforward value) {
-    msg.setKs(value.getKs());
-    msg.setKv(value.getKv());
-    msg.setKa(value.getKa());
+    msg.setKs(value.ks);
+    msg.setKv(value.kv);
+    msg.setKa(value.ka);
 
   }
 }

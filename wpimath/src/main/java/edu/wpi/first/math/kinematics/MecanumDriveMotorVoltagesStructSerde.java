@@ -39,9 +39,9 @@ public class MecanumDriveMotorVoltagesStructSerde implements Struct<MecanumDrive
 
   @Override
   public void pack(ByteBuffer bb, MecanumDriveMotorVoltages value) {
-    bb.putDouble(value.getFrontLeftVolts());
-    bb.putDouble(value.getFrontRightVolts());
-    bb.putDouble(value.getRearLeftVolts());
-    bb.putDouble(value.getRearRightVolts());
+    bb.putDouble(value.frontLeftVoltage);
+    bb.putDouble(value.frontRightVoltage);
+    bb.putDouble(value.rearLeftVoltage);
+    bb.putDouble(value.rearRightVoltage);
   }
 }

@@ -38,8 +38,8 @@ public class ChassisSpeedsStructSerde implements Struct<ChassisSpeeds> {
 
   @Override
   public void pack(ByteBuffer bb, ChassisSpeeds value) {
-    bb.putDouble(value.getVxMps());
-    bb.putDouble(value.getVyMps());
-    bb.putDouble(value.getOmegaRps());
+    bb.putDouble(value.vxMetersPerSecond);
+    bb.putDouble(value.vyMetersPerSecond);
+    bb.putDouble(value.omegaRadiansPerSecond);
   }
 }

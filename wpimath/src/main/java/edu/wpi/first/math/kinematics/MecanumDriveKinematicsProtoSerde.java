@@ -4,6 +4,7 @@
 
 package edu.wpi.first.math.kinematics;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.proto.Kinematics.ProtobufMecanumDriveKinematics;
 import edu.wpi.first.util.protobuf.Protobuf;
 import us.hebi.quickbuf.Descriptors.Descriptor;
@@ -40,10 +41,11 @@ public class MecanumDriveKinematicsProtoSerde implements Protobuf<MecanumDriveKi
 
   @Override
   public void pack(ProtobufMecanumDriveKinematics msg, MecanumDriveKinematics value) {
-    Translation2d.proto.pack(msg.getMutableFrontLeft(), value.getFrontLeft());
-    Translation2d.proto.pack(msg.getMutableFrontRight(), value.getFrontRight());
-    Translation2d.proto.pack(msg.getMutableRearLeft(), value.getRearLeft());
-    Translation2d.proto.pack(msg.getMutableRearRight(), value.getRearRight());
+//    value.
+//    Translation2d.proto.pack(msg.getMutableFrontLeft(), value.getFrontLeft());
+//    Translation2d.proto.pack(msg.getMutableFrontRight(), value.getFrontRight());
+//    Translation2d.proto.pack(msg.getMutableRearLeft(), value.getRearLeft());
+//    Translation2d.proto.pack(msg.getMutableRearRight(), value.getRearRight());
 
   }
 }

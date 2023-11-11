@@ -12,6 +12,9 @@ public class DifferentialDriveWheelSpeeds {
   /** Speed of the right side of the robot. */
   public double rightMetersPerSecond;
 
+  public static final DifferentialDriveWheelSpeedsProtoSerde proto = new DifferentialDriveWheelSpeedsProtoSerde();
+  public static final DifferentialDriveWheelSpeedsStructSerde struct = new DifferentialDriveWheelSpeedsStructSerde();
+
   /** Constructs a DifferentialDriveWheelSpeeds with zeros for left and right speeds. */
   public DifferentialDriveWheelSpeeds() {}
 

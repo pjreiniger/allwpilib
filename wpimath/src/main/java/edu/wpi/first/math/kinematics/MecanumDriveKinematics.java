@@ -42,6 +42,9 @@ public class MecanumDriveKinematics
 
   private Translation2d m_prevCoR = new Translation2d();
 
+  public static final MecanumDriveKinematicsProtoSerde proto = new MecanumDriveKinematicsProtoSerde();
+  public static final MecanumDriveKinematicsStructSerde struct = new MecanumDriveKinematicsStructSerde();
+
   /**
    * Constructs a mecanum drive kinematics object.
    *

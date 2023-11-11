@@ -37,7 +37,7 @@ public class DifferentialDriveWheelSpeedsStructSerde implements Struct<Different
 
   @Override
   public void pack(ByteBuffer bb, DifferentialDriveWheelSpeeds value) {
-    bb.putDouble(value.getLeftMps());
-    bb.putDouble(value.getRightMps());
+    bb.putDouble(value.leftMetersPerSecond);
+    bb.putDouble(value.rightMetersPerSecond);
   }
 }

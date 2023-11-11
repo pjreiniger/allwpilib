@@ -15,8 +15,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 
 public class ArmFeedforwardSerdeTest {
-  private static final ArmFeedforward DATA = new ArmFeedforward(1.91, 2.29);
-  private static final byte[] STRUCT_BUFFER = new byte[]{63, -2, -113, 92, 40, -11, -62, -113, 64, 2, 81, -21, -123, 30, -72, 82};
+  private static final ArmFeedforward DATA = new ArmFeedforward(1.91, 2.29, 35.04, 1.74);
+  private static final byte[] STRUCT_BUFFER = new byte[]{-113, -62, -11, 40, 92, -113, -2, 63, 82, -72, 30, -123, -21, 81, 2, 64, -123, -21, 81, -72, 30, -123, 65, 64, -41, -93, 112, 61, 10, -41, -5, 63};
 
   @Test
   void testStructPack() {
@@ -37,10 +37,10 @@ public class ArmFeedforwardSerdeTest {
     buffer.order(ByteOrder.LITTLE_ENDIAN);
 
     ArmFeedforward data = ArmFeedforward.struct.unpack(buffer);
-    assertEquals(DATA.getKs(), data.getKs());
-    assertEquals(DATA.getKg(), data.getKg());
-    assertEquals(DATA.getKv(), data.getKv());
-    assertEquals(DATA.getKa(), data.getKa());
+    assertEquals(DATA.ks, data.ks);
+    assertEquals(DATA.kg, data.kg);
+    assertEquals(DATA.kv, data.kv);
+    assertEquals(DATA.ka, data.ka);
   }
 
   @Test
@@ -48,24 +48,24 @@ public class ArmFeedforwardSerdeTest {
     ProtobufArmFeedforward proto = ArmFeedforward.proto.createMessage();
     ArmFeedforward.proto.pack(proto, DATA);
 
-    assertEquals(DATA.getKs(), proto.getKs());
-    assertEquals(DATA.getKg(), proto.getKg());
-    assertEquals(DATA.getKv(), proto.getKv());
-    assertEquals(DATA.getKa(), proto.getKa());
+    assertEquals(DATA.ks, proto.getKs());
+    assertEquals(DATA.kg, proto.getKg());
+    assertEquals(DATA.kv, proto.getKv());
+    assertEquals(DATA.ka, proto.getKa());
   }
 
   @Test
   void testProtoUnpack() {
     ProtobufArmFeedforward proto = ArmFeedforward.proto.createMessage();
-    proto.setKs(DATA.getKs());
-    proto.setKg(DATA.getKg());
-    proto.setKv(DATA.getKv());
-    proto.setKa(DATA.getKa());
+    proto.setKs(DATA.ks);
+    proto.setKg(DATA.kg);
+    proto.setKv(DATA.kv);
+    proto.setKa(DATA.ka);
 
     ArmFeedforward data = ArmFeedforward.proto.unpack(proto);
-    assertEquals(DATA.getKs(), data.getKs());
-    assertEquals(DATA.getKg(), data.getKg());
-    assertEquals(DATA.getKv(), data.getKv());
-    assertEquals(DATA.getKa(), data.getKa());
+    assertEquals(DATA.ks, data.ks);
+    assertEquals(DATA.kg, data.kg);
+    assertEquals(DATA.kv, data.kv);
+    assertEquals(DATA.ka, data.ka);
   }
 }

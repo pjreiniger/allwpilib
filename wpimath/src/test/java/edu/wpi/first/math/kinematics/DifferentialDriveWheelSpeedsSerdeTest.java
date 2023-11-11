@@ -16,7 +16,7 @@ import java.util.Arrays;
 
 public class DifferentialDriveWheelSpeedsSerdeTest {
   private static final DifferentialDriveWheelSpeeds DATA = new DifferentialDriveWheelSpeeds(1.91, 2.29);
-  private static final byte[] STRUCT_BUFFER = new byte[]{63, -2, -113, 92, 40, -11, -62, -113, 64, 2, 81, -21, -123, 30, -72, 82};
+  private static final byte[] STRUCT_BUFFER = new byte[]{-113, -62, -11, 40, 92, -113, -2, 63, 82, -72, 30, -123, -21, 81, 2, 64};
 
   @Test
   void testStructPack() {
@@ -36,9 +36,11 @@ public class DifferentialDriveWheelSpeedsSerdeTest {
     ByteBuffer buffer = ByteBuffer.wrap(STRUCT_BUFFER);
     buffer.order(ByteOrder.LITTLE_ENDIAN);
 
+
     DifferentialDriveWheelSpeeds data = DifferentialDriveWheelSpeeds.struct.unpack(buffer);
-    assertEquals(DATA.getLeftMps(), data.getLeftMps());
-    assertEquals(DATA.getRightMps(), data.getRightMps());
+    System.out.println(data);
+    assertEquals(DATA.leftMetersPerSecond, data.leftMetersPerSecond);
+    assertEquals(DATA.rightMetersPerSecond, data.rightMetersPerSecond);
   }
 
   @Test
@@ -46,18 +48,18 @@ public class DifferentialDriveWheelSpeedsSerdeTest {
     ProtobufDifferentialDriveWheelSpeeds proto = DifferentialDriveWheelSpeeds.proto.createMessage();
     DifferentialDriveWheelSpeeds.proto.pack(proto, DATA);
 
-    assertEquals(DATA.getLeftMps(), proto.getLeftMps());
-    assertEquals(DATA.getRightMps(), proto.getRightMps());
+    assertEquals(DATA.leftMetersPerSecond, proto.getLeftMps());
+    assertEquals(DATA.rightMetersPerSecond, proto.getRightMps());
   }
 
   @Test
   void testProtoUnpack() {
     ProtobufDifferentialDriveWheelSpeeds proto = DifferentialDriveWheelSpeeds.proto.createMessage();
-    proto.setLeftMps(DATA.getLeftMps());
-    proto.setRightMps(DATA.getRightMps());
+    proto.setLeftMps(DATA.leftMetersPerSecond);
+    proto.setRightMps(DATA.rightMetersPerSecond);
 
     DifferentialDriveWheelSpeeds data = DifferentialDriveWheelSpeeds.proto.unpack(proto);
-    assertEquals(DATA.getLeftMps(), data.getLeftMps());
-    assertEquals(DATA.getRightMps(), data.getRightMps());
+    assertEquals(DATA.leftMetersPerSecond, data.leftMetersPerSecond);
+    assertEquals(DATA.rightMetersPerSecond, data.rightMetersPerSecond);
   }
 }

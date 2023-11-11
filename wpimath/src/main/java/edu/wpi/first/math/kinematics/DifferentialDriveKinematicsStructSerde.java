@@ -36,6 +36,6 @@ public class DifferentialDriveKinematicsStructSerde implements Struct<Differenti
 
   @Override
   public void pack(ByteBuffer bb, DifferentialDriveKinematics value) {
-    bb.putDouble(value.getTrackWidth());
+    bb.putDouble(value.trackWidthMeters);
   }
 }

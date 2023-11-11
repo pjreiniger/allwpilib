@@ -37,7 +37,7 @@ public class DifferentialDriveWheelVoltagesStructSerde implements Struct<Differe
 
   @Override
   public void pack(ByteBuffer bb, DifferentialDriveWheelVoltages value) {
-    bb.putDouble(value.getLeft());
-    bb.putDouble(value.getRight());
+    bb.putDouble(value.left);
+    bb.putDouble(value.right);
   }
 }

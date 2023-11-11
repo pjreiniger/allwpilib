@@ -39,9 +39,9 @@ public class MecanumDriveWheelPositionsStructSerde implements Struct<MecanumDriv
 
   @Override
   public void pack(ByteBuffer bb, MecanumDriveWheelPositions value) {
-    bb.putDouble(value.getFrontLeft());
-    bb.putDouble(value.getFrontRight());
-    bb.putDouble(value.getRearLeft());
-    bb.putDouble(value.getRearRight());
+    bb.putDouble(value.frontLeftMeters);
+    bb.putDouble(value.frontRightMeters);
+    bb.putDouble(value.rearLeftMeters);
+    bb.putDouble(value.rearRightMeters);
   }
 }

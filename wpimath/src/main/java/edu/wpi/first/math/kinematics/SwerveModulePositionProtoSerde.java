@@ -4,6 +4,7 @@
 
 package edu.wpi.first.math.kinematics;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.proto.Kinematics.ProtobufSwerveModulePosition;
 import edu.wpi.first.util.protobuf.Protobuf;
 import us.hebi.quickbuf.Descriptors.Descriptor;
@@ -37,8 +38,8 @@ public class SwerveModulePositionProtoSerde implements Protobuf<SwerveModulePosi
 
   @Override
   public void pack(ProtobufSwerveModulePosition msg, SwerveModulePosition value) {
-    msg.setDistanceMeters(value.getDistance());
-    Rotation2d.proto.pack(msg.getMutableAngle(), value.getAngle());
+    msg.setDistanceMeters(value.distanceMeters);
+    Rotation2d.proto.pack(msg.getMutableAngle(), value.angle);
 
   }
 }

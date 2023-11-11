@@ -9,6 +9,9 @@ public class DifferentialDriveWheelVoltages {
   public double left;
   public double right;
 
+  public static final DifferentialDriveWheelVoltagesProtoSerde proto = new DifferentialDriveWheelVoltagesProtoSerde();
+  public static final DifferentialDriveWheelVoltagesStructSerde struct = new DifferentialDriveWheelVoltagesStructSerde();
+
   public DifferentialDriveWheelVoltages() {}
 
   public DifferentialDriveWheelVoltages(double left, double right) {

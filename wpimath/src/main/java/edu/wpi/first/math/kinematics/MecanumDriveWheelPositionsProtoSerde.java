@@ -31,10 +31,10 @@ public class MecanumDriveWheelPositionsProtoSerde implements Protobuf<MecanumDri
 
   @Override
   public void pack(ProtobufMecanumDriveWheelPositions msg, MecanumDriveWheelPositions value) {
-    msg.setFrontLeftMeters(value.getFrontLeft());
-    msg.setFrontRightMeters(value.getFrontRight());
-    msg.setRearLeftMeters(value.getRearLeft());
-    msg.setRearRightMeters(value.getRearRight());
+    msg.setFrontLeftMeters(value.frontLeftMeters);
+    msg.setFrontRightMeters(value.frontRightMeters);
+    msg.setRearLeftMeters(value.rearLeftMeters);
+    msg.setRearRightMeters(value.rearRightMeters);
 
   }
 }

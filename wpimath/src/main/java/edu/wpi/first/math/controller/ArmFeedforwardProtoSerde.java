@@ -31,10 +31,10 @@ public class ArmFeedforwardProtoSerde implements Protobuf<ArmFeedforward, Protob
 
   @Override
   public void pack(ProtobufArmFeedforward msg, ArmFeedforward value) {
-    msg.setKs(value.getKs());
-    msg.setKg(value.getKg());
-    msg.setKv(value.getKv());
-    msg.setKa(value.getKa());
+    msg.setKs(value.ks);
+    msg.setKg(value.kg);
+    msg.setKv(value.kv);
+    msg.setKa(value.ka);
 
   }
 }

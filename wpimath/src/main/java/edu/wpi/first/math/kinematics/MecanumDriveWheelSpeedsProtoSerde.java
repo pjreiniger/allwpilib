@@ -31,10 +31,10 @@ public class MecanumDriveWheelSpeedsProtoSerde implements Protobuf<MecanumDriveW
 
   @Override
   public void pack(ProtobufMecanumDriveWheelSpeeds msg, MecanumDriveWheelSpeeds value) {
-    msg.setFrontLeftMps(value.getFrontLeftMps());
-    msg.setFrontRightMps(value.getFrontRightMps());
-    msg.setRearLeftMps(value.getRearLeftMps());
-    msg.setRearRightMps(value.getRearRightMps());
+    msg.setFrontLeftMps(value.frontLeftMetersPerSecond);
+    msg.setFrontRightMps(value.frontRightMetersPerSecond);
+    msg.setRearLeftMps(value.rearLeftMetersPerSecond);
+    msg.setRearRightMps(value.rearRightMetersPerSecond);
 
   }
 }

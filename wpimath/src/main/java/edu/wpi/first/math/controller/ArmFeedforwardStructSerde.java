@@ -39,9 +39,9 @@ public class ArmFeedforwardStructSerde implements Struct<ArmFeedforward> {
 
   @Override
   public void pack(ByteBuffer bb, ArmFeedforward value) {
-    bb.putDouble(value.getKs());
-    bb.putDouble(value.getKg());
-    bb.putDouble(value.getKv());
-    bb.putDouble(value.getKa());
+    bb.putDouble(value.ks);
+    bb.putDouble(value.kg);
+    bb.putDouble(value.kv);
+    bb.putDouble(value.ka);
   }
 }

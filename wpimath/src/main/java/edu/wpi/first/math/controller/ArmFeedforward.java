@@ -14,6 +14,9 @@ public class ArmFeedforward {
   public final double kv;
   public final double ka;
 
+  public static final ArmFeedforwardProtoSerde proto = new ArmFeedforwardProtoSerde();
+  public static final ArmFeedforwardStructSerde struct = new ArmFeedforwardStructSerde();
+
   /**
    * Creates a new ArmFeedforward with the specified gains. Units of the gain values will dictate
    * units of the computed feedforward.
