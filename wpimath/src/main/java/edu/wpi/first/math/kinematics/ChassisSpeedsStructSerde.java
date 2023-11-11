@@ -25,15 +25,15 @@ public class ChassisSpeedsStructSerde implements Struct<ChassisSpeeds> {
 
   @Override
   public String getSchema() {
-    return "double vx_mps;double vy_mps;double omega_rps";
+    return "double vx;double vy;double omega";
   }
 
   @Override
   public ChassisSpeeds unpack(ByteBuffer bb) {
-    double vx_mps = bb.getDouble();
-    double vy_mps = bb.getDouble();
-    double omega_rps = bb.getDouble();
-    return new ChassisSpeeds(vx_mps, vy_mps, omega_rps);
+    double vx = bb.getDouble();
+    double vy = bb.getDouble();
+    double omega = bb.getDouble();
+    return new ChassisSpeeds(vx, vy, omega);
   }
 
   @Override

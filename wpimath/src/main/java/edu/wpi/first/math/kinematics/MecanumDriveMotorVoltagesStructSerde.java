@@ -25,16 +25,16 @@ public class MecanumDriveMotorVoltagesStructSerde implements Struct<MecanumDrive
 
   @Override
   public String getSchema() {
-    return "double front_left_volts;double front_right_volts;double rear_left_volts;double rear_right_volts";
+    return "double front_left;double front_right;double rear_left;double rear_right";
   }
 
   @Override
   public MecanumDriveMotorVoltages unpack(ByteBuffer bb) {
-    double front_left_volts = bb.getDouble();
-    double front_right_volts = bb.getDouble();
-    double rear_left_volts = bb.getDouble();
-    double rear_right_volts = bb.getDouble();
-    return new MecanumDriveMotorVoltages(front_left_volts, front_right_volts, rear_left_volts, rear_right_volts);
+    double front_left = bb.getDouble();
+    double front_right = bb.getDouble();
+    double rear_left = bb.getDouble();
+    double rear_right = bb.getDouble();
+    return new MecanumDriveMotorVoltages(front_left, front_right, rear_left, rear_right);
   }
 
   @Override

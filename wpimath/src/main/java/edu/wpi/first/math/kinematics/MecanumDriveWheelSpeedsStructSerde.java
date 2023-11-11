@@ -25,16 +25,16 @@ public class MecanumDriveWheelSpeedsStructSerde implements Struct<MecanumDriveWh
 
   @Override
   public String getSchema() {
-    return "double front_left_mps;double front_right_mps;double rear_left_mps;double rear_right_mps";
+    return "double front_left;double front_right;double rear_left;double rear_right";
   }
 
   @Override
   public MecanumDriveWheelSpeeds unpack(ByteBuffer bb) {
-    double front_left_mps = bb.getDouble();
-    double front_right_mps = bb.getDouble();
-    double rear_left_mps = bb.getDouble();
-    double rear_right_mps = bb.getDouble();
-    return new MecanumDriveWheelSpeeds(front_left_mps, front_right_mps, rear_left_mps, rear_right_mps);
+    double front_left = bb.getDouble();
+    double front_right = bb.getDouble();
+    double rear_left = bb.getDouble();
+    double rear_right = bb.getDouble();
+    return new MecanumDriveWheelSpeeds(front_left, front_right, rear_left, rear_right);
   }
 
   @Override

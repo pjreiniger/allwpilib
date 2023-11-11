@@ -25,14 +25,14 @@ public class DifferentialDriveWheelSpeedsStructSerde implements Struct<Different
 
   @Override
   public String getSchema() {
-    return "double left_mps;double right_mps";
+    return "double left;double right";
   }
 
   @Override
   public DifferentialDriveWheelSpeeds unpack(ByteBuffer bb) {
-    double left_mps = bb.getDouble();
-    double right_mps = bb.getDouble();
-    return new DifferentialDriveWheelSpeeds(left_mps, right_mps);
+    double left = bb.getDouble();
+    double right = bb.getDouble();
+    return new DifferentialDriveWheelSpeeds(left, right);
   }
 
   @Override

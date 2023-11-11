@@ -2,21 +2,21 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package edu.wpi.first.math.{{java_package}};
+package edu.wpi.first.math.{{module.subfolder}};
 
-import edu.wpi.first.math.proto.{{protobuf_package}}.Protobuf{{lang_type}};
+import edu.wpi.first.math.proto.{{module.java_proto_subpath}}.{{message.protobuf_short_type}};
 import edu.wpi.first.util.protobuf.Protobuf;
 import us.hebi.quickbuf.Descriptors.Descriptor;
 
-public class {{lang_type}}ProtoSerde implements Protobuf<{{lang_type}}, {{protobuf_type}}> {
+public class {{message.local_type}}ProtoSerde implements Protobuf<{{message.local_type}}, {{message.protobuf_short_type}}> {
   @Override
-  public Class<{{lang_type}}> getTypeClass() {
-    return {{lang_type}}.class;
+  public Class<{{message.local_type}}> getTypeClass() {
+    return {{message.local_type}}.class;
   }
 
   @Override
   public Descriptor getDescriptor() {
-    return {{protobuf_type}}.getDescriptor();
+    return {{message.protobuf_short_type}}.getDescriptor();
   }
 {%- if has_nested_types %}
 
@@ -26,18 +26,18 @@ public class {{lang_type}}ProtoSerde implements Protobuf<{{lang_type}}, {{protob
   }{% endif %}
 
   @Override
-  public {{protobuf_type}} createMessage() {
-    return {{protobuf_type}}.newInstance();
+  public {{message.protobuf_short_type}} createMessage() {
+    return {{message.protobuf_short_type}}.newInstance();
   }
 
   @Override
-  public {{lang_type}} unpack({{protobuf_type}} msg) {
-    return new {{lang_type}}({{get_protobuf_unpack(clazz, fields)}});
+  public {{message.local_type}} unpack({{message.protobuf_short_type}} msg) {
+    return new {{message.local_type}}({{get_protobuf_unpack(message)}});
   }
 
   @Override
-  public void pack({{protobuf_type}} msg, {{lang_type}} value) {
-{{get_protobuf_pack(clazz, fields)}}
+  public void pack({{message.protobuf_short_type}} msg, {{message.local_type}} value) {
+{{get_protobuf_pack(message)}}
   }
 }
 
