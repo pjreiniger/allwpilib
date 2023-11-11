@@ -14,11 +14,11 @@ namespace {
 using StructType = wpi::Struct<frc::Translation2d>;
 using ProtoType = wpi::Protobuf<frc::Translation2d>;
 
-char kExpectedStructBufferChar[] = {
--113, -62, -11, 40, 92, -113, -2, 63, 82, -72, 30, -123, -21, 81, 2, 64
-};
+char kExpectedStructBufferChar[] = {-113, -62, -11, 40,   92,  -113, -2, 63,
+                                    82,   -72, 30,  -123, -21, 81,   2,  64};
 
-uint8_t* kExpectedStructBuffer = reinterpret_cast<uint8_t*>(kExpectedStructBufferChar);
+uint8_t* kExpectedStructBuffer =
+    reinterpret_cast<uint8_t*>(kExpectedStructBufferChar);
 
 constexpr Translation2d kExpectedData{1.91_m, 2.29_m};
 }  // namespace
@@ -34,22 +34,20 @@ TEST(Translation2dTest, StructPack) {
 
 TEST(Translation2dTest, StructUnpack) {
   Translation2d unpacked_data =
-      StructType::Unpack(std::span<uint8_t, StructType::kSize>(kExpectedStructBuffer, StructType::kSize));
+      StructType::Unpack(std::span<uint8_t, StructType::kSize>(
+          kExpectedStructBuffer, StructType::kSize));
 
-    EXPECT_EQ(kExpectedData.X().value(), unpacked_data.X().value());
-    EXPECT_EQ(kExpectedData.Y().value(), unpacked_data.Y().value());
+  EXPECT_EQ(kExpectedData.X().value(), unpacked_data.X().value());
+  EXPECT_EQ(kExpectedData.Y().value(), unpacked_data.Y().value());
 }
-
 
 TEST(Translation2dTest, ProtobufPack) {
   wpi::proto::ProtobufTranslation2d proto;
   ProtoType::Pack(&proto, kExpectedData);
 
-    EXPECT_EQ(kExpectedData.X().value(), proto.x_meters());
-    EXPECT_EQ(kExpectedData.Y().value(), proto.y_meters());
+  EXPECT_EQ(kExpectedData.X().value(), proto.x_meters());
+  EXPECT_EQ(kExpectedData.Y().value(), proto.y_meters());
 }
-
-
 
 TEST(Translation2dTest, ProtobufUnpack) {
   wpi::proto::ProtobufTranslation2d proto;
@@ -57,6 +55,6 @@ TEST(Translation2dTest, ProtobufUnpack) {
   proto.set_y_meters(kExpectedData.Y().value());
 
   Translation2d unpacked_data = ProtoType::Unpack(proto);
-    EXPECT_EQ(kExpectedData.X().value(), unpacked_data.X().value());
-    EXPECT_EQ(kExpectedData.Y().value(), unpacked_data.Y().value());
+  EXPECT_EQ(kExpectedData.X().value(), unpacked_data.X().value());
+  EXPECT_EQ(kExpectedData.Y().value(), unpacked_data.Y().value());
 }

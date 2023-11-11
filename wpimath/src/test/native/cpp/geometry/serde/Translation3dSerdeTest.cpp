@@ -14,12 +14,12 @@ namespace {
 using StructType = wpi::Struct<frc::Translation3d>;
 using ProtoType = wpi::Protobuf<frc::Translation3d>;
 
-char kExpectedStructBufferChar[] = {
-        -102, -103, -103, -103, -103, 25, 51, 64, 102, 102, 102, 102, 102, -26, 54, 64, -43, 120,
-        -23, 38, 49, 8, 12, 64
-};
+char kExpectedStructBufferChar[] = {-102, -103, -103, -103, -103, 25,  51, 64,
+                                    102,  102,  102,  102,  102,  -26, 54, 64,
+                                    -43,  120,  -23,  38,   49,   8,   12, 64};
 
-uint8_t* kExpectedStructBuffer = reinterpret_cast<uint8_t*>(kExpectedStructBufferChar);
+uint8_t* kExpectedStructBuffer =
+    reinterpret_cast<uint8_t*>(kExpectedStructBufferChar);
 
 constexpr Translation3d kExpectedData{19.1_m, 22.9_m, 3.504_m};
 }  // namespace
@@ -35,24 +35,22 @@ TEST(Translation3dTest, StructPack) {
 
 TEST(Translation3dTest, StructUnpack) {
   Translation3d unpacked_data =
-      StructType::Unpack(std::span<uint8_t, StructType::kSize>(kExpectedStructBuffer, StructType::kSize));
+      StructType::Unpack(std::span<uint8_t, StructType::kSize>(
+          kExpectedStructBuffer, StructType::kSize));
 
-    EXPECT_EQ(kExpectedData.X().value(), unpacked_data.X().value());
-    EXPECT_EQ(kExpectedData.Y().value(), unpacked_data.Y().value());
-    EXPECT_EQ(kExpectedData.Z().value(), unpacked_data.Z().value());
+  EXPECT_EQ(kExpectedData.X().value(), unpacked_data.X().value());
+  EXPECT_EQ(kExpectedData.Y().value(), unpacked_data.Y().value());
+  EXPECT_EQ(kExpectedData.Z().value(), unpacked_data.Z().value());
 }
-
 
 TEST(Translation3dTest, ProtobufPack) {
   wpi::proto::ProtobufTranslation3d proto;
   ProtoType::Pack(&proto, kExpectedData);
 
-    EXPECT_EQ(kExpectedData.X().value(), proto.x_meters());
-    EXPECT_EQ(kExpectedData.Y().value(), proto.y_meters());
-    EXPECT_EQ(kExpectedData.Z().value(), proto.z_meters());
+  EXPECT_EQ(kExpectedData.X().value(), proto.x_meters());
+  EXPECT_EQ(kExpectedData.Y().value(), proto.y_meters());
+  EXPECT_EQ(kExpectedData.Z().value(), proto.z_meters());
 }
-
-
 
 TEST(Translation3dTest, ProtobufUnpack) {
   wpi::proto::ProtobufTranslation3d proto;
@@ -61,7 +59,7 @@ TEST(Translation3dTest, ProtobufUnpack) {
   proto.set_z_meters(kExpectedData.Z().value());
 
   Translation3d unpacked_data = ProtoType::Unpack(proto);
-    EXPECT_EQ(kExpectedData.X().value(), unpacked_data.X().value());
-    EXPECT_EQ(kExpectedData.Y().value(), unpacked_data.Y().value());
-    EXPECT_EQ(kExpectedData.Z().value(), unpacked_data.Z().value());
+  EXPECT_EQ(kExpectedData.X().value(), unpacked_data.X().value());
+  EXPECT_EQ(kExpectedData.Y().value(), unpacked_data.Y().value());
+  EXPECT_EQ(kExpectedData.Z().value(), unpacked_data.Z().value());
 }

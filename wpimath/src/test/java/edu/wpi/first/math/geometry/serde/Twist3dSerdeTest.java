@@ -14,7 +14,7 @@ import java.nio.ByteOrder;
 import org.junit.jupiter.api.Test;
 
 public class Twist3dSerdeTest {
-  private static final Twist3d DATA = new Twist3d(1.91, 2.29, 1.74, .3504, .0191, .0229);
+  private static final Twist3d DATA = new Twist3d(1.91, 2.29, 1.74, 0.3504, 0.0191, 0.0229);
   private static final byte[] STRUCT_BUFFER =
       new byte[] {
         -113, -62, -11, 40, 92, -113, -2, 63, 82, -72, 30, -123, -21, 81, 2, 64, -41, -93, 112, 61,
