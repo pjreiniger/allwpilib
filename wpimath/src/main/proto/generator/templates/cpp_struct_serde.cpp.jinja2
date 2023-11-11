@@ -1,0 +1,26 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+#include "frc/geometry/{{lang_type}}.h"
+
+using StructType = wpi::Struct<frc::{{lang_type}}>;
+
+frc::{{lang_type}} StructType::Unpack(
+    std::span<const uint8_t, StructType::kSize> data) {
+  return {units::meter_t{wpi::UnpackStruct<double, 0>(data)},
+          units::meter_t{wpi::UnpackStruct<double, 8>(data)}};
+}
+
+void StructType::Pack(std::span<uint8_t, StructType::kSize> data,
+                      const frc::{{lang_type}}& value) {
+  wpi::PackStruct<0>(data, value.X().value());
+  wpi::PackStruct<8>(data, value.Y().value());
+}
+{% if has_nested_types %}
+void StructType::ForEachNested(
+    std::invocable<std::string_view, std::string_view> auto fn) {
+  wpi::ForEachStructSchema<frc::Translation2d>(fn);
+  wpi::ForEachStructSchema<frc::Rotation2d>(fn);
+}
+{% endif %}

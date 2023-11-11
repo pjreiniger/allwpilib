@@ -1,0 +1,43 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package edu.wpi.first.math.{{java_package}};
+
+import edu.wpi.first.math.proto.{{protobuf_package}}.Protobuf{{lang_type}};
+import edu.wpi.first.util.protobuf.Protobuf;
+import us.hebi.quickbuf.Descriptors.Descriptor;
+
+public class {{lang_type}}ProtoSerde implements Protobuf<{{lang_type}}, {{protobuf_type}}> {
+  @Override
+  public Class<{{lang_type}}> getTypeClass() {
+    return {{lang_type}}.class;
+  }
+
+  @Override
+  public Descriptor getDescriptor() {
+    return {{protobuf_type}}.getDescriptor();
+  }
+{%- if has_nested_types %}
+
+  @Override
+  public Protobuf<?, ?>[] getNested() {
+    return new Protobuf<?, ?>[] {{get_nested(clazz, fields, "proto")}};
+  }{% endif %}
+
+  @Override
+  public {{protobuf_type}} createMessage() {
+    return {{protobuf_type}}.newInstance();
+  }
+
+  @Override
+  public {{lang_type}} unpack({{protobuf_type}} msg) {
+    return new {{lang_type}}({{get_protobuf_unpack(clazz, fields)}});
+  }
+
+  @Override
+  public void pack({{protobuf_type}} msg, {{lang_type}} value) {
+{{get_protobuf_pack(clazz, fields)}}
+  }
+}
+

@@ -12,7 +12,8 @@ wpilib_cc_test(
     name = "wpimath-cpp-test",
     size = "small",
     srcs = glob([
-        "cpp/**/*.cpp",
+        "cpp/geometry/serde/**/*.cpp",
+        "cpp/main.cpp",
         "cpp/**/*.h",
     ]),
     deps = [

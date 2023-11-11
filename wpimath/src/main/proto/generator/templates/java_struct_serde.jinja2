@@ -1,0 +1,51 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package edu.wpi.first.math.{{java_package}}.serde;
+
+import edu.wpi.first.util.struct.Struct;
+import java.nio.ByteBuffer;
+
+public class {{lang_type}}StructSerde implements Struct<{{lang_type}}> {
+  @Override
+  public Class<{{lang_type}}> getTypeClass() {
+    return {{lang_type}}.class;
+  }
+
+  @Override
+  public String getTypeString() {
+    return "struct:{{lang_type}}";
+  }
+
+  @Override
+  public int getSize() {
+    return {{get_size(clazz, fields)}};
+  }
+
+  @Override
+  public String getSchema() {
+    return "{{get_schema(clazz, fields)}}";
+  }
+{% if has_nested_types %}
+  @Override
+  public Struct<?>[] getNested() {
+    return new Struct<?>[] {{get_nested(clazz, fields, "struct")}};
+  }
+{% endif %}
+  @Override
+  public {{lang_type}} unpack(ByteBuffer bb) {
+{%- for field in fields %}
+    {{struct_unpack(clazz, field)}}
+{%- endfor %}
+    return new {{lang_type}}({% for field in fields %}{{strip_units(field.name)}}{% if not loop.last %}, {%endif%}{%endfor%});
+  }
+
+  @Override
+  public void pack(ByteBuffer bb, {{lang_type}} value) {
+{%- for field in fields %}
+    {{struct_pack(clazz, field)}}
+{%- endfor %}
+  }
+}
+

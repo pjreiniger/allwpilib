@@ -1,0 +1,66 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+#include <gtest/gtest.h>
+
+#include "frc/geometry/{{lang_type}}.h"
+#include "geometry2d.pb.h"
+
+using namespace frc;
+
+namespace {
+
+using StructType = wpi::Struct<frc::{{lang_type}}>;
+using ProtoType = wpi::Protobuf<frc::{{lang_type}}>;
+
+char kExpectedStructBufferChar[] = {
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+};
+
+uint8_t* kExpectedStructBuffer = reinterpret_cast<uint8_t*>(kExpectedStructBufferChar);
+
+constexpr {{lang_type}} kExpectedData{};
+}  // namespace
+
+TEST({{lang_type}}Test, StructPack) {
+  uint8_t buffer[StructType::kSize];
+  StructType::Pack(buffer, kExpectedData);
+
+  for (size_t i = 0; i < StructType::kSize; ++i) {
+    EXPECT_EQ(kExpectedStructBuffer[i], buffer[i]) << " on byte " << i;
+  }
+}
+
+TEST({{lang_type}}Test, StructUnpack) {
+  {{lang_type}} unpacked_data =
+      StructType::Unpack(std::span<uint8_t, StructType::kSize>(kExpectedStructBuffer, StructType::kSize));
+{% for field in fields %}
+    {{assert_equals(clazz, field, "unpacked_data")}}
+{%- endfor %}
+}
+
+
+TEST({{lang_type}}Test, ProtobufPack) {
+  wpi::proto::Protobuf{{lang_type}} proto;
+  ProtoType::Pack(&proto, kExpectedData);
+{% for field in fields %}
+    {{assert_equals(clazz, field, "proto")}}
+{%- endfor %}
+}
+
+
+
+TEST({{lang_type}}Test, ProtobufUnpack) {
+  wpi::proto::Protobuf{{lang_type}} proto;
+{%- for field in fields %}
+  {{test_proto_setter(clazz, field)}}
+{%- endfor %}
+
+  {{lang_type}} unpacked_data = ProtoType::Unpack(proto);
+{%- for field in fields %}
+    {{assert_equals(clazz, field, "unpacked_data")}}
+{%- endfor %}
+}

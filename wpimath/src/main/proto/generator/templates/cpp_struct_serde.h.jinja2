@@ -1,0 +1,21 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+template <>
+struct wpi::Struct<frc::{{lang_type}}> {
+  static constexpr std::string_view kTypeString = "struct:{{lang_type}}";
+  static constexpr size_t kSize = {{get_size(clazz, fields)}};
+  static constexpr std::string_view kSchema = "{{get_schema(clazz, fields)}}";
+
+  static frc::{{lang_type}} Unpack(std::span<const uint8_t, kSize> data);
+  static void Pack(std::span<uint8_t, kSize> data,
+                   const frc::{{lang_type}}& value);
+{%- if has_nested_types %}
+  static void ForEachNested(
+      std::invocable<std::string_view, std::string_view> auto fn);
+{%- endif %}
+};
+{% if has_nested_types %}
+static_assert(wpi::HasNestedStruct<frc::{{lang_type}}>);
+{% endif %}
