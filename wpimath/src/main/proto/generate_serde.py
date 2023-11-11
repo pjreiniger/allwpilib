@@ -16,15 +16,15 @@ from wpimath.src.main.proto.generator.cpp_helpers import render_cpp_class
 def main():
     # proto_files = ["geometry2d", "geometry3d"]
     proto_files = [
-        ("geometry2d", "geometry"),
-          ("geometry3d", "geometry"),
-        #   ("controller", "controller"),
-        #   ("kinematics", "kinematics"),
-        # #   ("plant", "system/plant"),
-        #  ###########33 ("spline", "spline"),
-        #   ("system", "system"),
-        #   ("trajectory", "trajectory"),
-        #   ("wpimath", "."),
+        # ("geometry2d", "geometry"),
+        # ("geometry3d", "geometry"),
+          ("controller", "controller"),
+          ("kinematics", "kinematics"),
+          ("plant", "system/plant"),
+         ###########33 ("spline", "spline"),
+          ("system", "system"),
+          ("trajectory", "trajectory"),
+          ("wpimath", "."),
     ]
 
     for proto_file, output_directory in proto_files:
@@ -37,7 +37,7 @@ def main():
 
         for clazz in clsmembers:
             render_java_class(output_directory, java_package, clazz)
-            render_cpp_class(output_directory, clazz)
+            # render_cpp_class(output_directory, clazz)
 
 
 if __name__ == "__main__":

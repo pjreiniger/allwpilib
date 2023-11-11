@@ -191,16 +191,16 @@ def render_java_class(output_directory, java_package, clazz):
                 java_package=output_directory,
                 protobuf_package=java_package,)
 
-    proto_src = os.path.join(wpimath_src_dir, f"{output_directory}/serde/{lang_type}ProtoSerde.java")
+    proto_src = os.path.join(wpimath_src_dir, f"{output_directory}/{lang_type}ProtoSerde.java")
     with open(proto_src, "w") as f:
         f.write(env.get_template("java_proto_serde.jinja2").render(**kwargs))
 
-    struct_src = os.path.join(wpimath_src_dir, f"{output_directory}/serde/{lang_type}StructSerde.java")
+    struct_src = os.path.join(wpimath_src_dir, f"{output_directory}/{lang_type}StructSerde.java")
     with open(struct_src, "w") as f:
         f.write(env.get_template("java_struct_serde.jinja2").render(**kwargs))
 
 
-    proto_test = os.path.join(wpimath_test_dir, f"{output_directory}/serde/{lang_type}SerdeTest.java")
+    proto_test = os.path.join(wpimath_test_dir, f"{output_directory}/{lang_type}SerdeTest.java")
     with open(proto_test, "w") as f:
         f.write(env.get_template("java_serde_test.jinja2").render(**kwargs))
 
