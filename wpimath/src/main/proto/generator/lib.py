@@ -10,7 +10,7 @@ class ProtobufModule:
         importlib.import_module(module_name, package=None)
         clsmembers = inspect.getmembers(sys.modules[module_name], inspect.isclass)
 
-        self.subfolder = subfolder
+        self.subfolder = subfolder.replace("2d", "").replace("3d", "")
         self.java_proto_subpath = subfolder[0].upper() + subfolder[1:]
         self.messages = []
 
@@ -61,3 +61,30 @@ class MessageField:
             return self.message_type + " " + self.name_without_units
         
         return primitive_lookup[self.protobuf_type] + " " + self.name_without_units
+    
+    
+
+def strip_units(field_name):
+    field_name = field_name.replace("_meters", "")
+    field_name = field_name.replace("_radians", "")
+
+    return field_name
+
+
+def snake_to_camel_case(snake_str):
+    return "".join(x.capitalize() for x in snake_str.lower().split("_"))
+
+
+def upper_camel_case(name):
+    name = snake_to_camel_case(name)
+    return name[0].upper() + name[1:]
+
+
+def lower_camel_case(name):
+    name = snake_to_camel_case(name)
+    return name[0].lower() + name[1:]
+
+
+def render_template(env, template_file, output_file, **kwargs):
+    with open(output_file, "w") as f:
+        f.write(env.get_template(template_file).render(**kwargs))
