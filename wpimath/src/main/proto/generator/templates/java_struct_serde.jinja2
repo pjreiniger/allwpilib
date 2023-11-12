@@ -3,7 +3,11 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package edu.wpi.first.math.{{module.subfolder}};
-
+{% for field in message.fields %}
+{%- if field.is_message %}
+import edu.wpi.first.math.geometry.{{field.message_type}};
+{%- endif %}
+{%- endfor %}
 import edu.wpi.first.util.struct.Struct;
 import java.nio.ByteBuffer;
 
@@ -27,10 +31,10 @@ public class {{message.local_type}}StructSerde implements Struct<{{message.local
   public String getSchema() {
     return "{{get_schema(message)}}";
   }
-{% if has_nested_types %}
+{% if message.has_nested_types %}
   @Override
   public Struct<?>[] getNested() {
-    return new Struct<?>[] {{get_nested(clazz, fields, "struct")}};
+    return new Struct<?>[] { {%- for field in message.fields %}{% if field.is_message %}{{field.message_type}}.struct{% if not loop.last %}, {% endif%}{% endif %}{%endfor-%} };
   }
 {% endif %}
   @Override

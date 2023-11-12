@@ -39,7 +39,7 @@ def strip_units(field_name):
 
 def struct_unpack(field : MessageField):
     if field.is_message:
-        return "TODO"
+        return field.message_type + ".struct.unpack(bb)"
 
     local_type = __local_type(field)
     getter = "get" + local_type[0].upper() + local_type[1:]
@@ -47,16 +47,16 @@ def struct_unpack(field : MessageField):
 
 def struct_pack(field : MessageField):
     if field.is_message:
-        return "TODO"
+        return field.message_type + f".struct.pack(bb, value.{__local_getter(field)})"
 
     local_type = __local_type(field)
     setter = "put" + local_type[0].upper() + local_type[1:]
-    return f"bb.{setter}(value.{field.name})"
+    return f"bb.{setter}(value.{__local_getter(field)})"
 
 
-def __local_type(field):
+def __local_type(field : MessageField):
     if field.is_message:
-        return "TODO"
+        return field.message_type
     return PROTO_TYPE_TO_JAVA_TEXT[field.protobuf_type]
 
 # def java_struct_pack(clazz, field):
@@ -91,10 +91,9 @@ def get_struct_size(message : MessageClass):
 
     for field in message.fields:
         if field.is_message:
-            pass
-            # subclass_parts.append(
-            #     f"{get_field_class_name(clazz, field)}.struct.getSize()"
-            # )
+            subclass_parts.append(
+                f"{field.message_type}.struct.getSize()"
+            )
         elif field.protobuf_type == FieldDescriptor.TYPE_DOUBLE:
             num_doubles += 1
         elif field.protobuf_type == FieldDescriptor.TYPE_INT32:
@@ -118,15 +117,20 @@ def __proto_getter(field : MessageField):
     return f"get{upper_camel_case(field.name)}"
 
 def __proto_setter(field : MessageField):
+    if field.is_message:
+        return f"getMutable{upper_camel_case(field.name)}"
     return f"set{upper_camel_case(field.name)}"
 
 def __local_getter(field : MessageField):
-    print(field.name)
+    # print(field.name)
     field_name = field.name
     field_name = field_name.replace("volts", "voltage")
     # field_name = field_name.replace("meters", "meters")
     field_name = field_name.replace("mps", "meters_per_second")
     field_name = field_name.replace("rps", "radians_per_second")
+
+    if field.is_message:
+        return f"get{to_camel_case(field_name)}()"
 
     output = to_lower_camel_case(field_name)
     return output
@@ -137,6 +141,9 @@ def get_protobuf_unpack(message : MessageClass):
 
     for field in message.fields:
         if field.is_message:
+            output_fields.append(
+                f"\n        {field.message_type}.proto.unpack(msg.{__proto_getter(field)}())"
+            )
     #         output_fields.append(
     #             f"\n        {get_field_class_name(clazz, field)}.proto.unpack(msg.get{upper_camel_case(field.name)}())"
     #         )
@@ -151,7 +158,7 @@ def get_protobuf_pack(message):
 
     for field in message.fields:
         if field.is_message:
-            pass
+            output += f"    {field.message_type}.proto.pack(msg.{__proto_setter(field)}(), value.{__local_getter(field)});\n"
         else:
             output += f"    msg.{__proto_setter(field)}(value.{__local_getter(field)});\n"
         # if field.type == FieldDescriptor.TYPE_MESSAGE:
@@ -171,14 +178,14 @@ def get_protobuf_pack(message):
     return output
 
 
-# def java_get_nested(clazz, field, nested_type):
-#     output_parts = []
+def get_nested(clazz, field, nested_type):
+    output_parts = []
 
-#     for field in clazz[1].DESCRIPTOR.fields:
-#         if field.type == FieldDescriptor.TYPE_MESSAGE:
-#             output_parts.append(f"{get_field_class_name(clazz, field)}.{nested_type}")
+    # for field in clazz[1].DESCRIPTOR.fields:
+    #     if field.type == FieldDescriptor.TYPE_MESSAGE:
+    #         output_parts.append(f"{get_field_class_name(clazz, field)}.{nested_type}")
 
-#     return "{" + ", ".join(output_parts) + "}"
+    return "{" + ", ".join(output_parts) + "}"
 
 
 # def java_assert_equals(clazz, field, data_name):
@@ -216,7 +223,7 @@ def render_message_java(module : ProtobufModule, message : MessageClass):
     # env.globals["get_schema"] = java_get_schema
     # env.globals["get_protobuf_unpack"] = java_protobuf_unpack
     # env.globals["get_protobuf_pack"] = java_protobuf_pack
-    # env.globals["get_nested"] = java_get_nested
+    # env.globals["get_nested"] = get_nested
     # env.globals["assert_equals"] = java_assert_equals
     # env.globals["test_proto_setter"] = test_proto_setter
     # env.globals["strip_units"] = strip_units
@@ -228,7 +235,7 @@ def render_message_java(module : ProtobufModule, message : MessageClass):
     env.globals["get_schema"] = get_schema
     env.globals["get_protobuf_unpack"] = get_protobuf_unpack
     env.globals["get_protobuf_pack"] = get_protobuf_pack
-    env.globals["get_nested"] = lambda *kargs : None
+    env.globals["get_nested"] = get_nested
     env.globals["assert_equals"] = lambda *kargs : None
     env.globals["test_proto_setter"] = lambda *kargs: None
     env.filters["local_type"] = __local_type

@@ -24,7 +24,7 @@ def main():
           ("kinematics", "kinematics"),
         #   ("plant", "system/plant"),
          ###########33 ("spline", "spline"),
-          ("system", "system"),
+        #   ("system", "system"),
           ("trajectory", "trajectory"),
         #   ("wpimath", "."),
     ]

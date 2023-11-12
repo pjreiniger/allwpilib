@@ -34,17 +34,21 @@ class MessageClass:
                 self.has_nested_types = True
             
             # print("  ", field)
-            self.fields.append(MessageField(field))
+            self.fields.append(MessageField(protobuf_class, field))
 
         
 
 
 class MessageField:
-    def __init__(self, protobuf_field : FieldDescriptor):
-        print("  ", protobuf_field)
+    def __init__(self, protobuf_class, protobuf_field : FieldDescriptor):
+        # print("  ", protobuf_field)
         self.name = protobuf_field.name
         self.protobuf_type = protobuf_field.type
         self.is_message = self.protobuf_type == FieldDescriptor.TYPE_MESSAGE
+        if self.is_message:
+            field_clazz = type(getattr(protobuf_class(), self.name))
+            # print(field_clazz)
+            self.message_type = field_clazz.__name__.replace("Protobuf", "")
 
         self.name_without_units = self.name
         self.name_without_units = self.name_without_units.replace("_volts", "")
@@ -54,6 +58,6 @@ class MessageField:
 
     def get_schema(self, primitive_lookup):
         if self.is_message:
-            return "Poop"
+            return self.message_type + " " + self.name_without_units
         
         return primitive_lookup[self.protobuf_type] + " " + self.name_without_units

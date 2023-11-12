@@ -26,7 +26,7 @@ public class SwerveModuleStateStructSerde implements Struct<SwerveModuleState> {
 
   @Override
   public String getSchema() {
-    return "double speed_mps;Rotation2d angle";
+    return "double speed;Rotation2d angle";
   }
 
   @Override
@@ -36,9 +36,9 @@ public class SwerveModuleStateStructSerde implements Struct<SwerveModuleState> {
 
   @Override
   public SwerveModuleState unpack(ByteBuffer bb) {
-    double speed_mps = bb.getDouble();
+    double speed = bb.getDouble();
     Rotation2d angle = Rotation2d.struct.unpack(bb);
-    return new SwerveModuleState(speed_mps, angle);
+    return new SwerveModuleState(speed, angle);
   }
 
   @Override

@@ -3,7 +3,11 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package edu.wpi.first.math.{{module.subfolder}};
-
+{% for field in message.fields %}
+{%- if field.is_message %}
+import edu.wpi.first.math.geometry.{{field.message_type}};
+{%- endif %}
+{%- endfor %}
 import edu.wpi.first.math.proto.{{module.java_proto_subpath}}.{{message.protobuf_short_type}};
 import edu.wpi.first.util.protobuf.Protobuf;
 import us.hebi.quickbuf.Descriptors.Descriptor;
@@ -18,11 +22,11 @@ public class {{message.local_type}}ProtoSerde implements Protobuf<{{message.loca
   public Descriptor getDescriptor() {
     return {{message.protobuf_short_type}}.getDescriptor();
   }
-{%- if has_nested_types %}
+{%- if message.has_nested_types %}
 
   @Override
   public Protobuf<?, ?>[] getNested() {
-    return new Protobuf<?, ?>[] {{get_nested(clazz, fields, "proto")}};
+    return new Protobuf<?, ?>[] { {%- for field in message.fields %}{% if field.is_message %}{{field.message_type}}.proto{% if not loop.last %}, {% endif%}{% endif %}{%endfor-%} };
   }{% endif %}
 
   @Override

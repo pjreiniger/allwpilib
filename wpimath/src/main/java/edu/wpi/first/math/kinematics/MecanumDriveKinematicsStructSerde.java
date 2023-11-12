@@ -45,9 +45,9 @@ public class MecanumDriveKinematicsStructSerde implements Struct<MecanumDriveKin
 
   @Override
   public void pack(ByteBuffer bb, MecanumDriveKinematics value) {
-//    Translation2d.struct.pack(bb, value.getFrontLeft());
-//    Translation2d.struct.pack(bb, value.getFrontRight());
-//    Translation2d.struct.pack(bb, value.getRearLeft());
-//    Translation2d.struct.pack(bb, value.getRearRight());
+    // Translation2d.struct.pack(bb, value.getFrontLeft());
+    // Translation2d.struct.pack(bb, value.getFrontRight());
+    // Translation2d.struct.pack(bb, value.getRearLeft());
+    // Translation2d.struct.pack(bb, value.getRearRight());
   }
 }

@@ -41,11 +41,10 @@ public class MecanumDriveKinematicsProtoSerde implements Protobuf<MecanumDriveKi
 
   @Override
   public void pack(ProtobufMecanumDriveKinematics msg, MecanumDriveKinematics value) {
-//    value.
-//    Translation2d.proto.pack(msg.getMutableFrontLeft(), value.getFrontLeft());
-//    Translation2d.proto.pack(msg.getMutableFrontRight(), value.getFrontRight());
-//    Translation2d.proto.pack(msg.getMutableRearLeft(), value.getRearLeft());
-//    Translation2d.proto.pack(msg.getMutableRearRight(), value.getRearRight());
+    // Translation2d.proto.pack(msg.getMutableFrontLeft(), value.getFrontLeft());
+    // Translation2d.proto.pack(msg.getMutableFrontRight(), value.getFrontRight());
+    // Translation2d.proto.pack(msg.getMutableRearLeft(), value.getRearLeft());
+    // Translation2d.proto.pack(msg.getMutableRearRight(), value.getRearRight());
 
   }
 }
