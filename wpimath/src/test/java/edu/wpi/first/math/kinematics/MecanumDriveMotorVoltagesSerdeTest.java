@@ -7,7 +7,7 @@ package edu.wpi.first.math.kinematics;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import edu.wpi.first.math.proto.Kinematics.ProtobufMecanumDriveMotorVoltages;
+import edu.wpi.first.math.proto..ProtobufMecanumDriveMotorVoltages;
 import edu.wpi.first.util.struct.Struct;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -15,8 +15,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 
 public class MecanumDriveMotorVoltagesSerdeTest {
-  private static final MecanumDriveMotorVoltages DATA = new MecanumDriveMotorVoltages(1.91, 2.29, 3.504, 17.4);
-  private static final byte[] STRUCT_BUFFER = new byte[]{-113, -62, -11, 40, 92, -113, -2, 63, 82, -72, 30, -123, -21, 81, 2, 64, -43, 120, -23, 38, 49, 8, 12, 64, 102, 102, 102, 102, 102, 102, 49, 64};
+  private static final MecanumDriveMotorVoltages DATA = new MecanumDriveMotorVoltages(1.91, 2.29);
+  private static final byte[] STRUCT_BUFFER = new byte[]{63, -2, -113, 92, 40, -11, -62, -113, 64, 2, 81, -21, -123, 30, -72, 82};
 
   @Test
   void testStructPack() {
@@ -43,29 +43,29 @@ public class MecanumDriveMotorVoltagesSerdeTest {
     assertEquals(DATA.rearRightVoltage, data.rearRightVoltage);
   }
 
-//  @Test
-//  void testProtoPack() {
-//    ProtobufMecanumDriveMotorVoltages proto = MecanumDriveMotorVoltages.proto.createMessage();
-//    MecanumDriveMotorVoltages.proto.pack(proto, DATA);
-//
-//    assertEquals(DATA.getFrontLeftVolts(), proto.getFrontLeftVolts());
-//    assertEquals(DATA.getFrontRightVolts(), proto.getFrontRightVolts());
-//    assertEquals(DATA.getRearLeftVolts(), proto.getRearLeftVolts());
-//    assertEquals(DATA.getRearRightVolts(), proto.getRearRightVolts());
-//  }
-//
-//  @Test
-//  void testProtoUnpack() {
-//    ProtobufMecanumDriveMotorVoltages proto = MecanumDriveMotorVoltages.proto.createMessage();
-//    proto.setFrontLeftVolts(DATA.getFrontLeftVolts());
-//    proto.setFrontRightVolts(DATA.getFrontRightVolts());
-//    proto.setRearLeftVolts(DATA.getRearLeftVolts());
-//    proto.setRearRightVolts(DATA.getRearRightVolts());
-//
-//    MecanumDriveMotorVoltages data = MecanumDriveMotorVoltages.proto.unpack(proto);
-//    assertEquals(DATA.getFrontLeftVolts(), data.getFrontLeftVolts());
-//    assertEquals(DATA.getFrontRightVolts(), data.getFrontRightVolts());
-//    assertEquals(DATA.getRearLeftVolts(), data.getRearLeftVolts());
-//    assertEquals(DATA.getRearRightVolts(), data.getRearRightVolts());
-//  }
+  @Test
+  void testProtoPack() {
+    ProtobufMecanumDriveMotorVoltages proto = MecanumDriveMotorVoltages.proto.createMessage();
+    MecanumDriveMotorVoltages.proto.pack(proto, DATA);
+
+    assertEquals(DATA.frontLeftVoltage, proto.getFrontLeftVolts());
+    assertEquals(DATA.frontRightVoltage, proto.getFrontRightVolts());
+    assertEquals(DATA.rearLeftVoltage, proto.getRearLeftVolts());
+    assertEquals(DATA.rearRightVoltage, proto.getRearRightVolts());
+  }
+
+  @Test
+  void testProtoUnpack() {
+    ProtobufMecanumDriveMotorVoltages proto = MecanumDriveMotorVoltages.proto.createMessage();
+    proto.setFrontLeftVolts(DATA.frontLeftVoltage);
+    proto.setFrontRightVolts(DATA.frontRightVoltage);
+    proto.setRearLeftVolts(DATA.rearLeftVoltage);
+    proto.setRearRightVolts(DATA.rearRightVoltage);
+
+    MecanumDriveMotorVoltages data = MecanumDriveMotorVoltages.proto.unpack(proto);
+    assertEquals(DATA.frontLeftVoltage, data.frontLeftVoltage);
+    assertEquals(DATA.frontRightVoltage, data.frontRightVoltage);
+    assertEquals(DATA.rearLeftVoltage, data.rearLeftVoltage);
+    assertEquals(DATA.rearRightVoltage, data.rearRightVoltage);
+  }
 }

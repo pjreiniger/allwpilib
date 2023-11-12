@@ -36,9 +36,7 @@ public class DifferentialDriveWheelSpeedsSerdeTest {
     ByteBuffer buffer = ByteBuffer.wrap(STRUCT_BUFFER);
     buffer.order(ByteOrder.LITTLE_ENDIAN);
 
-
     DifferentialDriveWheelSpeeds data = DifferentialDriveWheelSpeeds.struct.unpack(buffer);
-    System.out.println(data);
     assertEquals(DATA.leftMetersPerSecond, data.leftMetersPerSecond);
     assertEquals(DATA.rightMetersPerSecond, data.rightMetersPerSecond);
   }

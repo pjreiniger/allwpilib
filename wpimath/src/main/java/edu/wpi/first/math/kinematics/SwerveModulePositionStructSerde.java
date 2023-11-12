@@ -21,7 +21,7 @@ public class SwerveModulePositionStructSerde implements Struct<SwerveModulePosit
 
   @Override
   public int getSize() {
-    return kSizeDouble * 1+ Rotation2d.struct.getSize();
+    return kSizeDouble * 1 + Rotation2d.struct.getSize();
   }
 
   @Override
