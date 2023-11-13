@@ -77,7 +77,7 @@ def main():
                     print(f"Ignoring {message.local_type}")
                     continue
 
-            # render_message_java(module, message, force_tests)
+            render_message_java(module, message, force_tests)
             render_message_cpp(module, message, force_tests)
 
 

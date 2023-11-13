@@ -11,7 +11,7 @@ frc::{{message.local_type}} StructType::Unpack(
     std::span<const uint8_t, StructType::kSize> data) {
   return frc::{{message.local_type}}{
   {%- for field in message.fields %}
-    {{ struct_unpack(field) }},
+      {{ struct_unpack(field) }},
   {%- endfor %}
   };
 }
@@ -19,7 +19,7 @@ frc::{{message.local_type}} StructType::Unpack(
 void StructType::Pack(std::span<uint8_t, StructType::kSize> data,
                       const frc::{{message.local_type}}& value) {
   {%- for field in message.fields %}
-    {{ struct_pack(field) }};
+  {{ struct_pack(field) }};
   {%- endfor %}
 }
 {% if message.has_nested_types %}
@@ -34,8 +34,8 @@ void StructType::ForEachNested(
 {% endif %}
 google::protobuf::Message* wpi::Protobuf<frc::{{message.local_type}}>::New(
     google::protobuf::Arena* arena) {
-  return google::protobuf::Arena::CreateMessage<
-      wpi::proto::Protobuf{{message.local_type}}>(arena);
+  return google::protobuf::Arena::CreateMessage<wpi::proto::Protobuf{{message.local_type}}>(
+      arena);
 }
 
 frc::{{message.local_type}} wpi::Protobuf<frc::{{message.local_type}}>::Unpack(
@@ -43,16 +43,15 @@ frc::{{message.local_type}} wpi::Protobuf<frc::{{message.local_type}}>::Unpack(
   auto m = static_cast<const wpi::proto::Protobuf{{message.local_type}}*>(&msg);
   return frc::{{message.local_type}}{
   {%- for field in message.fields %}
-    {{ proto_unpack(field) }},
+      {{ proto_unpack(field) }},
   {%- endfor %}
   };
 }
 
 void wpi::Protobuf<frc::{{message.local_type}}>::Pack(google::protobuf::Message* msg,
-                                             const frc::{{message.local_type}}& value) {
+                                      const frc::{{message.local_type}}& value) {
   auto m = static_cast<wpi::proto::Protobuf{{message.local_type}}*>(msg);
   {%- for field in message.fields %}
-    {{ proto_pack(field) }};
+  {{ proto_pack(field) }};
   {%- endfor %}
 }
-

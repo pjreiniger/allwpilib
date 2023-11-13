@@ -18,9 +18,18 @@ PROTO_TYPE_TO_CPP_TEXT = {
 
 
 def __get_schema(message: MessageClass):
-    return ";".join(
+    schema = ";".join(
         field.get_schema(PROTO_TYPE_TO_CPP_TEXT) for field in message.fields
     )
+
+    schema = '"' + schema + '"'
+
+    if len(schema) > 30:
+        schema = "\n      " + schema
+    else:
+        schema = " " + schema
+
+    return schema
 
 
 def __get_struct_size(message):
@@ -174,12 +183,12 @@ def render_message_cpp(
     wpimath_incl_dir = os.path.join(wpimath_dir, "src/main/native/include/frc")
     wpimath_incl_serde_dir = os.path.join(wpimath_incl_dir, module.subfolder, "serde")
     serde_hdr = os.path.join(wpimath_incl_serde_dir, f"{lang_type}Serde.inc")
-    # render_template(env, "cpp_serde.h.jinja2", serde_hdr, **kwargs)
+    render_template(env, "cpp_serde.h.jinja2", serde_hdr, **kwargs)
 
     wpimath_cpp_dir = os.path.join(wpimath_dir, "src/main/native/cpp/")
     wpimath_cpp_serde_dir = os.path.join(wpimath_cpp_dir, module.subfolder, "serde")
     serde_cpp = os.path.join(wpimath_cpp_serde_dir, f"{lang_type}Serde.cpp")
-    # render_template(env, "cpp_serde.cpp.jinja2", serde_cpp, **kwargs)
+    render_template(env, "cpp_serde.cpp.jinja2", serde_cpp, **kwargs)
 
     wpimath_test_dir = os.path.join(wpimath_dir, "src/test/native/cpp/")
     wpimath_test_serde_dir = os.path.join(wpimath_test_dir, module.subfolder, "serde")
