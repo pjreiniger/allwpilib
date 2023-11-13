@@ -41,7 +41,13 @@ def main():
 
         modules.append(ProtobufModule(proto_file, module_name))
 
-    message_types_to_ignore = ["DifferentialDriveFeedforward", "MecanumDriveKinematics"]
+    message_types_to_ignore = [
+        "DifferentialDriveFeedforward", 
+        "MecanumDriveKinematics",
+        "SimpleMotorFeedforward",
+        "MecanumDriveMotorVoltages",
+        "SwerveDriveKinematics",
+    ]
 
     
     for module in modules:

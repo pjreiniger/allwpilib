@@ -7,7 +7,7 @@
 #include <wpi/protobuf/Protobuf.h>
 #include <wpi/struct/Struct.h>
 
-#include "frc/geometry/{{message.local_type}}.h"
+#include "frc/{{module.subfolder}}/{{message.local_type}}.h"
 
 template <>
 struct wpi::Struct<frc::{{message.local_type}}> {
