@@ -212,7 +212,7 @@ def render_message_cpp(module : ProtobufModule, message : MessageClass, force_te
     wpimath_incl_dir = os.path.join(wpimath_dir, "src/main/native/include/frc")
     wpimath_incl_serde_dir = os.path.join(wpimath_incl_dir, module.subfolder, "serde")
     serde_hdr = os.path.join(wpimath_incl_serde_dir, f"{lang_type}Serde.inc")
-    # render_template(env, "cpp_serde.h.jinja2", serde_hdr, **kwargs)
+    render_template(env, "cpp_serde.h.jinja2", serde_hdr, **kwargs)
     
     
     wpimath_cpp_dir = os.path.join(wpimath_dir, "src/main/native/cpp/")
@@ -224,5 +224,5 @@ def render_message_cpp(module : ProtobufModule, message : MessageClass, force_te
     wpimath_test_dir = os.path.join(wpimath_dir, "src/test/native/cpp/")
     wpimath_test_serde_dir = os.path.join(wpimath_test_dir, module.subfolder, "serde")
     serde_test = os.path.join(wpimath_test_serde_dir, f"{lang_type}SerdeTest.cpp")
-    # render_template(env, "cpp_test.jinja2", serde_test, **kwargs)
+    render_template(env, "cpp_test.jinja2", serde_test, **kwargs)
     

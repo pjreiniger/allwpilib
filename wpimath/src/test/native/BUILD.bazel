@@ -11,11 +11,19 @@ wpilib_cc_library(
 wpilib_cc_test(
     name = "wpimath-cpp-test",
     size = "small",
-    srcs = glob([
-        "cpp/geometry/serde/**/*.cpp",
-        "cpp/main.cpp",
-        "cpp/**/*.h",
-    ]),
+    # srcs = glob(["cpp/**"]),
+    
+     srcs = glob([
+         "cpp/**/serde/**/*.cpp",
+         "cpp/main.cpp",
+         "cpp/**/*.h",
+     ]),
+
+     #srcs = glob([
+     #    "cpp/geometry/serde/**/*.cpp",
+     #    "cpp/main.cpp",
+     #    "cpp/**/*.h",
+     #]),
     deps = [
         ":test_headers",
         "//wpimath/src/main/native:wpimath.static",

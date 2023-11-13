@@ -18,14 +18,14 @@ from wpimath.src.main.proto.generator.lib import MessageClass, ProtobufModule
 def main():
     # proto_files = ["geometry2d", "geometry3d"]
     proto_files = [
-        # ("geometry2d", "geometry"),
-        # ("geometry3d", "geometry"),
-        #   ("controller", "controller"),
+        ("geometry2d", "geometry"),
+        ("geometry3d", "geometry"),
+          ("controller", "controller"),
           ("kinematics", "kinematics"),
         # #   ("plant", "system/plant"),
         #  ###########33 ("spline", "spline"),
         # #   ("system", "system"),
-        #   ("trajectory", "trajectory"),
+          ("trajectory", "trajectory"),
         # #   ("wpimath", "."),
     ]
 
@@ -50,15 +50,17 @@ def main():
     ]
 
     message_types_to_do = [
-        # "ArmFeedforward",
-        "DifferentialDriveWheelVoltages",
-        "MecanumDriveWheelPositions",
-        "MecanumDriveWheelSpeeds",
-        "ChassisSpeeds",
-        "DifferentialDriveKinematics",
-        "DifferentialDriveWheelSpeeds",
-        "SwerveModulePosition",
-        "SwerveModuleState",
+        # # "ArmFeedforward",
+
+        # "DifferentialDriveWheelVoltages",
+        # "MecanumDriveWheelPositions",
+        # "MecanumDriveWheelSpeeds",
+        # "ChassisSpeeds",
+        # "DifferentialDriveKinematics",
+        # "DifferentialDriveWheelSpeeds",
+
+        # # "SwerveModulePosition",
+        # # "SwerveModuleState",
     ]
 
     
@@ -68,9 +70,10 @@ def main():
                 # print(f"Ignoring {message.local_type}")
                 continue
 
-            if message.local_type not in message_types_to_do:
-                print(f"Ignoring {message.local_type}")
-                continue
+            if message_types_to_do:
+                if message.local_type not in message_types_to_do:
+                    print(f"Ignoring {message.local_type}")
+                    continue
           
             # render_message_java(module, message, force_tests)
             render_message_cpp(module, message, force_tests)

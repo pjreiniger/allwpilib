@@ -7,6 +7,8 @@
 #include <wpi/protobuf/Protobuf.h>
 #include <wpi/struct/Struct.h>
 
+#include <wpi/SymbolExports.h>
+
 #include "frc/kinematics/MecanumDriveWheelSpeeds.h"
 
 template <>
