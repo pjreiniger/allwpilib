@@ -7,6 +7,10 @@
 
 using StructType = wpi::Struct<frc::Transform2d>;
 
+namespace {
+static constexpr size_t kRotationOff = wpi::Struct<frc::Translation2d>::kSize;
+}
+
 frc::Transform2d StructType::Unpack(std::span<const uint8_t, kSize> data) {
   return {wpi::UnpackStruct<frc::Translation2d, 0>(data),
           wpi::UnpackStruct<frc::Rotation2d, kRotationOff>(data)};
