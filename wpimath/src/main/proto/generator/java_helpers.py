@@ -140,7 +140,7 @@ def __assert_local_vs_proto_equals(field: MessageField):
 
 
 
-def render_message_java(module : ProtobufModule, message : MessageClass, generate_tests: bool):
+def render_message_java(module : ProtobufModule, message : MessageClass, force_tests: bool):
     env = Environment(
         loader=FileSystemLoader(
             "/home/pjreiniger/git/allwpilib/wpimath/src/main/proto/generator/templates"
@@ -179,6 +179,6 @@ def render_message_java(module : ProtobufModule, message : MessageClass, generat
     struct_src = os.path.join(src_serde_folder, f"{lang_type}StructSerde.java")
     render_template(env, "java_serde_struct.jinja2", struct_src, **kwargs)
 
-    if generate_tests:
-        proto_test = os.path.join(test_serde_folder, f"{lang_type}SerdeTest.java")
+    proto_test = os.path.join(test_serde_folder, f"{lang_type}SerdeTest.java")
+    if force_tests or not os.path.exists(proto_test):
         render_template(env, "java_test.jinja2", proto_test, **kwargs)

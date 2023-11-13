@@ -29,7 +29,7 @@ def main():
         #   ("wpimath", "."),
     ]
 
-    generate_tests = True
+    force_tests = False
 
     modules = []
 
@@ -41,10 +41,16 @@ def main():
 
         modules.append(ProtobufModule(proto_file, module_name))
 
+    message_types_to_ignore = ["DifferentialDriveFeedforward", "MecanumDriveKinematics"]
+
     
     for module in modules:
         for message in module.messages:
-            render_message_java(module, message, generate_tests)
+            print(message.local_type)
+            if message.local_type in message_types_to_ignore:
+                print(f"Ignoring {message.local_type}")
+                continue
+            render_message_java(module, message, force_tests)
 
 if __name__ == "__main__":
     main()

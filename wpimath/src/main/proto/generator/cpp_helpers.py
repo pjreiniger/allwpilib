@@ -82,7 +82,7 @@ def test_proto_setter(clazz, field):
     # return f"proto.set{upper_camel_case(field.name)}(DATA.get{upper_camel_case(field.name)}());"
 
 
-def render_cpp_class(output_directory, clazz, generate_tests: bool):
+def render_cpp_class(output_directory, clazz, force_tests: bool):
     has_nested_types = False
     for field in clazz[1].DESCRIPTOR.fields:
         if field.type == FieldDescriptor.TYPE_MESSAGE:
