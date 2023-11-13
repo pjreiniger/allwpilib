@@ -140,7 +140,7 @@ def __assert_local_vs_proto_equals(field: MessageField):
 
 
 
-def render_message_java(module : ProtobufModule, message : MessageClass):
+def render_message_java(module : ProtobufModule, message : MessageClass, generate_tests: bool):
     env = Environment(
         loader=FileSystemLoader(
             "/home/pjreiniger/git/allwpilib/wpimath/src/main/proto/generator/templates"
@@ -152,22 +152,19 @@ def render_message_java(module : ProtobufModule, message : MessageClass):
     env.globals["get_schema"] = __get_schema
     env.globals["get_protobuf_unpack"] = __get_protobuf_unpack
     env.globals["get_protobuf_pack"] = __get_protobuf_pack
-    # env.globals["get_nested"] = __get_nested
     env.filters["local_type"] = __local_type
 
     env.globals["test_proto_setter"] = __test_proto_setter
     env.globals["assert_local_vs_proto_equals"] = __assert_local_vs_proto_equals
     env.globals["assert_local_equals"] = __assert_local_equals
-    
-    # env.globals["strip_units"] = strip_units
 
 
     wpimath_dir = "/home/pjreiniger/git/allwpilib/wpimath"
     wpimath_src_dir = os.path.join(wpimath_dir, "src/main/java/edu/wpi/first/math")
-    src_serde_folder = os.path.join(wpimath_src_dir, module.subfolder)
+    src_serde_folder = os.path.join(wpimath_src_dir, module.subfolder, "serde")
 
     wpimath_test_dir = os.path.join(wpimath_dir, "src/test/java/edu/wpi/first/math")
-    test_serde_folder = os.path.join(wpimath_test_dir, module.subfolder)
+    test_serde_folder = os.path.join(wpimath_test_dir, module.subfolder, "serde")
 
     kwargs = dict(
         module = module,
@@ -182,14 +179,6 @@ def render_message_java(module : ProtobufModule, message : MessageClass):
     struct_src = os.path.join(src_serde_folder, f"{lang_type}StructSerde.java")
     render_template(env, "java_serde_struct.jinja2", struct_src, **kwargs)
 
-    test_src = os.path.join(test_serde_folder, )
-
-    proto_test = os.path.join(wpimath_test_dir, f"{module.subfolder}/{lang_type}SerdeTest.java")
-    render_template(env, "java_test.jinja2", proto_test, **kwargs)
-
-    # with open(proto_test, "w") as f:
-    #     f.write(env.get_template("java_serde_test.jinja2").render(**kwargs))
-
-    # struct_test = os.path.join(wpimath_test_dir, f"{output_directory}/{lang_type}StructSerdeTest.java")
-    # with open(struct_test, "w") as f:
-    #     f.write(env.get_template("java_struct_test.jinja2").render(**kwargs))
+    if generate_tests:
+        proto_test = os.path.join(test_serde_folder, f"{lang_type}SerdeTest.java")
+        render_template(env, "java_test.jinja2", proto_test, **kwargs)

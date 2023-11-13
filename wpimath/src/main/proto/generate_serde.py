@@ -29,6 +29,8 @@ def main():
         #   ("wpimath", "."),
     ]
 
+    generate_tests = True
+
     modules = []
 
     for proto_file, output_directory in proto_files:
@@ -42,7 +44,7 @@ def main():
     
     for module in modules:
         for message in module.messages:
-            render_message_java(module, message)
+            render_message_java(module, message, generate_tests)
 
 if __name__ == "__main__":
     main()
