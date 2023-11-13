@@ -11,14 +11,14 @@ frc::SwerveModuleState StructType::Unpack(
     std::span<const uint8_t, StructType::kSize> data) {
   return frc::SwerveModuleState{
     units::meters_per_second_t{wpi::UnpackStruct<double, 0>(data)},
-    wpi::UnpackStruct<frc::Rotation2d, 0>(data),
+    wpi::UnpackStruct<frc::Rotation2d, 8>(data),
   };
 }
 
 void StructType::Pack(std::span<uint8_t, StructType::kSize> data,
                       const frc::SwerveModuleState& value) {
     wpi::PackStruct<0>(data, value.speed.value());
-    wpi::PackStruct<0>(data, value.angle.Radians().value());
+    wpi::PackStruct<8>(data, value.angle.Radians().value());
 }
 
 void StructType::ForEachNested(

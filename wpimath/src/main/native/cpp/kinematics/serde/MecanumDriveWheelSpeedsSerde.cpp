@@ -11,18 +11,18 @@ frc::MecanumDriveWheelSpeeds StructType::Unpack(
     std::span<const uint8_t, StructType::kSize> data) {
   return frc::MecanumDriveWheelSpeeds{
     units::meters_per_second_t{wpi::UnpackStruct<double, 0>(data)},
-    units::meters_per_second_t{wpi::UnpackStruct<double, 0>(data)},
-    units::meters_per_second_t{wpi::UnpackStruct<double, 0>(data)},
-    units::meters_per_second_t{wpi::UnpackStruct<double, 0>(data)},
+    units::meters_per_second_t{wpi::UnpackStruct<double, 8>(data)},
+    units::meters_per_second_t{wpi::UnpackStruct<double, 16>(data)},
+    units::meters_per_second_t{wpi::UnpackStruct<double, 24>(data)},
   };
 }
 
 void StructType::Pack(std::span<uint8_t, StructType::kSize> data,
                       const frc::MecanumDriveWheelSpeeds& value) {
     wpi::PackStruct<0>(data, value.frontLeft.value());
-    wpi::PackStruct<0>(data, value.frontRight.value());
-    wpi::PackStruct<0>(data, value.rearLeft.value());
-    wpi::PackStruct<0>(data, value.rearRight.value());
+    wpi::PackStruct<8>(data, value.frontRight.value());
+    wpi::PackStruct<16>(data, value.rearLeft.value());
+    wpi::PackStruct<24>(data, value.rearRight.value());
 }
 
 google::protobuf::Message* wpi::Protobuf<frc::MecanumDriveWheelSpeeds>::New(

@@ -11,16 +11,16 @@ frc::ChassisSpeeds StructType::Unpack(
     std::span<const uint8_t, StructType::kSize> data) {
   return frc::ChassisSpeeds{
     units::meters_per_second_t{wpi::UnpackStruct<double, 0>(data)},
-    units::meters_per_second_t{wpi::UnpackStruct<double, 0>(data)},
-    units::radians_per_second_t{wpi::UnpackStruct<double, 0>(data)},
+    units::meters_per_second_t{wpi::UnpackStruct<double, 8>(data)},
+    units::radians_per_second_t{wpi::UnpackStruct<double, 16>(data)},
   };
 }
 
 void StructType::Pack(std::span<uint8_t, StructType::kSize> data,
                       const frc::ChassisSpeeds& value) {
     wpi::PackStruct<0>(data, value.vx.value());
-    wpi::PackStruct<0>(data, value.vy.value());
-    wpi::PackStruct<0>(data, value.omega.value());
+    wpi::PackStruct<8>(data, value.vy.value());
+    wpi::PackStruct<16>(data, value.omega.value());
 }
 
 google::protobuf::Message* wpi::Protobuf<frc::ChassisSpeeds>::New(

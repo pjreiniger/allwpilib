@@ -53,11 +53,11 @@ def main():
         # "ArmFeedforward",
 
         "DifferentialDriveWheelVoltages",
-        # "MecanumDriveWheelPositions",
-        # "MecanumDriveWheelSpeeds",
-        # "ChassisSpeeds",
-        # "DifferentialDriveKinematics",
-        # "DifferentialDriveWheelSpeeds",
+        "MecanumDriveWheelPositions",
+        "MecanumDriveWheelSpeeds",
+        "ChassisSpeeds",
+        "DifferentialDriveKinematics",
+        "DifferentialDriveWheelSpeeds",
 
         # "SwerveModulePosition",
         # "SwerveModuleState",

@@ -224,5 +224,6 @@ def render_message_cpp(module : ProtobufModule, message : MessageClass, force_te
     wpimath_test_dir = os.path.join(wpimath_dir, "src/test/native/cpp/")
     wpimath_test_serde_dir = os.path.join(wpimath_test_dir, module.subfolder, "serde")
     serde_test = os.path.join(wpimath_test_serde_dir, f"{lang_type}SerdeTest.cpp")
-    render_template(env, "cpp_test.jinja2", serde_test, **kwargs)
+    if force_tests or not os.path.exists(serde_test):
+        render_template(env, "cpp_test.jinja2", serde_test, **kwargs)
     

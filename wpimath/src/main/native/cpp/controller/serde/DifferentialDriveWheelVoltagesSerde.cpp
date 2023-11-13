@@ -11,14 +11,14 @@ frc::DifferentialDriveWheelVoltages StructType::Unpack(
     std::span<const uint8_t, StructType::kSize> data) {
   return frc::DifferentialDriveWheelVoltages{
     units::volt_t{wpi::UnpackStruct<double, 0>(data)},
-    units::volt_t{wpi::UnpackStruct<double, 0>(data)},
+    units::volt_t{wpi::UnpackStruct<double, 8>(data)},
   };
 }
 
 void StructType::Pack(std::span<uint8_t, StructType::kSize> data,
                       const frc::DifferentialDriveWheelVoltages& value) {
     wpi::PackStruct<0>(data, value.left.value());
-    wpi::PackStruct<0>(data, value.right.value());
+    wpi::PackStruct<8>(data, value.right.value());
 }
 
 google::protobuf::Message* wpi::Protobuf<frc::DifferentialDriveWheelVoltages>::New(

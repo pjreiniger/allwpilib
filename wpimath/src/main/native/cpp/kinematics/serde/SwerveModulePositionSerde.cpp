@@ -11,14 +11,14 @@ frc::SwerveModulePosition StructType::Unpack(
     std::span<const uint8_t, StructType::kSize> data) {
   return frc::SwerveModulePosition{
     units::meter_t{wpi::UnpackStruct<double, 0>(data)},
-    wpi::UnpackStruct<frc::Rotation2d, 0>(data),
+    wpi::UnpackStruct<frc::Rotation2d, 8>(data),
   };
 }
 
 void StructType::Pack(std::span<uint8_t, StructType::kSize> data,
                       const frc::SwerveModulePosition& value) {
     wpi::PackStruct<0>(data, value.distance.value());
-    wpi::PackStruct<0>(data, value.angle.Radians().value());
+    wpi::PackStruct<8>(data, value.angle.Radians().value());
 }
 
 void StructType::ForEachNested(

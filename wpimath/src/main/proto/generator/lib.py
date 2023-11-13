@@ -2,6 +2,7 @@
 import importlib
 import inspect
 import sys
+import os
 
 from google.protobuf.descriptor import FieldDescriptor
 
@@ -87,5 +88,8 @@ def lower_camel_case(name):
 
 
 def render_template(env, template_file, output_file, **kwargs):
+    dirname = os.path.dirname(output_file)
+    if not os.path.exists(dirname):
+        os.mkdir(dirname)
     with open(output_file, "w") as f:
         f.write(env.get_template(template_file).render(**kwargs))

@@ -11,14 +11,14 @@ frc::DifferentialDriveWheelSpeeds StructType::Unpack(
     std::span<const uint8_t, StructType::kSize> data) {
   return frc::DifferentialDriveWheelSpeeds{
     units::meters_per_second_t{wpi::UnpackStruct<double, 0>(data)},
-    units::meters_per_second_t{wpi::UnpackStruct<double, 0>(data)},
+    units::meters_per_second_t{wpi::UnpackStruct<double, 8>(data)},
   };
 }
 
 void StructType::Pack(std::span<uint8_t, StructType::kSize> data,
                       const frc::DifferentialDriveWheelSpeeds& value) {
     wpi::PackStruct<0>(data, value.left.value());
-    wpi::PackStruct<0>(data, value.right.value());
+    wpi::PackStruct<8>(data, value.right.value());
 }
 
 google::protobuf::Message* wpi::Protobuf<frc::DifferentialDriveWheelSpeeds>::New(
