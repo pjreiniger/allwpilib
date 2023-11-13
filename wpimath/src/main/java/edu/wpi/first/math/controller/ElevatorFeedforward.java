@@ -6,6 +6,8 @@ package edu.wpi.first.math.controller;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.controller.serde.ElevatorFeedforwardProtoSerde;
+import edu.wpi.first.math.controller.serde.ElevatorFeedforwardStructSerde;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 
 /**

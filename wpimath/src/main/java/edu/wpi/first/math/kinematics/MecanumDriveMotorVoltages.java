@@ -4,6 +4,9 @@
 
 package edu.wpi.first.math.kinematics;
 
+import edu.wpi.first.math.kinematics.serde.MecanumDriveMotorVoltagesProtoSerde;
+import edu.wpi.first.math.kinematics.serde.MecanumDriveMotorVoltagesStructSerde;
+
 /** Represents the motor voltages for a mecanum drive drivetrain. */
 public class MecanumDriveMotorVoltages {
   /** Voltage of the front left motor. */

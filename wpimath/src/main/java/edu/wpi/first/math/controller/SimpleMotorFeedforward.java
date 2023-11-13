@@ -6,6 +6,8 @@ package edu.wpi.first.math.controller;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.controller.serde.SimpleMotorFeedforwardProtoSerde;
+import edu.wpi.first.math.controller.serde.SimpleMotorFeedforwardStructSerde;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 
 /** A helper class that computes feedforward outputs for a simple permanent-magnet DC motor. */

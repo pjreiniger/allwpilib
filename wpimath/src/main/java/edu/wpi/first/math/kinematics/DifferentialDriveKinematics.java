@@ -7,6 +7,8 @@ package edu.wpi.first.math.kinematics;
 import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.MathUsageId;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.kinematics.serde.DifferentialDriveKinematicsProtoSerde;
+import edu.wpi.first.math.kinematics.serde.DifferentialDriveKinematicsStructSerde;
 
 /**
  * Helper class that converts a chassis velocity (dx and dtheta components) to left and right wheel

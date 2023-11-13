@@ -4,6 +4,9 @@
 
 package edu.wpi.first.math.kinematics;
 
+import edu.wpi.first.math.kinematics.serde.MecanumDriveWheelSpeedsProtoSerde;
+import edu.wpi.first.math.kinematics.serde.MecanumDriveWheelSpeedsStructSerde;
+
 import java.util.stream.DoubleStream;
 
 public class MecanumDriveWheelSpeeds {

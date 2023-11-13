@@ -4,6 +4,9 @@
 
 package edu.wpi.first.math.controller;
 
+import edu.wpi.first.math.controller.serde.ArmFeedforwardProtoSerde;
+import edu.wpi.first.math.controller.serde.ArmFeedforwardStructSerde;
+
 /**
  * A helper class that computes feedforward outputs for a simple arm (modeled as a motor acting
  * against the force of gravity on a beam suspended at an angle).

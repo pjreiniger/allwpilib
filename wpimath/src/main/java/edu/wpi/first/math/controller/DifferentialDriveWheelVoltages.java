@@ -4,6 +4,9 @@
 
 package edu.wpi.first.math.controller;
 
+import edu.wpi.first.math.controller.serde.DifferentialDriveWheelVoltagesProtoSerde;
+import edu.wpi.first.math.controller.serde.DifferentialDriveWheelVoltagesStructSerde;
+
 /** Motor voltages for a differential drive. */
 public class DifferentialDriveWheelVoltages {
   public double left;
