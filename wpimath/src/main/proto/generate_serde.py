@@ -50,17 +50,17 @@ def main():
     ]
 
     message_types_to_do = [
-        # # "ArmFeedforward",
+        # "ArmFeedforward",
 
-        # "DifferentialDriveWheelVoltages",
+        "DifferentialDriveWheelVoltages",
         # "MecanumDriveWheelPositions",
         # "MecanumDriveWheelSpeeds",
         # "ChassisSpeeds",
         # "DifferentialDriveKinematics",
         # "DifferentialDriveWheelSpeeds",
 
-        # # "SwerveModulePosition",
-        # # "SwerveModuleState",
+        # "SwerveModulePosition",
+        # "SwerveModuleState",
     ]
 
     

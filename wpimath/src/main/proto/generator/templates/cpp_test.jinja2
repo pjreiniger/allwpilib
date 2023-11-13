@@ -4,8 +4,8 @@
 
 #include <gtest/gtest.h>
 
-#include "frc/geometry/{{message.local_type}}.h"
-#include "geometry2d.pb.h"
+#include "frc/{{module.subfolder}}/{{message.local_type}}.h"
+#include "{{module.subfolder}}.pb.h"
 
 using namespace frc;
 
@@ -33,7 +33,7 @@ std::array<uint8_t, StructType::kSize> kExpectedStructBuffer =
 constexpr {{message.local_type}} kExpectedData{};
 }  // namespace
 
-TEST({{message.local_type}}Test, StructPack) {
+TEST({{message.local_type}}SerdeTest, StructPack) {
   uint8_t buffer[StructType::kSize];
   StructType::Pack(buffer, kExpectedData);
 
@@ -42,7 +42,7 @@ TEST({{message.local_type}}Test, StructPack) {
   }
 }
 
-TEST({{message.local_type}}Test, StructUnpack) {
+TEST({{message.local_type}}SerdeTest, StructUnpack) {
   {{message.local_type}} unpacked_data = StructType::Unpack(kExpectedStructBuffer);
 {% for field in message.fields %}
     {{assert_local_equals(field)}}
@@ -50,7 +50,7 @@ TEST({{message.local_type}}Test, StructUnpack) {
 }
 
 
-TEST({{message.local_type}}Test, ProtobufPack) {
+TEST({{message.local_type}}SerdeTest, ProtobufPack) {
   wpi::proto::Protobuf{{message.local_type}} proto;
   ProtoType::Pack(&proto, kExpectedData);
 {% for field in message.fields %}
@@ -60,7 +60,7 @@ TEST({{message.local_type}}Test, ProtobufPack) {
 
 
 
-TEST({{message.local_type}}Test, ProtobufUnpack) {
+TEST({{message.local_type}}SerdeTest, ProtobufUnpack) {
   wpi::proto::Protobuf{{message.local_type}} proto;
 {%- for field in message.fields %}
   {{test_proto_setter(field)}}
