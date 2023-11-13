@@ -53,6 +53,7 @@ class MessageField:
         self.name_without_units = self.name
         self.name_without_units = self.name_without_units.replace("_volts", "")
         self.name_without_units = self.name_without_units.replace("_meters", "")
+        self.name_without_units = self.name_without_units.replace("_radians", "")
         self.name_without_units = self.name_without_units.replace("_mps", "")
         self.name_without_units = self.name_without_units.replace("_rps", "")
 

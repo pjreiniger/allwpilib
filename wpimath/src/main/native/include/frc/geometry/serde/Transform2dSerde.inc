@@ -12,19 +12,14 @@
 template <>
 struct wpi::Struct<frc::Transform2d> {
   static constexpr std::string_view kTypeString = "struct:Transform2d";
-  static constexpr size_t kSize = wpi::Struct<frc::Translation2d>::kSize +
-                                  wpi::Struct<frc::Rotation2d>::kSize;
-  static constexpr std::string_view kSchema =
-      "Translation2d translation;Rotation2d rotation";
+  static constexpr size_t kSize = wpi::Struct<frc::Translation2d>::kSize + wpi::Struct<frc::Rotation2d>::kSize;
+  static constexpr std::string_view kSchema = "Translation2d translation;Rotation2d rotation";
 
   static frc::Transform2d Unpack(std::span<const uint8_t, kSize> data);
   static void Pack(std::span<uint8_t, kSize> data,
                    const frc::Transform2d& value);
   static void ForEachNested(
       std::invocable<std::string_view, std::string_view> auto fn);
-
- private:
-  static constexpr size_t kRotationOff = wpi::Struct<frc::Translation2d>::kSize;
 };
 
 static_assert(wpi::HasNestedStruct<frc::Transform2d>);

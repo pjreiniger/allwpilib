@@ -10,7 +10,7 @@ from jinja2 import Environment, BaseLoader
 # print(clsmembers)
 
 from wpimath.src.main.proto.generator.java_helpers import render_message_java
-from wpimath.src.main.proto.generator.cpp_helpers import render_cpp_class
+from wpimath.src.main.proto.generator.cpp_helpers import render_message_cpp
 
 from wpimath.src.main.proto.generator.lib import MessageClass, ProtobufModule
 
@@ -18,14 +18,14 @@ from wpimath.src.main.proto.generator.lib import MessageClass, ProtobufModule
 def main():
     # proto_files = ["geometry2d", "geometry3d"]
     proto_files = [
-        # ("geometry2d", "geometry"),
+        ("geometry2d", "geometry"),
         # ("geometry3d", "geometry"),
-          ("controller", "controller"),
-          ("kinematics", "kinematics"),
-        #   ("plant", "system/plant"),
-         ###########33 ("spline", "spline"),
-        #   ("system", "system"),
-          ("trajectory", "trajectory"),
+        #   ("controller", "controller"),
+        #   ("kinematics", "kinematics"),
+        # #   ("plant", "system/plant"),
+        #  ###########33 ("spline", "spline"),
+        # #   ("system", "system"),
+        #   ("trajectory", "trajectory"),
         #   ("wpimath", "."),
     ]
 
@@ -50,7 +50,9 @@ def main():
             if message.local_type in message_types_to_ignore:
                 print(f"Ignoring {message.local_type}")
                 continue
-            render_message_java(module, message, force_tests)
+          
+            # render_message_java(module, message, force_tests)
+            render_message_cpp(module, message, force_tests)
 
 if __name__ == "__main__":
     main()
