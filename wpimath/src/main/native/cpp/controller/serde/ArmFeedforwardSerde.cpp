@@ -10,19 +10,19 @@ using StructType = wpi::Struct<frc::ArmFeedforward>;
 frc::ArmFeedforward StructType::Unpack(
     std::span<const uint8_t, StructType::kSize> data) {
   return {
-    // wpi::UnpackStruct<double, 0>(data),
-    // wpi::UnpackStruct<double, 0>(data),
-    // wpi::UnpackStruct<double, 0>(data),
-    // wpi::UnpackStruct<double, 0>(data),
+    units::volt_t{wpi::UnpackStruct<double, 0>(data)},
+    units::volt_t{wpi::UnpackStruct<double, 8>(data)},
+    units::unit_t<frc::ArmFeedforward::kv_unit>{wpi::UnpackStruct<double, 16>(data)},
+    units::unit_t<frc::ArmFeedforward::ka_unit>{wpi::UnpackStruct<double, 24>(data)},
   };
 }
 
 void StructType::Pack(std::span<uint8_t, StructType::kSize> data,
                       const frc::ArmFeedforward& value) {
     wpi::PackStruct<0>(data, value.kS());
-    wpi::PackStruct<0>(data, value.kG());
-    wpi::PackStruct<0>(data, value.kV());
-    wpi::PackStruct<0>(data, value.kA());
+    wpi::PackStruct<8>(data, value.kG());
+    wpi::PackStruct<16>(data, value.kV());
+    wpi::PackStruct<24>(data, value.kA());
 }
 
 google::protobuf::Message* wpi::Protobuf<frc::ArmFeedforward>::New(
@@ -33,12 +33,12 @@ google::protobuf::Message* wpi::Protobuf<frc::ArmFeedforward>::New(
 
 frc::ArmFeedforward wpi::Protobuf<frc::ArmFeedforward>::Unpack(
     const google::protobuf::Message& msg) {
-  // auto m = static_cast<const wpi::proto::ProtobufArmFeedforward*>(&msg);
+  auto m = static_cast<const wpi::proto::ProtobufArmFeedforward*>(&msg);
   return frc::ArmFeedforward{
-    // m->ks(),
-    // m->kg(),
-    // m->kv(),
-    // m->ka(),
+    units::volt_t{m->ks()},
+    units::volt_t{m->kg()},
+    units::unit_t<frc::ArmFeedforward::kv_unit>{m->kv()},
+    units::unit_t<frc::ArmFeedforward::ka_unit>{m->ka()},
   };
 }
 
