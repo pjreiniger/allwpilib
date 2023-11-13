@@ -92,5 +92,4 @@ class WPILIB_DLLEXPORT DifferentialDriveKinematics
 };
 }  // namespace frc
 
-
 #include "frc/kinematics/serde/DifferentialDriveKinematicsSerde.inc"

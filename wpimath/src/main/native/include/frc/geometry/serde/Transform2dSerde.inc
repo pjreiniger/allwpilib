@@ -4,18 +4,19 @@
 
 #pragma once
 
+#include <wpi/SymbolExports.h>
 #include <wpi/protobuf/Protobuf.h>
 #include <wpi/struct/Struct.h>
-
-#include <wpi/SymbolExports.h>
 
 #include "frc/geometry/Transform2d.h"
 
 template <>
 struct wpi::Struct<frc::Transform2d> {
   static constexpr std::string_view kTypeString = "struct:Transform2d";
-  static constexpr size_t kSize = wpi::Struct<frc::Translation2d>::kSize + wpi::Struct<frc::Rotation2d>::kSize;
-  static constexpr std::string_view kSchema = "Translation2d translation;Rotation2d rotation";
+  static constexpr size_t kSize = wpi::Struct<frc::Translation2d>::kSize +
+                                  wpi::Struct<frc::Rotation2d>::kSize;
+  static constexpr std::string_view kSchema =
+      "Translation2d translation;Rotation2d rotation";
 
   static frc::Transform2d Unpack(std::span<const uint8_t, kSize> data);
   static void Pack(std::span<uint8_t, kSize> data,

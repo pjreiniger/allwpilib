@@ -4,18 +4,18 @@
 
 #pragma once
 
+#include <wpi/SymbolExports.h>
 #include <wpi/protobuf/Protobuf.h>
 #include <wpi/struct/Struct.h>
-
-#include <wpi/SymbolExports.h>
 
 #include "frc/kinematics/SwerveModulePosition.h"
 
 template <>
 struct wpi::Struct<frc::SwerveModulePosition> {
   static constexpr std::string_view kTypeString = "struct:SwerveModulePosition";
-  static constexpr size_t kSize = 8+ wpi::Struct<frc::Rotation2d>::kSize;
-  static constexpr std::string_view kSchema = "double distance;Rotation2d angle";
+  static constexpr size_t kSize = 8 + wpi::Struct<frc::Rotation2d>::kSize;
+  static constexpr std::string_view kSchema =
+      "double distance;Rotation2d angle";
 
   static frc::SwerveModulePosition Unpack(std::span<const uint8_t, kSize> data);
   static void Pack(std::span<uint8_t, kSize> data,

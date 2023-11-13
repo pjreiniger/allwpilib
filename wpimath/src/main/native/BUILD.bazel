@@ -6,10 +6,10 @@ wpilib_cc_static_and_shared_library(
     srcs = glob(
         ["cpp/**"],
         # [
-        #     "cpp/geometry/**", 
-        #     "cpp/trajectory/**", 
-        #     "cpp/controller/**", 
-        #     "cpp/kinematics/**", 
+        #     "cpp/geometry/**",
+        #     "cpp/trajectory/**",
+        #     "cpp/controller/**",
+        #     "cpp/kinematics/**",
         #     "cpp/MathShared.cpp", "cpp/StateSpaceUtil.cpp", "cpp/trajectory/Trajectory.cpp", "cpp/trajectory/TrajectoryUtil.cpp"
         # ],
         exclude = ["cpp/jni/**"],

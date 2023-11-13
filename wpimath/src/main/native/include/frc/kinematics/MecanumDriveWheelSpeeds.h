@@ -121,5 +121,4 @@ struct WPILIB_DLLEXPORT MecanumDriveWheelSpeeds {
 };
 }  // namespace frc
 
-
 #include "frc/kinematics/serde/MecanumDriveWheelSpeedsSerde.inc"

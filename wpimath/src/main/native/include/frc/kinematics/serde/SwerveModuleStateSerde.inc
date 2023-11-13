@@ -4,17 +4,16 @@
 
 #pragma once
 
+#include <wpi/SymbolExports.h>
 #include <wpi/protobuf/Protobuf.h>
 #include <wpi/struct/Struct.h>
-
-#include <wpi/SymbolExports.h>
 
 #include "frc/kinematics/SwerveModuleState.h"
 
 template <>
 struct wpi::Struct<frc::SwerveModuleState> {
   static constexpr std::string_view kTypeString = "struct:SwerveModuleState";
-  static constexpr size_t kSize = 8+ wpi::Struct<frc::Rotation2d>::kSize;
+  static constexpr size_t kSize = 8 + wpi::Struct<frc::Rotation2d>::kSize;
   static constexpr std::string_view kSchema = "double speed;Rotation2d angle";
 
   static frc::SwerveModuleState Unpack(std::span<const uint8_t, kSize> data);

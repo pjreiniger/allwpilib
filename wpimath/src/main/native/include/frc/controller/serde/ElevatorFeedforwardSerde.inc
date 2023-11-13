@@ -4,10 +4,9 @@
 
 #pragma once
 
+#include <wpi/SymbolExports.h>
 #include <wpi/protobuf/Protobuf.h>
 #include <wpi/struct/Struct.h>
-
-#include <wpi/SymbolExports.h>
 
 #include "frc/controller/ElevatorFeedforward.h"
 
@@ -15,7 +14,8 @@ template <>
 struct wpi::Struct<frc::ElevatorFeedforward> {
   static constexpr std::string_view kTypeString = "struct:ElevatorFeedforward";
   static constexpr size_t kSize = 32;
-  static constexpr std::string_view kSchema = "double ks;double kg;double kv;double ka";
+  static constexpr std::string_view kSchema =
+      "double ks;double kg;double kv;double ka";
 
   static frc::ElevatorFeedforward Unpack(std::span<const uint8_t, kSize> data);
   static void Pack(std::span<uint8_t, kSize> data,

@@ -4,10 +4,9 @@
 
 #pragma once
 
+#include <wpi/SymbolExports.h>
 #include <wpi/protobuf/Protobuf.h>
 #include <wpi/struct/Struct.h>
-
-#include <wpi/SymbolExports.h>
 
 #include "frc/controller/ArmFeedforward.h"
 
@@ -15,7 +14,8 @@ template <>
 struct wpi::Struct<frc::ArmFeedforward> {
   static constexpr std::string_view kTypeString = "struct:ArmFeedforward";
   static constexpr size_t kSize = 32;
-  static constexpr std::string_view kSchema = "double ks;double kg;double kv;double ka";
+  static constexpr std::string_view kSchema =
+      "double ks;double kg;double kv;double ka";
 
   static frc::ArmFeedforward Unpack(std::span<const uint8_t, kSize> data);
   static void Pack(std::span<uint8_t, kSize> data,

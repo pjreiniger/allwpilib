@@ -12,7 +12,7 @@ wpilib_cc_test(
     name = "wpimath-cpp-test",
     size = "small",
     # srcs = glob(["cpp/**"]),
-    
+
      srcs = glob([
          "cpp/**/serde/**/*.cpp",
          "cpp/main.cpp",

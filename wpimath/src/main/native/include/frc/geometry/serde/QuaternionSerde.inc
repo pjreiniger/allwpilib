@@ -4,10 +4,9 @@
 
 #pragma once
 
+#include <wpi/SymbolExports.h>
 #include <wpi/protobuf/Protobuf.h>
 #include <wpi/struct/Struct.h>
-
-#include <wpi/SymbolExports.h>
 
 #include "frc/geometry/Quaternion.h"
 
@@ -15,7 +14,8 @@ template <>
 struct wpi::Struct<frc::Quaternion> {
   static constexpr std::string_view kTypeString = "struct:Quaternion";
   static constexpr size_t kSize = 32;
-  static constexpr std::string_view kSchema = "double w;double x;double y;double z";
+  static constexpr std::string_view kSchema =
+      "double w;double x;double y;double z";
 
   static frc::Quaternion Unpack(std::span<const uint8_t, kSize> data);
   static void Pack(std::span<uint8_t, kSize> data,

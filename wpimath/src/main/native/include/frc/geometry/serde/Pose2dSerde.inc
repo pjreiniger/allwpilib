@@ -4,22 +4,22 @@
 
 #pragma once
 
+#include <wpi/SymbolExports.h>
 #include <wpi/protobuf/Protobuf.h>
 #include <wpi/struct/Struct.h>
-
-#include <wpi/SymbolExports.h>
 
 #include "frc/geometry/Pose2d.h"
 
 template <>
 struct wpi::Struct<frc::Pose2d> {
   static constexpr std::string_view kTypeString = "struct:Pose2d";
-  static constexpr size_t kSize = wpi::Struct<frc::Translation2d>::kSize + wpi::Struct<frc::Rotation2d>::kSize;
-  static constexpr std::string_view kSchema = "Translation2d translation;Rotation2d rotation";
+  static constexpr size_t kSize = wpi::Struct<frc::Translation2d>::kSize +
+                                  wpi::Struct<frc::Rotation2d>::kSize;
+  static constexpr std::string_view kSchema =
+      "Translation2d translation;Rotation2d rotation";
 
   static frc::Pose2d Unpack(std::span<const uint8_t, kSize> data);
-  static void Pack(std::span<uint8_t, kSize> data,
-                   const frc::Pose2d& value);
+  static void Pack(std::span<uint8_t, kSize> data, const frc::Pose2d& value);
   static void ForEachNested(
       std::invocable<std::string_view, std::string_view> auto fn);
 };
@@ -30,6 +30,5 @@ template <>
 struct WPILIB_DLLEXPORT wpi::Protobuf<frc::Pose2d> {
   static google::protobuf::Message* New(google::protobuf::Arena* arena);
   static frc::Pose2d Unpack(const google::protobuf::Message& msg);
-  static void Pack(google::protobuf::Message* msg,
-                   const frc::Pose2d& value);
+  static void Pack(google::protobuf::Message* msg, const frc::Pose2d& value);
 };

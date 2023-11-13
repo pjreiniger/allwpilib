@@ -16,9 +16,7 @@ using ProtoType = wpi::Protobuf<frc::DifferentialDriveKinematics>;
 
 constexpr std::array<uint8_t, StructType::kSize> create_test_buffer() {
   std::array<uint8_t, StructType::kSize> output;
-  int buffer[] = {
-    -113, -62, -11, 40, 92, -113, -2, 63
-};
+  int buffer[] = {-113, -62, -11, 40, 92, -113, -2, 63};
   for (size_t idx = 0; idx < StructType::kSize; ++idx) {
     output[idx] = static_cast<uint8_t>(buffer[idx]);
   }
@@ -41,25 +39,23 @@ TEST(DifferentialDriveKinematicsSerdeTest, StructPack) {
 }
 
 TEST(DifferentialDriveKinematicsSerdeTest, StructUnpack) {
-  DifferentialDriveKinematics unpacked_data = StructType::Unpack(kExpectedStructBuffer);
+  DifferentialDriveKinematics unpacked_data =
+      StructType::Unpack(kExpectedStructBuffer);
 
-    EXPECT_EQ(kExpectedData.trackWidth.value(), unpacked_data.trackWidth.value());
+  EXPECT_EQ(kExpectedData.trackWidth.value(), unpacked_data.trackWidth.value());
 }
-
 
 TEST(DifferentialDriveKinematicsSerdeTest, ProtobufPack) {
   wpi::proto::ProtobufDifferentialDriveKinematics proto;
   ProtoType::Pack(&proto, kExpectedData);
 
-    EXPECT_EQ(kExpectedData.trackWidth.value(), proto.track_width_meters());
+  EXPECT_EQ(kExpectedData.trackWidth.value(), proto.track_width_meters());
 }
-
-
 
 TEST(DifferentialDriveKinematicsSerdeTest, ProtobufUnpack) {
   wpi::proto::ProtobufDifferentialDriveKinematics proto;
   proto.set_track_width_meters(kExpectedData.trackWidth.value());
 
   DifferentialDriveKinematics unpacked_data = ProtoType::Unpack(proto);
-    EXPECT_EQ(kExpectedData.trackWidth.value(), unpacked_data.trackWidth.value());
+  EXPECT_EQ(kExpectedData.trackWidth.value(), unpacked_data.trackWidth.value());
 }

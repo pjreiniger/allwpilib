@@ -4,10 +4,9 @@
 
 #pragma once
 
+#include <wpi/SymbolExports.h>
 #include <wpi/protobuf/Protobuf.h>
 #include <wpi/struct/Struct.h>
-
-#include <wpi/SymbolExports.h>
 
 #include "frc/kinematics/ChassisSpeeds.h"
 
@@ -15,7 +14,8 @@ template <>
 struct wpi::Struct<frc::ChassisSpeeds> {
   static constexpr std::string_view kTypeString = "struct:ChassisSpeeds";
   static constexpr size_t kSize = 24;
-  static constexpr std::string_view kSchema = "double vx;double vy;double omega";
+  static constexpr std::string_view kSchema =
+      "double vx;double vy;double omega";
 
   static frc::ChassisSpeeds Unpack(std::span<const uint8_t, kSize> data);
   static void Pack(std::span<uint8_t, kSize> data,

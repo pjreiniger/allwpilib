@@ -10,15 +10,15 @@ using StructType = wpi::Struct<frc::SwerveModuleState>;
 frc::SwerveModuleState StructType::Unpack(
     std::span<const uint8_t, StructType::kSize> data) {
   return frc::SwerveModuleState{
-    units::meters_per_second_t{wpi::UnpackStruct<double, 0>(data)},
-    wpi::UnpackStruct<frc::Rotation2d, 8>(data),
+      units::meters_per_second_t{wpi::UnpackStruct<double, 0>(data)},
+      wpi::UnpackStruct<frc::Rotation2d, 8>(data),
   };
 }
 
 void StructType::Pack(std::span<uint8_t, StructType::kSize> data,
                       const frc::SwerveModuleState& value) {
-    wpi::PackStruct<0>(data, value.speed.value());
-    wpi::PackStruct<8>(data, value.angle.Radians().value());
+  wpi::PackStruct<0>(data, value.speed.value());
+  wpi::PackStruct<8>(data, value.angle.Radians().value());
 }
 
 void StructType::ForEachNested(
@@ -36,14 +36,14 @@ frc::SwerveModuleState wpi::Protobuf<frc::SwerveModuleState>::Unpack(
     const google::protobuf::Message& msg) {
   auto m = static_cast<const wpi::proto::ProtobufSwerveModuleState*>(&msg);
   return frc::SwerveModuleState{
-    units::meters_per_second_t{m->speed_mps()},
-    wpi::UnpackProtobuf<frc::Rotation2d>(m->angle()),
+      units::meters_per_second_t{m->speed_mps()},
+      wpi::UnpackProtobuf<frc::Rotation2d>(m->angle()),
   };
 }
 
-void wpi::Protobuf<frc::SwerveModuleState>::Pack(google::protobuf::Message* msg,
-                                             const frc::SwerveModuleState& value) {
+void wpi::Protobuf<frc::SwerveModuleState>::Pack(
+    google::protobuf::Message* msg, const frc::SwerveModuleState& value) {
   auto m = static_cast<wpi::proto::ProtobufSwerveModuleState*>(msg);
-    m->set_speed_mps(value.speed.value());
-    // wpi::PackProtobuf(m->mutable_angle(), value.angle.Radians().value());
+  m->set_speed_mps(value.speed.value());
+  wpi::PackProtobuf(m->mutable_angle(), value.angle);
 }

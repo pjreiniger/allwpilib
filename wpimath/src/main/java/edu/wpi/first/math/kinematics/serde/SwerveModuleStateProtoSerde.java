@@ -33,7 +33,7 @@ public class SwerveModuleStateProtoSerde implements Protobuf<SwerveModuleState, 
 
   @Override
   public SwerveModuleState unpack(ProtobufSwerveModuleState msg) {
-    return new SwerveModuleState(msg.getSpeedMps(), 
+    return new SwerveModuleState(msg.getSpeedMps(),
         Rotation2d.proto.unpack(msg.getAngle()));
   }
 

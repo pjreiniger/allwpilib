@@ -16,9 +16,8 @@ using ProtoType = wpi::Protobuf<frc::DifferentialDriveWheelSpeeds>;
 
 constexpr std::array<uint8_t, StructType::kSize> create_test_buffer() {
   std::array<uint8_t, StructType::kSize> output;
-  int buffer[] = {
-    -113, -62, -11, 40, 92, -113, -2, 63, 82, -72, 30, -123, -21, 81, 2, 64
-};
+  int buffer[] = {-113, -62, -11, 40,   92,  -113, -2, 63,
+                  82,   -72, 30,  -123, -21, 81,   2,  64};
   for (size_t idx = 0; idx < StructType::kSize; ++idx) {
     output[idx] = static_cast<uint8_t>(buffer[idx]);
   }
@@ -41,22 +40,20 @@ TEST(DifferentialDriveWheelSpeedsSerdeTest, StructPack) {
 }
 
 TEST(DifferentialDriveWheelSpeedsSerdeTest, StructUnpack) {
-  DifferentialDriveWheelSpeeds unpacked_data = StructType::Unpack(kExpectedStructBuffer);
+  DifferentialDriveWheelSpeeds unpacked_data =
+      StructType::Unpack(kExpectedStructBuffer);
 
-    EXPECT_EQ(kExpectedData.left.value(), unpacked_data.left.value());
-    EXPECT_EQ(kExpectedData.right.value(), unpacked_data.right.value());
+  EXPECT_EQ(kExpectedData.left.value(), unpacked_data.left.value());
+  EXPECT_EQ(kExpectedData.right.value(), unpacked_data.right.value());
 }
-
 
 TEST(DifferentialDriveWheelSpeedsSerdeTest, ProtobufPack) {
   wpi::proto::ProtobufDifferentialDriveWheelSpeeds proto;
   ProtoType::Pack(&proto, kExpectedData);
 
-    EXPECT_EQ(kExpectedData.left.value(), proto.left_mps());
-    EXPECT_EQ(kExpectedData.right.value(), proto.right_mps());
+  EXPECT_EQ(kExpectedData.left.value(), proto.left_mps());
+  EXPECT_EQ(kExpectedData.right.value(), proto.right_mps());
 }
-
-
 
 TEST(DifferentialDriveWheelSpeedsSerdeTest, ProtobufUnpack) {
   wpi::proto::ProtobufDifferentialDriveWheelSpeeds proto;
@@ -64,6 +61,6 @@ TEST(DifferentialDriveWheelSpeedsSerdeTest, ProtobufUnpack) {
   proto.set_right_mps(kExpectedData.right.value());
 
   DifferentialDriveWheelSpeeds unpacked_data = ProtoType::Unpack(proto);
-    EXPECT_EQ(kExpectedData.left.value(), unpacked_data.left.value());
-    EXPECT_EQ(kExpectedData.right.value(), unpacked_data.right.value());
+  EXPECT_EQ(kExpectedData.left.value(), unpacked_data.left.value());
+  EXPECT_EQ(kExpectedData.right.value(), unpacked_data.right.value());
 }

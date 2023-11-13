@@ -4,8 +4,8 @@
 
 #include <gtest/gtest.h>
 
-#include "frc/controller/ArmFeedforward.h"
 #include "controller.pb.h"
+#include "frc/controller/ArmFeedforward.h"
 
 using namespace frc;
 
@@ -16,10 +16,9 @@ using ProtoType = wpi::Protobuf<frc::ArmFeedforward>;
 
 constexpr std::array<uint8_t, StructType::kSize> create_test_buffer() {
   std::array<uint8_t, StructType::kSize> output;
-  int buffer[] = {
-        -113, -62, -11, 40, 92, -113, -2, 63, 82, -72, 30, -123, -21, 81, 2, 64, -123, -21, 81, -72,
-        30, -123, 65, 64, -41, -93, 112, 61, 10, -41, -5, 63
-};
+  int buffer[] = {-113, -62, -11, 40,  92,  -113, -2,  63,  82,  -72, 30,
+                  -123, -21, 81,  2,   64,  -123, -21, 81,  -72, 30,  -123,
+                  65,   64,  -41, -93, 112, 61,   10,  -41, -5,  63};
   for (size_t idx = 0; idx < StructType::kSize; ++idx) {
     output[idx] = static_cast<uint8_t>(buffer[idx]);
   }
@@ -48,24 +47,21 @@ TEST(ArmFeedforwardSerdeTest, StructPack) {
 TEST(ArmFeedforwardSerdeTest, StructUnpack) {
   ArmFeedforward unpacked_data = StructType::Unpack(kExpectedStructBuffer);
 
-    EXPECT_EQ(kExpectedData.kS.value(), unpacked_data.kS.value());
-    EXPECT_EQ(kExpectedData.kG.value(), unpacked_data.kG.value());
-    EXPECT_EQ(kExpectedData.kV.value(), unpacked_data.kV.value());
-    EXPECT_EQ(kExpectedData.kA.value(), unpacked_data.kA.value());
+  EXPECT_EQ(kExpectedData.kS.value(), unpacked_data.kS.value());
+  EXPECT_EQ(kExpectedData.kG.value(), unpacked_data.kG.value());
+  EXPECT_EQ(kExpectedData.kV.value(), unpacked_data.kV.value());
+  EXPECT_EQ(kExpectedData.kA.value(), unpacked_data.kA.value());
 }
-
 
 TEST(ArmFeedforwardSerdeTest, ProtobufPack) {
   wpi::proto::ProtobufArmFeedforward proto;
   ProtoType::Pack(&proto, kExpectedData);
 
-    EXPECT_EQ(kExpectedData.kS.value(), proto.ks());
-    EXPECT_EQ(kExpectedData.kG.value(), proto.kg());
-    EXPECT_EQ(kExpectedData.kV.value(), proto.kv());
-    EXPECT_EQ(kExpectedData.kA.value(), proto.ka());
+  EXPECT_EQ(kExpectedData.kS.value(), proto.ks());
+  EXPECT_EQ(kExpectedData.kG.value(), proto.kg());
+  EXPECT_EQ(kExpectedData.kV.value(), proto.kv());
+  EXPECT_EQ(kExpectedData.kA.value(), proto.ka());
 }
-
-
 
 TEST(ArmFeedforwardSerdeTest, ProtobufUnpack) {
   wpi::proto::ProtobufArmFeedforward proto;
@@ -75,8 +71,8 @@ TEST(ArmFeedforwardSerdeTest, ProtobufUnpack) {
   proto.set_ka(kExpectedData.kA.value());
 
   ArmFeedforward unpacked_data = ProtoType::Unpack(proto);
-    EXPECT_EQ(kExpectedData.kS.value(), unpacked_data.kS.value());
-    EXPECT_EQ(kExpectedData.kG.value(), unpacked_data.kG.value());
-    EXPECT_EQ(kExpectedData.kV.value(), unpacked_data.kV.value());
-    EXPECT_EQ(kExpectedData.kA.value(), unpacked_data.kA.value());
+  EXPECT_EQ(kExpectedData.kS.value(), unpacked_data.kS.value());
+  EXPECT_EQ(kExpectedData.kG.value(), unpacked_data.kG.value());
+  EXPECT_EQ(kExpectedData.kV.value(), unpacked_data.kV.value());
+  EXPECT_EQ(kExpectedData.kA.value(), unpacked_data.kA.value());
 }
