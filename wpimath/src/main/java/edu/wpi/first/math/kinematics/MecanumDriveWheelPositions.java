@@ -20,6 +20,11 @@ public class MecanumDriveWheelPositions implements WheelPositions<MecanumDriveWh
   /** Distance measured by the rear right wheel. */
   public double rearRightMeters;
 
+  public static final MecanumDriveWheelPositionsStructSerde struct =
+      new MecanumDriveWheelPositionsStructSerde();
+  public static final MecanumDriveWheelPositionsProtoSerde proto =
+      new MecanumDriveWheelPositionsProtoSerde();
+
   /** Constructs a MecanumDriveWheelPositions with zeros for all member fields. */
   public MecanumDriveWheelPositions() {}
 

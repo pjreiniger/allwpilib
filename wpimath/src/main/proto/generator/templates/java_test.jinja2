@@ -25,9 +25,6 @@ public class {{message.local_type}}SerdeTest {
     {{message.local_type}}.struct.pack(buffer, DATA);
 
     byte[] actual = buffer.array();
-    String newContent = new String(buffer.array());
-    System.out.println(Arrays.toString(actual));
-    System.out.println(newContent);
     assertArrayEquals(actual, STRUCT_BUFFER);
   }
 

@@ -4,9 +4,11 @@
 
 package edu.wpi.first.math.trajectory;
 
-import edu.wpi.first.math.geometry.RepeatedCompositeFieldContainer;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.proto.Trajectory.ProtobufTrajectory;
 import edu.wpi.first.util.protobuf.Protobuf;
+import java.util.ArrayList;
+import java.util.List;
 import us.hebi.quickbuf.Descriptors.Descriptor;
 
 public class TrajectoryProtoSerde implements Protobuf<Trajectory, ProtobufTrajectory> {
@@ -22,7 +24,7 @@ public class TrajectoryProtoSerde implements Protobuf<Trajectory, ProtobufTrajec
 
   @Override
   public Protobuf<?, ?>[] getNested() {
-    return new Protobuf<?, ?>[] {RepeatedCompositeFieldContainer.proto};
+    return new Protobuf<?, ?>[] {Trajectory.State.proto};
   }
 
   @Override
@@ -30,16 +32,38 @@ public class TrajectoryProtoSerde implements Protobuf<Trajectory, ProtobufTrajec
     return ProtobufTrajectory.newInstance();
   }
 
+  public Trajectory.State unpack(ProtobufTrajectory.State msg) {
+    return new Trajectory.State(
+        msg.getTimeSeconds(),
+        msg.getVelocityMps(),
+        msg.getAccelerationMpsSq(),
+        Pose2d.proto.unpack(msg.getMutablePose()),
+        msg.getCurvatureRadPerMeter());
+  }
+
+  public void pack(ProtobufTrajectory.State msg, Trajectory.State value) {
+    msg.setTimeSeconds(value.timeSeconds);
+    msg.setVelocityMps(value.velocityMetersPerSecond);
+    msg.setAccelerationMpsSq(value.accelerationMetersPerSecondSq);
+    Pose2d.proto.pack(msg.getMutablePose(), value.poseMeters);
+    msg.setCurvatureRadPerMeter(value.curvatureRadPerMeter);
+  }
+
   @Override
   public Trajectory unpack(ProtobufTrajectory msg) {
-    return new Trajectory(msg.getTotalTime(), 
-        RepeatedCompositeFieldContainer.proto.unpack(msg.getStates()));
+    List<Trajectory.State> states = new ArrayList<>();
+    for (ProtobufTrajectory.State protoState : msg.getStates()) {
+      states.add(unpack(protoState));
+    }
+    return new Trajectory(states);
   }
 
   @Override
   public void pack(ProtobufTrajectory msg, Trajectory value) {
-    msg.setTotalTime(value.totalTime);
-    RepeatedCompositeFieldContainer.proto.pack(msg.getMutableStates(), value.getStates());
-
+    for (Trajectory.State state : value.getStates()) {
+      ProtobufTrajectory.State protoState = ProtobufTrajectory.State.newInstance();
+      pack(protoState, state);
+      msg.getMutableStates().add(protoState);
+    }
   }
 }

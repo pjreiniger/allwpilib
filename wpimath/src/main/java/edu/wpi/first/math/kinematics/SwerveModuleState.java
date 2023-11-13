@@ -15,6 +15,9 @@ public class SwerveModuleState implements Comparable<SwerveModuleState> {
   /** Angle of the module. */
   public Rotation2d angle = Rotation2d.fromDegrees(0);
 
+  public static final SwerveModuleStateStructSerde struct = new SwerveModuleStateStructSerde();
+  public static final SwerveModuleStateProtoSerde proto = new SwerveModuleStateProtoSerde();
+
   /** Constructs a SwerveModuleState with zeros for speed and angle. */
   public SwerveModuleState() {}
 

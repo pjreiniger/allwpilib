@@ -58,6 +58,8 @@ public class SwerveDriveKinematics
   private Rotation2d[] m_moduleHeadings;
   private Translation2d m_prevCoR = new Translation2d();
 
+  public static final SwerveDriveKinematicsProtoSerde proto = new SwerveDriveKinematicsProtoSerde();
+
   /**
    * Constructs a swerve drive kinematics object. This takes in a variable number of module
    * locations as Translation2d objects. The order in which you pass in the module locations is the
@@ -347,5 +349,9 @@ public class SwerveDriveKinematics
     for (SwerveModuleState moduleState : moduleStates) {
       moduleState.speedMetersPerSecond *= scale;
     }
+  }
+
+  public Translation2d[] getModules() {
+    return Arrays.copyOf(m_modules, m_numModules);
   }
 }

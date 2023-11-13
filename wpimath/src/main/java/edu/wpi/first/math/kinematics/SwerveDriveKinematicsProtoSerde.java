@@ -4,11 +4,14 @@
 
 package edu.wpi.first.math.kinematics;
 
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.proto.Geometry2D;
 import edu.wpi.first.math.proto.Kinematics.ProtobufSwerveDriveKinematics;
 import edu.wpi.first.util.protobuf.Protobuf;
 import us.hebi.quickbuf.Descriptors.Descriptor;
 
-public class SwerveDriveKinematicsProtoSerde implements Protobuf<SwerveDriveKinematics, ProtobufSwerveDriveKinematics> {
+public class SwerveDriveKinematicsProtoSerde
+    implements Protobuf<SwerveDriveKinematics, ProtobufSwerveDriveKinematics> {
   @Override
   public Class<SwerveDriveKinematics> getTypeClass() {
     return SwerveDriveKinematics.class;
@@ -19,10 +22,10 @@ public class SwerveDriveKinematicsProtoSerde implements Protobuf<SwerveDriveKine
     return ProtobufSwerveDriveKinematics.getDescriptor();
   }
 
-  // @Override
-  // public Protobuf<?, ?>[] getNested() {
-  //   return new Protobuf<?, ?>[] {SwerveModuleState.proto, SwerveModuleState.proto, SwerveModuleState.proto, SwerveModuleState.proto};
-  // }
+  @Override
+  public Protobuf<?, ?>[] getNested() {
+    return new Protobuf<?, ?>[] {Translation2d.proto};
+  }
 
   @Override
   public ProtobufSwerveDriveKinematics createMessage() {
@@ -31,15 +34,21 @@ public class SwerveDriveKinematicsProtoSerde implements Protobuf<SwerveDriveKine
 
   @Override
   public SwerveDriveKinematics unpack(ProtobufSwerveDriveKinematics msg) {
-    // if (msg.)
-    // return new SwerveDriveKinematics(
-    //     RepeatedCompositeFieldContainer.proto.unpack(msg.getModules()));
-    return null;
+    Translation2d[] translations = new Translation2d[msg.getModules().length()];
+    for (int i = 0; i < msg.getModules().length(); ++i) {
+      translations[i] = Translation2d.proto.unpack(msg.getModules().get(i));
+    }
+    return new SwerveDriveKinematics(translations);
   }
 
   @Override
   public void pack(ProtobufSwerveDriveKinematics msg, SwerveDriveKinematics value) {
-    // RepeatedCompositeFieldContainer.proto.pack(msg.getMutableModules(), value.getModules());
-
+    Translation2d[] translations = value.getModules();
+    for (Translation2d translation : translations) {
+      Geometry2D.ProtobufTranslation2d protoTranslation =
+          Geometry2D.ProtobufTranslation2d.newInstance();
+      Translation2d.proto.pack(protoTranslation, translation);
+      msg.addModules(protoTranslation);
+    }
   }
 }

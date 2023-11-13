@@ -20,8 +20,10 @@ public class DifferentialDriveKinematics
     implements Kinematics<DifferentialDriveWheelSpeeds, DifferentialDriveWheelPositions> {
   public final double trackWidthMeters;
 
-  public static final DifferentialDriveKinematicsProtoSerde proto = new DifferentialDriveKinematicsProtoSerde();
-  public static final DifferentialDriveKinematicsStructSerde struct = new DifferentialDriveKinematicsStructSerde();
+  public static final DifferentialDriveKinematicsProtoSerde proto =
+      new DifferentialDriveKinematicsProtoSerde();
+  public static final DifferentialDriveKinematicsStructSerde struct =
+      new DifferentialDriveKinematicsStructSerde();
 
   /**
    * Constructs a differential drive kinematics object.

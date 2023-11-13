@@ -19,6 +19,11 @@ public class MecanumDriveWheelSpeeds {
   /** Speed of the rear right wheel. */
   public double rearRightMetersPerSecond;
 
+  public static final MecanumDriveWheelSpeedsStructSerde struct =
+      new MecanumDriveWheelSpeedsStructSerde();
+  public static final MecanumDriveWheelSpeedsProtoSerde proto =
+      new MecanumDriveWheelSpeedsProtoSerde();
+
   /** Constructs a MecanumDriveWheelSpeeds with zeros for all member fields. */
   public MecanumDriveWheelSpeeds() {}
 

@@ -8,15 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import edu.wpi.first.math.proto.Kinematics.ProtobufDifferentialDriveKinematics;
-import edu.wpi.first.util.struct.Struct;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import org.junit.jupiter.api.Test;
-import java.util.Arrays;
 
 public class DifferentialDriveKinematicsSerdeTest {
   private static final DifferentialDriveKinematics DATA = new DifferentialDriveKinematics(1.91);
-  private static final byte[] STRUCT_BUFFER = new byte[]{-113, -62, -11, 40, 92, -113, -2, 63};
+  private static final byte[] STRUCT_BUFFER = new byte[] {-113, -62, -11, 40, 92, -113, -2, 63};
 
   @Test
   void testStructPack() {
@@ -25,9 +23,6 @@ public class DifferentialDriveKinematicsSerdeTest {
     DifferentialDriveKinematics.struct.pack(buffer, DATA);
 
     byte[] actual = buffer.array();
-    String newContent = new String(buffer.array());
-    System.out.println(Arrays.toString(actual));
-    System.out.println(newContent);
     assertArrayEquals(actual, STRUCT_BUFFER);
   }
 

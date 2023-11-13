@@ -8,7 +8,8 @@ import edu.wpi.first.math.proto.Kinematics.ProtobufDifferentialDriveWheelSpeeds;
 import edu.wpi.first.util.protobuf.Protobuf;
 import us.hebi.quickbuf.Descriptors.Descriptor;
 
-public class DifferentialDriveWheelSpeedsProtoSerde implements Protobuf<DifferentialDriveWheelSpeeds, ProtobufDifferentialDriveWheelSpeeds> {
+public class DifferentialDriveWheelSpeedsProtoSerde
+    implements Protobuf<DifferentialDriveWheelSpeeds, ProtobufDifferentialDriveWheelSpeeds> {
   @Override
   public Class<DifferentialDriveWheelSpeeds> getTypeClass() {
     return DifferentialDriveWheelSpeeds.class;
@@ -33,6 +34,5 @@ public class DifferentialDriveWheelSpeedsProtoSerde implements Protobuf<Differen
   public void pack(ProtobufDifferentialDriveWheelSpeeds msg, DifferentialDriveWheelSpeeds value) {
     msg.setLeftMps(value.leftMetersPerSecond);
     msg.setRightMps(value.rightMetersPerSecond);
-
   }
 }

@@ -4,8 +4,6 @@
 
 package edu.wpi.first.math.kinematics;
 
-import edu.wpi.first.math.controller.SimpleMotorFeedforwardProtoSerde;
-import edu.wpi.first.math.controller.SimpleMotorFeedforwardStructSerde;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;

@@ -15,6 +15,6 @@ message ProtobufTrajectory {
     double curvature_rad_per_meter = 5;
   }
 
-  double total_time = 1;
+  reserved 1;
   repeated State states = 2;
 }

@@ -7,7 +7,8 @@ package edu.wpi.first.math.controller;
 import edu.wpi.first.util.struct.Struct;
 import java.nio.ByteBuffer;
 
-public class DifferentialDriveWheelVoltagesStructSerde implements Struct<DifferentialDriveWheelVoltages> {
+public class DifferentialDriveWheelVoltagesStructSerde
+    implements Struct<DifferentialDriveWheelVoltages> {
   @Override
   public Class<DifferentialDriveWheelVoltages> getTypeClass() {
     return DifferentialDriveWheelVoltages.class;

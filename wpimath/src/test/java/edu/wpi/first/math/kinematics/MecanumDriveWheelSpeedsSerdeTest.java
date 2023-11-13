@@ -7,16 +7,19 @@ package edu.wpi.first.math.kinematics;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import edu.wpi.first.math.proto..ProtobufMecanumDriveWheelSpeeds;
-import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.math.proto.Kinematics.ProtobufMecanumDriveWheelSpeeds;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import org.junit.jupiter.api.Test;
-import java.util.Arrays;
 
 public class MecanumDriveWheelSpeedsSerdeTest {
-  private static final MecanumDriveWheelSpeeds DATA = new MecanumDriveWheelSpeeds(1.91, 2.29);
-  private static final byte[] STRUCT_BUFFER = new byte[]{63, -2, -113, 92, 40, -11, -62, -113, 64, 2, 81, -21, -123, 30, -72, 82};
+  private static final MecanumDriveWheelSpeeds DATA =
+      new MecanumDriveWheelSpeeds(19.1, 22.9, 0.3405, 0.174);
+  private static final byte[] STRUCT_BUFFER =
+      new byte[] {
+        -102, -103, -103, -103, -103, 25, 51, 64, 102, 102, 102, 102, 102, -26, 54, 64, -104, 110,
+        18, -125, -64, -54, -43, 63, 18, -125, -64, -54, -95, 69, -58, 63
+      };
 
   @Test
   void testStructPack() {
@@ -25,9 +28,6 @@ public class MecanumDriveWheelSpeedsSerdeTest {
     MecanumDriveWheelSpeeds.struct.pack(buffer, DATA);
 
     byte[] actual = buffer.array();
-    String newContent = new String(buffer.array());
-    System.out.println(Arrays.toString(actual));
-    System.out.println(newContent);
     assertArrayEquals(actual, STRUCT_BUFFER);
   }
 

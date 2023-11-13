@@ -4,60 +4,73 @@
 
 package edu.wpi.first.math.trajectory;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import edu.wpi.first.math.proto..ProtobufTrajectory;
-import edu.wpi.first.util.struct.Struct;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.proto.Trajectory.ProtobufTrajectory;
+import java.util.List;
 import org.junit.jupiter.api.Test;
-import java.util.Arrays;
 
 public class TrajectorySerdeTest {
-  private static final Trajectory DATA = new Trajectory(1.91, 2.29);
-  private static final byte[] STRUCT_BUFFER = new byte[]{63, -2, -113, 92, 40, -11, -62, -113, 64, 2, 81, -21, -123, 30, -72, 82};
-
-  @Test
-  void testStructPack() {
-    ByteBuffer buffer = ByteBuffer.allocate(Trajectory.struct.getSize());
-    buffer.order(ByteOrder.LITTLE_ENDIAN);
-    Trajectory.struct.pack(buffer, DATA);
-
-    byte[] actual = buffer.array();
-    String newContent = new String(buffer.array());
-    System.out.println(Arrays.toString(actual));
-    System.out.println(newContent);
-    assertArrayEquals(actual, STRUCT_BUFFER);
-  }
-
-  @Test
-  void testStructUnpack() {
-    ByteBuffer buffer = ByteBuffer.wrap(STRUCT_BUFFER);
-    buffer.order(ByteOrder.LITTLE_ENDIAN);
-
-    Trajectory data = Trajectory.struct.unpack(buffer);
-    assertEquals(DATA.totalTime, data.totalTime);
-    assertEquals(DATA.getStates(), data.getStates());
-  }
+  private static final Trajectory DATA =
+      new Trajectory(
+          List.of(
+              new Trajectory.State(
+                  1.1,
+                  2.2,
+                  3.3,
+                  new Pose2d(new Translation2d(1.2, 3.4), Rotation2d.fromDegrees(1.6)),
+                  4.0),
+              new Trajectory.State(
+                  1.2,
+                  2.3,
+                  3.4,
+                  new Pose2d(new Translation2d(2.2, 4.4), Rotation2d.fromDegrees(3.6)),
+                  4.4),
+              new Trajectory.State(
+                  1.3,
+                  2.4,
+                  3.5,
+                  new Pose2d(new Translation2d(3.2, 5.4), Rotation2d.fromDegrees(5.6)),
+                  4.8),
+              new Trajectory.State(
+                  1.4,
+                  2.5,
+                  3.6,
+                  new Pose2d(new Translation2d(4.2, 6.4), Rotation2d.fromDegrees(7.6)),
+                  5.2)));
 
   @Test
   void testProtoPack() {
     ProtobufTrajectory proto = Trajectory.proto.createMessage();
     Trajectory.proto.pack(proto, DATA);
 
-    assertEquals(DATA.totalTime, proto.getTotalTime());
-    assertEquals(DATA.getStates(), proto.getStates());
+    assertEquals(DATA.getStates().size(), proto.getStates().length());
+    for (int i = 0; i < DATA.getStates().size(); ++i) {
+      Trajectory.State state = DATA.getStates().get(i);
+      ProtobufTrajectory.State protoState = proto.getStates().get(i);
+
+      assertEquals(state.timeSeconds, protoState.getTimeSeconds());
+      assertEquals(state.velocityMetersPerSecond, protoState.getVelocityMps());
+      assertEquals(state.accelerationMetersPerSecondSq, protoState.getAccelerationMpsSq());
+      assertEquals(state.poseMeters, Pose2d.proto.unpack(protoState.getPose()));
+      assertEquals(state.curvatureRadPerMeter, protoState.getCurvatureRadPerMeter());
+    }
   }
 
   @Test
   void testProtoUnpack() {
     ProtobufTrajectory proto = Trajectory.proto.createMessage();
-    proto.setTotalTime(DATA.totalTime);
-    proto.getMutableStates(DATA.getStates());
+
+    for (Trajectory.State state : DATA.getStates()) {
+      ProtobufTrajectory.State protoState = ProtobufTrajectory.State.newInstance();
+      Trajectory.proto.pack(protoState, state);
+      proto.getMutableStates().add(protoState);
+    }
 
     Trajectory data = Trajectory.proto.unpack(proto);
-    assertEquals(DATA.totalTime, data.totalTime);
     assertEquals(DATA.getStates(), data.getStates());
   }
 }

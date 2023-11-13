@@ -7,16 +7,19 @@ package edu.wpi.first.math.kinematics;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import edu.wpi.first.math.proto..ProtobufMecanumDriveWheelPositions;
-import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.math.proto.Kinematics.ProtobufMecanumDriveWheelPositions;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import org.junit.jupiter.api.Test;
-import java.util.Arrays;
 
 public class MecanumDriveWheelPositionsSerdeTest {
-  private static final MecanumDriveWheelPositions DATA = new MecanumDriveWheelPositions(1.91, 2.29);
-  private static final byte[] STRUCT_BUFFER = new byte[]{63, -2, -113, 92, 40, -11, -62, -113, 64, 2, 81, -21, -123, 30, -72, 82};
+  private static final MecanumDriveWheelPositions DATA =
+      new MecanumDriveWheelPositions(1.91, 2.29, 35.04, 17.4);
+  private static final byte[] STRUCT_BUFFER =
+      new byte[] {
+        -113, -62, -11, 40, 92, -113, -2, 63, 82, -72, 30, -123, -21, 81, 2, 64, -123, -21, 81, -72,
+        30, -123, 65, 64, 102, 102, 102, 102, 102, 102, 49, 64
+      };
 
   @Test
   void testStructPack() {
@@ -25,9 +28,6 @@ public class MecanumDriveWheelPositionsSerdeTest {
     MecanumDriveWheelPositions.struct.pack(buffer, DATA);
 
     byte[] actual = buffer.array();
-    String newContent = new String(buffer.array());
-    System.out.println(Arrays.toString(actual));
-    System.out.println(newContent);
     assertArrayEquals(actual, STRUCT_BUFFER);
   }
 

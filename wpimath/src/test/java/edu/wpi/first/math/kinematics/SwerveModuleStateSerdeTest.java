@@ -7,16 +7,17 @@ package edu.wpi.first.math.kinematics;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import edu.wpi.first.math.proto..ProtobufSwerveModuleState;
-import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.proto.Kinematics.ProtobufSwerveModuleState;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import org.junit.jupiter.api.Test;
-import java.util.Arrays;
 
 public class SwerveModuleStateSerdeTest {
-  private static final SwerveModuleState DATA = new SwerveModuleState(1.91, 2.29);
-  private static final byte[] STRUCT_BUFFER = new byte[]{63, -2, -113, 92, 40, -11, -62, -113, 64, 2, 81, -21, -123, 30, -72, 82};
+  private static final SwerveModuleState DATA =
+      new SwerveModuleState(1.91, Rotation2d.fromDegrees(17.4));
+  private static final byte[] STRUCT_BUFFER =
+      new byte[] {-113, -62, -11, 40, 92, -113, -2, 63, -108, -92, -122, -48, -100, 111, -45, 63};
 
   @Test
   void testStructPack() {
@@ -25,9 +26,6 @@ public class SwerveModuleStateSerdeTest {
     SwerveModuleState.struct.pack(buffer, DATA);
 
     byte[] actual = buffer.array();
-    String newContent = new String(buffer.array());
-    System.out.println(Arrays.toString(actual));
-    System.out.println(newContent);
     assertArrayEquals(actual, STRUCT_BUFFER);
   }
 
@@ -38,7 +36,7 @@ public class SwerveModuleStateSerdeTest {
 
     SwerveModuleState data = SwerveModuleState.struct.unpack(buffer);
     assertEquals(DATA.speedMetersPerSecond, data.speedMetersPerSecond);
-    assertEquals(DATA.getAngle(), data.getAngle());
+    assertEquals(DATA.angle, data.angle);
   }
 
   @Test
@@ -47,17 +45,17 @@ public class SwerveModuleStateSerdeTest {
     SwerveModuleState.proto.pack(proto, DATA);
 
     assertEquals(DATA.speedMetersPerSecond, proto.getSpeedMps());
-    assertEquals(DATA.getAngle(), proto.getAngle());
+    assertEquals(DATA.angle.getRadians(), proto.getAngle().getRadians());
   }
 
   @Test
   void testProtoUnpack() {
     ProtobufSwerveModuleState proto = SwerveModuleState.proto.createMessage();
     proto.setSpeedMps(DATA.speedMetersPerSecond);
-    proto.getMutableAngle(DATA.getAngle());
+    proto.getMutableAngle().setRadians(DATA.angle.getRadians());
 
     SwerveModuleState data = SwerveModuleState.proto.unpack(proto);
     assertEquals(DATA.speedMetersPerSecond, data.speedMetersPerSecond);
-    assertEquals(DATA.getAngle(), data.getAngle());
+    assertEquals(DATA.angle, data.angle);
   }
 }

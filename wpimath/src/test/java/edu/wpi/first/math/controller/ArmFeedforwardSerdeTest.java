@@ -8,15 +8,17 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import edu.wpi.first.math.proto.Controller.ProtobufArmFeedforward;
-import edu.wpi.first.util.struct.Struct;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import org.junit.jupiter.api.Test;
-import java.util.Arrays;
 
 public class ArmFeedforwardSerdeTest {
   private static final ArmFeedforward DATA = new ArmFeedforward(1.91, 2.29, 35.04, 1.74);
-  private static final byte[] STRUCT_BUFFER = new byte[]{-113, -62, -11, 40, 92, -113, -2, 63, 82, -72, 30, -123, -21, 81, 2, 64, -123, -21, 81, -72, 30, -123, 65, 64, -41, -93, 112, 61, 10, -41, -5, 63};
+  private static final byte[] STRUCT_BUFFER =
+      new byte[] {
+        -113, -62, -11, 40, 92, -113, -2, 63, 82, -72, 30, -123, -21, 81, 2, 64, -123, -21, 81, -72,
+        30, -123, 65, 64, -41, -93, 112, 61, 10, -41, -5, 63
+      };
 
   @Test
   void testStructPack() {
@@ -25,9 +27,6 @@ public class ArmFeedforwardSerdeTest {
     ArmFeedforward.struct.pack(buffer, DATA);
 
     byte[] actual = buffer.array();
-    String newContent = new String(buffer.array());
-    System.out.println(Arrays.toString(actual));
-    System.out.println(newContent);
     assertArrayEquals(actual, STRUCT_BUFFER);
   }
 

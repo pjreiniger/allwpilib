@@ -20,6 +20,8 @@ public class Trajectory {
   private final double m_totalTimeSeconds;
   private final List<State> m_states;
 
+  public static final TrajectoryProtoSerde proto = new TrajectoryProtoSerde();
+
   /** Constructs an empty trajectory. */
   public Trajectory() {
     m_states = new ArrayList<>();
@@ -287,6 +289,8 @@ public class Trajectory {
     public State() {
       poseMeters = new Pose2d();
     }
+
+    public static final TrajectoryProtoSerde proto = new TrajectoryProtoSerde();
 
     /**
      * Constructs a State with the specified parameters.

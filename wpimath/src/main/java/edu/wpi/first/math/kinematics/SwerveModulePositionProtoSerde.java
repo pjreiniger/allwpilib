@@ -9,7 +9,8 @@ import edu.wpi.first.math.proto.Kinematics.ProtobufSwerveModulePosition;
 import edu.wpi.first.util.protobuf.Protobuf;
 import us.hebi.quickbuf.Descriptors.Descriptor;
 
-public class SwerveModulePositionProtoSerde implements Protobuf<SwerveModulePosition, ProtobufSwerveModulePosition> {
+public class SwerveModulePositionProtoSerde
+    implements Protobuf<SwerveModulePosition, ProtobufSwerveModulePosition> {
   @Override
   public Class<SwerveModulePosition> getTypeClass() {
     return SwerveModulePosition.class;
@@ -32,14 +33,13 @@ public class SwerveModulePositionProtoSerde implements Protobuf<SwerveModulePosi
 
   @Override
   public SwerveModulePosition unpack(ProtobufSwerveModulePosition msg) {
-    return new SwerveModulePosition(msg.getDistanceMeters(), 
-        Rotation2d.proto.unpack(msg.getAngle()));
+    return new SwerveModulePosition(
+        msg.getDistanceMeters(), Rotation2d.proto.unpack(msg.getAngle()));
   }
 
   @Override
   public void pack(ProtobufSwerveModulePosition msg, SwerveModulePosition value) {
     msg.setDistanceMeters(value.distanceMeters);
     Rotation2d.proto.pack(msg.getMutableAngle(), value.angle);
-
   }
 }

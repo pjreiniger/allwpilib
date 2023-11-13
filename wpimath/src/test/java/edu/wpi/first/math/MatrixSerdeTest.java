@@ -2,21 +2,22 @@
 //// Open Source Software; you can modify and/or share it under the terms of
 //// the WPILib BSD license file in the root directory of this project.
 //
-//package edu.wpi.first.math;
+// package edu.wpi.first.math;
 //
-//import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-//import static org.junit.jupiter.api.Assertions.assertEquals;
+// import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+// import static org.junit.jupiter.api.Assertions.assertEquals;
 //
-//import edu.wpi.first.math.proto.Wpimath.ProtobufMatrix;
-//import edu.wpi.first.util.struct.Struct;
-//import java.nio.ByteBuffer;
-//import java.nio.ByteOrder;
-//import org.junit.jupiter.api.Test;
-//import java.util.Arrays;
+// import edu.wpi.first.math.proto.Wpimath.ProtobufMatrix;
+// import edu.wpi.first.util.struct.Struct;
+// import java.nio.ByteBuffer;
+// import java.nio.ByteOrder;
+// import org.junit.jupiter.api.Test;
+// import java.util.Arrays;
 //
-//public class MatrixSerdeTest {
+// public class MatrixSerdeTest {
 //  private static final Matrix DATA = new Matrix(1.91, 2.29);
-//  private static final byte[] STRUCT_BUFFER = new byte[]{63, -2, -113, 92, 40, -11, -62, -113, 64, 2, 81, -21, -123, 30, -72, 82};
+//  private static final byte[] STRUCT_BUFFER = new byte[]{63, -2, -113, 92, 40, -11, -62, -113, 64,
+// 2, 81, -21, -123, 30, -72, 82};
 //
 //  @Test
 //  void testStructPack() {
@@ -64,4 +65,4 @@
 //    assertEquals(DATA.getNumCols(), data.getNumCols());
 //    assertEquals(DATA.getData(), data.getData());
 //  }
-//}
+// }

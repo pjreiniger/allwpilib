@@ -14,8 +14,10 @@ public class SimpleMotorFeedforward {
   public final double kv;
   public final double ka;
 
-  public static final SimpleMotorFeedforwardProtoSerde proto = new SimpleMotorFeedforwardProtoSerde();
-  public static final SimpleMotorFeedforwardStructSerde struct = new SimpleMotorFeedforwardStructSerde();
+  public static final SimpleMotorFeedforwardProtoSerde proto =
+      new SimpleMotorFeedforwardProtoSerde();
+  public static final SimpleMotorFeedforwardStructSerde struct =
+      new SimpleMotorFeedforwardStructSerde();
 
   /**
    * Creates a new SimpleMotorFeedforward with the specified gains. Units of the gain values will

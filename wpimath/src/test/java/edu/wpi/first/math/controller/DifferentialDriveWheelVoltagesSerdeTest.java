@@ -8,15 +8,15 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import edu.wpi.first.math.proto.Controller.ProtobufDifferentialDriveWheelVoltages;
-import edu.wpi.first.util.struct.Struct;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import org.junit.jupiter.api.Test;
-import java.util.Arrays;
 
 public class DifferentialDriveWheelVoltagesSerdeTest {
-  private static final DifferentialDriveWheelVoltages DATA = new DifferentialDriveWheelVoltages(1.91, 2.29);
-  private static final byte[] STRUCT_BUFFER = new byte[]{-113, -62, -11, 40, 92, -113, -2, 63, 82, -72, 30, -123, -21, 81, 2, 64};
+  private static final DifferentialDriveWheelVoltages DATA =
+      new DifferentialDriveWheelVoltages(1.91, 2.29);
+  private static final byte[] STRUCT_BUFFER =
+      new byte[] {-113, -62, -11, 40, 92, -113, -2, 63, 82, -72, 30, -123, -21, 81, 2, 64};
 
   @Test
   void testStructPack() {
@@ -25,9 +25,6 @@ public class DifferentialDriveWheelVoltagesSerdeTest {
     DifferentialDriveWheelVoltages.struct.pack(buffer, DATA);
 
     byte[] actual = buffer.array();
-    String newContent = new String(buffer.array());
-    System.out.println(Arrays.toString(actual));
-    System.out.println(newContent);
     assertArrayEquals(actual, STRUCT_BUFFER);
   }
 
@@ -43,7 +40,8 @@ public class DifferentialDriveWheelVoltagesSerdeTest {
 
   @Test
   void testProtoPack() {
-    ProtobufDifferentialDriveWheelVoltages proto = DifferentialDriveWheelVoltages.proto.createMessage();
+    ProtobufDifferentialDriveWheelVoltages proto =
+        DifferentialDriveWheelVoltages.proto.createMessage();
     DifferentialDriveWheelVoltages.proto.pack(proto, DATA);
 
     assertEquals(DATA.left, proto.getLeft());
@@ -52,7 +50,8 @@ public class DifferentialDriveWheelVoltagesSerdeTest {
 
   @Test
   void testProtoUnpack() {
-    ProtobufDifferentialDriveWheelVoltages proto = DifferentialDriveWheelVoltages.proto.createMessage();
+    ProtobufDifferentialDriveWheelVoltages proto =
+        DifferentialDriveWheelVoltages.proto.createMessage();
     proto.setLeft(DATA.left);
     proto.setRight(DATA.right);
 
