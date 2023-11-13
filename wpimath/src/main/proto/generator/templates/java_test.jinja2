@@ -2,13 +2,13 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package edu.wpi.first.math.{{module.subfolder}};
+package edu.wpi.first.math.{{module.subfolder}}.serde;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import edu.wpi.first.math.proto.{{protobuf_package}}.Protobuf{{message.local_type}};
-import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.math.{{module.subfolder}}.{{message.local_type}};
+import edu.wpi.first.math.proto.{{module.java_proto_subpath}}.Protobuf{{message.local_type}};
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import org.junit.jupiter.api.Test;

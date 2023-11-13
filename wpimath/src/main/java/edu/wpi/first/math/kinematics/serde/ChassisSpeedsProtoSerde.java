@@ -35,5 +35,6 @@ public class ChassisSpeedsProtoSerde implements Protobuf<ChassisSpeeds, Protobuf
     msg.setVxMps(value.vxMetersPerSecond);
     msg.setVyMps(value.vyMetersPerSecond);
     msg.setOmegaRps(value.omegaRadiansPerSecond);
+
   }
 }

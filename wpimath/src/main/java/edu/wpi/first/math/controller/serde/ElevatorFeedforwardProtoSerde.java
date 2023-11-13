@@ -9,8 +9,7 @@ import edu.wpi.first.math.proto.Controller.ProtobufElevatorFeedforward;
 import edu.wpi.first.util.protobuf.Protobuf;
 import us.hebi.quickbuf.Descriptors.Descriptor;
 
-public class ElevatorFeedforwardProtoSerde
-    implements Protobuf<ElevatorFeedforward, ProtobufElevatorFeedforward> {
+public class ElevatorFeedforwardProtoSerde implements Protobuf<ElevatorFeedforward, ProtobufElevatorFeedforward> {
   @Override
   public Class<ElevatorFeedforward> getTypeClass() {
     return ElevatorFeedforward.class;
@@ -37,5 +36,6 @@ public class ElevatorFeedforwardProtoSerde
     msg.setKg(value.kg);
     msg.setKv(value.kv);
     msg.setKa(value.ka);
+
   }
 }

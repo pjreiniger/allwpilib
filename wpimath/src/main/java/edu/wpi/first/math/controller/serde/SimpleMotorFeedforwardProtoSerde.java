@@ -9,8 +9,7 @@ import edu.wpi.first.math.proto.Controller.ProtobufSimpleMotorFeedforward;
 import edu.wpi.first.util.protobuf.Protobuf;
 import us.hebi.quickbuf.Descriptors.Descriptor;
 
-public class SimpleMotorFeedforwardProtoSerde
-    implements Protobuf<SimpleMotorFeedforward, ProtobufSimpleMotorFeedforward> {
+public class SimpleMotorFeedforwardProtoSerde implements Protobuf<SimpleMotorFeedforward, ProtobufSimpleMotorFeedforward> {
   @Override
   public Class<SimpleMotorFeedforward> getTypeClass() {
     return SimpleMotorFeedforward.class;
@@ -36,5 +35,6 @@ public class SimpleMotorFeedforwardProtoSerde
     msg.setKs(value.ks);
     msg.setKv(value.kv);
     msg.setKa(value.ka);
+
   }
 }
