@@ -9,7 +9,8 @@ import edu.wpi.first.math.proto.Kinematics.ProtobufMecanumDriveWheelSpeeds;
 import edu.wpi.first.util.protobuf.Protobuf;
 import us.hebi.quickbuf.Descriptors.Descriptor;
 
-public class MecanumDriveWheelSpeedsProtoSerde implements Protobuf<MecanumDriveWheelSpeeds, ProtobufMecanumDriveWheelSpeeds> {
+public class MecanumDriveWheelSpeedsProtoSerde
+    implements Protobuf<MecanumDriveWheelSpeeds, ProtobufMecanumDriveWheelSpeeds> {
   @Override
   public Class<MecanumDriveWheelSpeeds> getTypeClass() {
     return MecanumDriveWheelSpeeds.class;
@@ -27,7 +28,8 @@ public class MecanumDriveWheelSpeedsProtoSerde implements Protobuf<MecanumDriveW
 
   @Override
   public MecanumDriveWheelSpeeds unpack(ProtobufMecanumDriveWheelSpeeds msg) {
-    return new MecanumDriveWheelSpeeds(msg.getFrontLeftMps(), msg.getFrontRightMps(), msg.getRearLeftMps(), msg.getRearRightMps());
+    return new MecanumDriveWheelSpeeds(
+        msg.getFrontLeftMps(), msg.getFrontRightMps(), msg.getRearLeftMps(), msg.getRearRightMps());
   }
 
   @Override
@@ -36,6 +38,5 @@ public class MecanumDriveWheelSpeedsProtoSerde implements Protobuf<MecanumDriveW
     msg.setFrontRightMps(value.frontRightMetersPerSecond);
     msg.setRearLeftMps(value.rearLeftMetersPerSecond);
     msg.setRearRightMps(value.rearRightMetersPerSecond);
-
   }
 }

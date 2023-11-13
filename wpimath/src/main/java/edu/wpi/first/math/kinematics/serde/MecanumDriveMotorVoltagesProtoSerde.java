@@ -9,7 +9,8 @@ import edu.wpi.first.math.proto.Kinematics.ProtobufMecanumDriveMotorVoltages;
 import edu.wpi.first.util.protobuf.Protobuf;
 import us.hebi.quickbuf.Descriptors.Descriptor;
 
-public class MecanumDriveMotorVoltagesProtoSerde implements Protobuf<MecanumDriveMotorVoltages, ProtobufMecanumDriveMotorVoltages> {
+public class MecanumDriveMotorVoltagesProtoSerde
+    implements Protobuf<MecanumDriveMotorVoltages, ProtobufMecanumDriveMotorVoltages> {
   @Override
   public Class<MecanumDriveMotorVoltages> getTypeClass() {
     return MecanumDriveMotorVoltages.class;
@@ -27,7 +28,11 @@ public class MecanumDriveMotorVoltagesProtoSerde implements Protobuf<MecanumDriv
 
   @Override
   public MecanumDriveMotorVoltages unpack(ProtobufMecanumDriveMotorVoltages msg) {
-    return new MecanumDriveMotorVoltages(msg.getFrontLeftVolts(), msg.getFrontRightVolts(), msg.getRearLeftVolts(), msg.getRearRightVolts());
+    return new MecanumDriveMotorVoltages(
+        msg.getFrontLeftVolts(),
+        msg.getFrontRightVolts(),
+        msg.getRearLeftVolts(),
+        msg.getRearRightVolts());
   }
 
   @Override
@@ -36,6 +41,5 @@ public class MecanumDriveMotorVoltagesProtoSerde implements Protobuf<MecanumDriv
     msg.setFrontRightVolts(value.frontRightVoltage);
     msg.setRearLeftVolts(value.rearLeftVoltage);
     msg.setRearRightVolts(value.rearRightVoltage);
-
   }
 }

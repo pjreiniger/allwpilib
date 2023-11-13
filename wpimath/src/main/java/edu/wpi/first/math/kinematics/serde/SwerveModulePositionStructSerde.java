@@ -4,8 +4,8 @@
 
 package edu.wpi.first.math.kinematics.serde;
 
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.util.struct.Struct;
 import java.nio.ByteBuffer;
 

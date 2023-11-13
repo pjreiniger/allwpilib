@@ -16,9 +16,8 @@ using ProtoType = wpi::Protobuf<frc::SwerveModulePosition>;
 
 constexpr std::array<uint8_t, StructType::kSize> create_test_buffer() {
   std::array<uint8_t, StructType::kSize> output;
-  int buffer[] = {
-      -113, -62, -11, 40, 92, -113, -2, 63, -26, 110, 66, -32, -80, 118, -92, 63
-  };
+  int buffer[] = {-113, -62, -11, 40,  92,  -113, -2,  63,
+                  -26,  110, 66,  -32, -80, 118,  -92, 63};
   for (size_t idx = 0; idx < StructType::kSize; ++idx) {
     output[idx] = static_cast<uint8_t>(buffer[idx]);
   }

@@ -10,9 +10,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.proto.Trajectory.ProtobufTrajectory;
-import java.util.List;
-
 import edu.wpi.first.math.trajectory.Trajectory;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 public class TrajectorySerdeTest {

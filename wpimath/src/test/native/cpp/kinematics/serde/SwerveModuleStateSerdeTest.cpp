@@ -16,9 +16,8 @@ using ProtoType = wpi::Protobuf<frc::SwerveModuleState>;
 
 constexpr std::array<uint8_t, StructType::kSize> create_test_buffer() {
   std::array<uint8_t, StructType::kSize> output;
-  int buffer[] = {
-    -113, -62, -11, 40, 92, -113, -2, 63, -108, -92, -122, -48, -100, 111, -45, 63
-};
+  int buffer[] = {-113, -62, -11,  40,  92,   -113, -2,  63,
+                  -108, -92, -122, -48, -100, 111,  -45, 63};
   for (size_t idx = 0; idx < StructType::kSize; ++idx) {
     output[idx] = static_cast<uint8_t>(buffer[idx]);
   }
@@ -41,19 +40,18 @@ TEST(SwerveModuleStateSerdeTest, StructPack) {
 }
 
 TEST(SwerveModuleStateSerdeTest, StructUnpack) {
-  SwerveModuleState unpacked_data =
-  StructType::Unpack(kExpectedStructBuffer);
+  SwerveModuleState unpacked_data = StructType::Unpack(kExpectedStructBuffer);
 
-    EXPECT_EQ(kExpectedData.speed.value(), unpacked_data.speed.value());
-    EXPECT_EQ(kExpectedData.angle, unpacked_data.angle);
+  EXPECT_EQ(kExpectedData.speed.value(), unpacked_data.speed.value());
+  EXPECT_EQ(kExpectedData.angle, unpacked_data.angle);
 }
 
 TEST(SwerveModuleStateSerdeTest, ProtobufPack) {
   wpi::proto::ProtobufSwerveModuleState proto;
   ProtoType::Pack(&proto, kExpectedData);
 
-    EXPECT_EQ(kExpectedData.speed.value(), proto.speed_mps());
-    EXPECT_EQ(kExpectedData.angle.Radians().value(), proto.angle().radians());
+  EXPECT_EQ(kExpectedData.speed.value(), proto.speed_mps());
+  EXPECT_EQ(kExpectedData.angle.Radians().value(), proto.angle().radians());
 }
 
 TEST(SwerveModuleStateSerdeTest, ProtobufUnpack) {
@@ -62,6 +60,6 @@ TEST(SwerveModuleStateSerdeTest, ProtobufUnpack) {
   proto.mutable_angle()->set_radians(kExpectedData.angle.Radians().value());
 
   SwerveModuleState unpacked_data = ProtoType::Unpack(proto);
-    EXPECT_EQ(kExpectedData.speed.value(), unpacked_data.speed.value());
-    EXPECT_EQ(kExpectedData.angle, unpacked_data.angle);
+  EXPECT_EQ(kExpectedData.speed.value(), unpacked_data.speed.value());
+  EXPECT_EQ(kExpectedData.angle, unpacked_data.angle);
 }

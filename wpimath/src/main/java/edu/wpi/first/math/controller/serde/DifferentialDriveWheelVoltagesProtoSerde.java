@@ -9,7 +9,8 @@ import edu.wpi.first.math.proto.Controller.ProtobufDifferentialDriveWheelVoltage
 import edu.wpi.first.util.protobuf.Protobuf;
 import us.hebi.quickbuf.Descriptors.Descriptor;
 
-public class DifferentialDriveWheelVoltagesProtoSerde implements Protobuf<DifferentialDriveWheelVoltages, ProtobufDifferentialDriveWheelVoltages> {
+public class DifferentialDriveWheelVoltagesProtoSerde
+    implements Protobuf<DifferentialDriveWheelVoltages, ProtobufDifferentialDriveWheelVoltages> {
   @Override
   public Class<DifferentialDriveWheelVoltages> getTypeClass() {
     return DifferentialDriveWheelVoltages.class;
@@ -31,9 +32,9 @@ public class DifferentialDriveWheelVoltagesProtoSerde implements Protobuf<Differ
   }
 
   @Override
-  public void pack(ProtobufDifferentialDriveWheelVoltages msg, DifferentialDriveWheelVoltages value) {
+  public void pack(
+      ProtobufDifferentialDriveWheelVoltages msg, DifferentialDriveWheelVoltages value) {
     msg.setLeftVolts(value.left);
     msg.setRightVolts(value.right);
-
   }
 }

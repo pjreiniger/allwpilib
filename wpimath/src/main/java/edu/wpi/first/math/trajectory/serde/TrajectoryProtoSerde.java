@@ -4,10 +4,9 @@
 
 package edu.wpi.first.math.trajectory.serde;
 
-
-import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.proto.Trajectory.ProtobufTrajectory;
+import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.util.protobuf.Protobuf;
 import java.util.ArrayList;
 import java.util.List;

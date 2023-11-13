@@ -9,7 +9,8 @@ import edu.wpi.first.math.proto.Kinematics.ProtobufDifferentialDriveKinematics;
 import edu.wpi.first.util.protobuf.Protobuf;
 import us.hebi.quickbuf.Descriptors.Descriptor;
 
-public class DifferentialDriveKinematicsProtoSerde implements Protobuf<DifferentialDriveKinematics, ProtobufDifferentialDriveKinematics> {
+public class DifferentialDriveKinematicsProtoSerde
+    implements Protobuf<DifferentialDriveKinematics, ProtobufDifferentialDriveKinematics> {
   @Override
   public Class<DifferentialDriveKinematics> getTypeClass() {
     return DifferentialDriveKinematics.class;
@@ -33,6 +34,5 @@ public class DifferentialDriveKinematicsProtoSerde implements Protobuf<Different
   @Override
   public void pack(ProtobufDifferentialDriveKinematics msg, DifferentialDriveKinematics value) {
     msg.setTrackWidthMeters(value.trackWidthMeters);
-
   }
 }

@@ -36,6 +36,5 @@ public class ArmFeedforwardProtoSerde implements Protobuf<ArmFeedforward, Protob
     msg.setKg(value.kg);
     msg.setKv(value.kv);
     msg.setKa(value.ka);
-
   }
 }

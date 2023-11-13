@@ -7,7 +7,6 @@ package edu.wpi.first.math.kinematics;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.kinematics.serde.MecanumDriveWheelPositionsProtoSerde;
 import edu.wpi.first.math.kinematics.serde.MecanumDriveWheelPositionsStructSerde;
-
 import java.util.Objects;
 
 public class MecanumDriveWheelPositions implements WheelPositions<MecanumDriveWheelPositions> {

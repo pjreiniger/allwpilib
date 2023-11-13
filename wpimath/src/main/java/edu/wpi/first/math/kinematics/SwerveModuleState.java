@@ -7,7 +7,6 @@ package edu.wpi.first.math.kinematics;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.serde.SwerveModuleStateProtoSerde;
 import edu.wpi.first.math.kinematics.serde.SwerveModuleStateStructSerde;
-
 import java.util.Objects;
 
 /** Represents the state of one swerve module. */

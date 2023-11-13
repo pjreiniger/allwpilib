@@ -9,9 +9,8 @@ import edu.wpi.first.math.MathUsageId;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import java.util.Arrays;
-
 import edu.wpi.first.math.kinematics.serde.SwerveDriveKinematicsProtoSerde;
+import java.util.Arrays;
 import org.ejml.simple.SimpleMatrix;
 
 /**
