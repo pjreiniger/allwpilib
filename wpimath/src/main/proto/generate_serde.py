@@ -19,7 +19,7 @@ def main():
     # proto_files = ["geometry2d", "geometry3d"]
     proto_files = [
         ("geometry2d", "geometry"),
-        # ("geometry3d", "geometry"),
+        ("geometry3d", "geometry"),
         #   ("controller", "controller"),
         #   ("kinematics", "kinematics"),
         # #   ("plant", "system/plant"),

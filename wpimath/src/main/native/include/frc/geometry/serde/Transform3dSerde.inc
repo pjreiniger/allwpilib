@@ -12,10 +12,8 @@
 template <>
 struct wpi::Struct<frc::Transform3d> {
   static constexpr std::string_view kTypeString = "struct:Transform3d";
-  static constexpr size_t kSize = wpi::Struct<frc::Translation3d>::kSize +
-                                  wpi::Struct<frc::Rotation3d>::kSize;
-  static constexpr std::string_view kSchema =
-      "Translation3d translation;Rotation3d rotation";
+  static constexpr size_t kSize = wpi::Struct<frc::Translation3d>::kSize + wpi::Struct<frc::Rotation3d>::kSize;
+  static constexpr std::string_view kSchema = "Translation3d translation;Rotation3d rotation";
 
   static frc::Transform3d Unpack(std::span<const uint8_t, kSize> data);
   static void Pack(std::span<uint8_t, kSize> data,
