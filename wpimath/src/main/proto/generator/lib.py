@@ -1,10 +1,10 @@
-
 import importlib
 import inspect
 import sys
 import os
 
 from google.protobuf.descriptor import FieldDescriptor
+
 
 class ProtobufModule:
     def __init__(self, subfolder, module_name):
@@ -19,8 +19,6 @@ class ProtobufModule:
             self.messages.append(MessageClass(module_name, clazz[0], clazz[1]))
 
 
-
-
 class MessageClass:
     def __init__(self, module_name, protobuf_type, protobuf_class):
         # print(protobuf_type, protobuf_type)
@@ -28,20 +26,18 @@ class MessageClass:
         self.has_nested_types = False
         self.local_type = protobuf_type[len("Protobuf") :]
 
-        self.fields : MessageField = []
-        
+        self.fields: MessageField = []
+
         for field in protobuf_class.DESCRIPTOR.fields:
             if field.type == FieldDescriptor.TYPE_MESSAGE:
                 self.has_nested_types = True
-            
+
             # print("  ", field)
             self.fields.append(MessageField(protobuf_class, field))
 
-        
-
 
 class MessageField:
-    def __init__(self, protobuf_class, protobuf_field : FieldDescriptor):
+    def __init__(self, protobuf_class, protobuf_field: FieldDescriptor):
         # print("  ", protobuf_field)
         self.name = protobuf_field.name
         self.protobuf_type = protobuf_field.type
@@ -61,10 +57,9 @@ class MessageField:
     def get_schema(self, primitive_lookup):
         if self.is_message:
             return self.message_type + " " + self.name_without_units
-        
+
         return primitive_lookup[self.protobuf_type] + " " + self.name_without_units
-    
-    
+
 
 def strip_units(field_name):
     field_name = field_name.replace("_meters", "")

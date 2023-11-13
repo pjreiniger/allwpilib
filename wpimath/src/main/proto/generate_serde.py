@@ -16,17 +16,16 @@ from wpimath.src.main.proto.generator.lib import MessageClass, ProtobufModule
 
 
 def main():
-    # proto_files = ["geometry2d", "geometry3d"]
     proto_files = [
+        ("controller", "controller"),
         ("geometry2d", "geometry"),
         ("geometry3d", "geometry"),
-          ("controller", "controller"),
-          ("kinematics", "kinematics"),
-        # #   ("plant", "system/plant"),
-        #  ###########33 ("spline", "spline"),
-        # #   ("system", "system"),
-          ("trajectory", "trajectory"),
-        # #   ("wpimath", "."),
+        ("kinematics", "kinematics"),
+        ("plant", "system/plant"),
+        ("spline", "spline"),
+        ("system", "system"),
+        ("trajectory", "trajectory"),
+        ("wpimath", "."),
     ]
 
     force_tests = False
@@ -42,7 +41,7 @@ def main():
         modules.append(ProtobufModule(proto_file, module_name))
 
     message_types_to_ignore = [
-        "DifferentialDriveFeedforward", 
+        "DifferentialDriveFeedforward",
         "MecanumDriveKinematics",
         "SimpleMotorFeedforward",
         "MecanumDriveMotorVoltages",
@@ -51,19 +50,16 @@ def main():
 
     message_types_to_do = [
         # "ArmFeedforward",
-
         # "DifferentialDriveWheelVoltages",
         # "MecanumDriveWheelPositions",
         # "MecanumDriveWheelSpeeds",
         # "ChassisSpeeds",
         # "DifferentialDriveKinematics",
         # "DifferentialDriveWheelSpeeds",
-
         # "SwerveModulePosition",
         # "SwerveModuleState",
     ]
 
-    
     for module in modules:
         for message in module.messages:
             if message.local_type in message_types_to_ignore:
@@ -74,9 +70,10 @@ def main():
                 if message.local_type not in message_types_to_do:
                     print(f"Ignoring {message.local_type}")
                     continue
-          
+
             # render_message_java(module, message, force_tests)
             render_message_cpp(module, message, force_tests)
+
 
 if __name__ == "__main__":
     main()

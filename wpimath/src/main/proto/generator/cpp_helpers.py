@@ -1,6 +1,12 @@
 from google.protobuf.descriptor import FieldDescriptor
 from jinja2 import Environment, FileSystemLoader
-from wpimath.src.main.proto.generator.lib import MessageClass, ProtobufModule, MessageField, upper_camel_case, lower_camel_case, render_template, snake_to_camel_case
+from wpimath.src.main.proto.generator.lib import (
+    MessageClass,
+    ProtobufModule,
+    MessageField,
+    lower_camel_case,
+    render_template,
+)
 import os
 
 PROTO_TYPE_TO_CPP_TEXT = {
@@ -11,14 +17,11 @@ PROTO_TYPE_TO_CPP_TEXT = {
 }
 
 
-# def get_field_class_name(clazz, field):
-#     obj = clazz[1]()
-#     field_clazz = type(getattr(obj, field.name))
-#     return field_clazz.__name__.replace("Protobuf", "")
+def __get_schema(message: MessageClass):
+    return ";".join(
+        field.get_schema(PROTO_TYPE_TO_CPP_TEXT) for field in message.fields
+    )
 
-
-def __get_schema(message : MessageClass):
-    return ";".join(field.get_schema(PROTO_TYPE_TO_CPP_TEXT) for field in message.fields)
 
 def __get_struct_size(message):
     primitive_size = 0
@@ -28,19 +31,15 @@ def __get_struct_size(message):
 
     for field in message.fields:
         if field.is_message:
-            subclass_parts.append(
-                f"wpi::Struct<frc::{field.message_type}>::kSize"
-            )
+            subclass_parts.append(f"wpi::Struct<frc::{field.message_type}>::kSize")
         elif field.protobuf_type == FieldDescriptor.TYPE_DOUBLE:
             primitive_size += 8
         elif field.protobuf_type == FieldDescriptor.TYPE_INT32:
             num_doubles += 1
         elif field.protobuf_type == FieldDescriptor.TYPE_UINT32:
             num_doubles += 1
-    #     elif field.type == FieldDescriptor.TYPE_MESSAGE:
-    #         pass
-    #     else:
-    #         raise Exception(f"Unsupported type {field.type} for field {field.name}")
+        else:
+            raise Exception(f"Unsupported type {field.type} for field {field.name}")
 
     if primitive_size > 0:
         output += f"{primitive_size}"
@@ -49,46 +48,10 @@ def __get_struct_size(message):
         output += "+ "
     output += " + ".join(subclass_parts)
 
-    # print("GET SIZE : " + output)
-
     return output
 
-# def get_schema(clazz, fields):
-#     schema_fields = []
 
-#     for field in fields:
-#         if field.type == FieldDescriptor.TYPE_MESSAGE:
-#             schema_fields.append(f"{get_field_class_name(clazz, field)} {field.name}")
-#         else:
-#             field_type = PROTO_TYPE_TO_CPP_TEXT[field.type]
-#             schema_fields.append(field_type + " " + field.name)
-
-#     return ";".join(schema_fields)
-
-
-# def strip_units(field_name):
-#     field_name = field_name.replace("_meters", "")
-#     field_name = field_name.replace("_radians", "")
-
-#     return field_name
-
-# def assert_equals(clazz, field, data_name):
-#     print(field)
-#     if data_name == "proto":
-#         return f"EXPECT_EQ(kExpectedData.{strip_units(field.name)}.value(), {data_name}.{field.name}());"
-#     return f"EXPECT_EQ(kExpectedData.{strip_units(field.name)}.value(), {data_name}.{strip_units(field.name)}.value());"
-#     # if data_name == "proto" and field.type == FieldDescriptor.TYPE_MESSAGE:
-#     #     return f"assertEquals(DATA.get{upper_camel_case(field.name)}(), {get_field_class_name(clazz, field)}.proto.unpack(proto.get{upper_camel_case(field.name)}()));"
-#     # return f"assertEquals(DATA.get{upper_camel_case(field.name)}(), {data_name}.get{upper_camel_case(field.name)}());"
-
-# def test_proto_setter(clazz, field):
-#     return f"proto.set_{field.name}(kExpectedData.{strip_units(field.name)}.value());"
-#     # if field.type == FieldDescriptor.TYPE_MESSAGE:
-#     #     return f"{get_field_class_name(clazz, field)}.proto.pack(proto.getMutable{upper_camel_case(field.name)}(), DATA.get{upper_camel_case(field.name)}());"
-#     # return f"proto.set{upper_camel_case(field.name)}(DATA.get{upper_camel_case(field.name)}());"
-
-
-def __maybe_wrap_with_unit(field : MessageField, txt):
+def __maybe_wrap_with_unit(field: MessageField, txt):
     if field.name.endswith("_radians"):
         return "units::radian_t{" + txt + "}"
     elif field.name.endswith("_meters"):
@@ -99,39 +62,44 @@ def __maybe_wrap_with_unit(field : MessageField, txt):
         return "units::meters_per_second_t{" + txt + "}"
     elif field.name.endswith("_rps"):
         return "units::radians_per_second_t{" + txt + "}"
-    
+
     print("No units for ", field.name)
 
     return txt
 
 
-def __struct_unpack(field : MessageField):
+def __struct_unpack(field: MessageField):
     if field.is_message:
         return f"wpi::UnpackStruct<frc::{field.message_type}, 0>(data)"
-    
-    output = f"wpi::UnpackStruct<{PROTO_TYPE_TO_CPP_TEXT[field.protobuf_type]}, 0>(data)"
+
+    output = (
+        f"wpi::UnpackStruct<{PROTO_TYPE_TO_CPP_TEXT[field.protobuf_type]}, 0>(data)"
+    )
     output = __maybe_wrap_with_unit(field, output)
 
     return output
 
-def __struct_pack(field : MessageField):
+
+def __struct_pack(field: MessageField):
     if field.is_message:
         return f"wpi::PackStruct<0>(data, value.{__local_getter(field)})"
-    
+
     output = f"wpi::PackStruct<0>(data, value.{__local_getter(field)})"
 
     return output
 
-def __proto_getter(field : MessageField):
+
+def __proto_getter(field: MessageField):
     return f"{field.name}"
 
-def __proto_setter(field : MessageField):
+
+def __proto_setter(field: MessageField):
     if field.is_message:
         return f"mutable_{field.name}()->"
     return f"set_{field.name}"
 
 
-def __local_getter(field : MessageField):
+def __local_getter(field: MessageField):
     field_name = field.name_without_units
     field_name = field_name.replace("meters", "")
     field_name = field_name.replace("volts", "")
@@ -144,35 +112,38 @@ def __local_getter(field : MessageField):
     return lower_camel_case(field_name) + ".value()"
 
 
-def __proto_unpack(field : MessageField):
+def __proto_unpack(field: MessageField):
     if field.is_message:
         return f"wpi::UnpackProtobuf<frc::{field.message_type}>(m->{__proto_getter(field)}())"
-    
+
     output = f"m->{__proto_getter(field)}()"
-    # print("POTO GETTER", output)
     output = __maybe_wrap_with_unit(field, output)
     return output
 
-def __proto_pack(field : MessageField):
+
+def __proto_pack(field: MessageField):
     if field.is_message:
         return f"wpi::PackProtobuf(m->mutable_{__proto_getter(field)}(), value.{__local_getter(field)})"
-    
+
     output = f"m->{__proto_setter(field)}(value.{__local_getter(field)})"
     return output
+
 
 def __test_proto_setter(field: MessageField):
     return f"proto.{__proto_setter(field)}(kExpectedData.{__local_getter(field)});"
 
+
 def __assert_local_equals(field: MessageField):
     return f"EXPECT_EQ(kExpectedData.{__local_getter(field)}, unpacked_data.{__local_getter(field)});"
+
 
 def __assert_local_vs_proto_equals(field: MessageField):
     return f"EXPECT_EQ(kExpectedData.{__local_getter(field)}, proto.{__proto_getter(field)}());"
 
 
-
-
-def render_message_cpp(module : ProtobufModule, message : MessageClass, force_tests: bool):
+def render_message_cpp(
+    module: ProtobufModule, message: MessageClass, force_tests: bool
+):
     env = Environment(
         loader=FileSystemLoader(
             "/home/pjreiniger/git/allwpilib/wpimath/src/main/proto/generator/templates"
@@ -184,46 +155,34 @@ def render_message_cpp(module : ProtobufModule, message : MessageClass, force_te
     env.globals["struct_pack"] = __struct_pack
     env.globals["proto_unpack"] = __proto_unpack
     env.globals["proto_pack"] = __proto_pack
-    
+
     env.globals["test_proto_setter"] = __test_proto_setter
     env.globals["assert_local_vs_proto_equals"] = __assert_local_vs_proto_equals
     env.globals["assert_local_equals"] = __assert_local_equals
 
     kwargs = dict(
-        module = module,
-        message = message,
-                # protobuf_type=protobuf_type,
-                # lang_type=lang_type,
-                # has_nested_types=has_nested_types,
-                # clazz = clazz,
-                # fields=clazz[1].DESCRIPTOR.fields,
+        module=module,
+        message=message,
     )
-    
+
     lang_type = message.local_type
-
-
 
     wpimath_dir = "/home/pjreiniger/git/allwpilib/wpimath"
 
-
     # wpimath_test_dir = os.path.join(wpimath_dir, "src/test/java/edu/wpi/first/math")
-
 
     wpimath_incl_dir = os.path.join(wpimath_dir, "src/main/native/include/frc")
     wpimath_incl_serde_dir = os.path.join(wpimath_incl_dir, module.subfolder, "serde")
     serde_hdr = os.path.join(wpimath_incl_serde_dir, f"{lang_type}Serde.inc")
     # render_template(env, "cpp_serde.h.jinja2", serde_hdr, **kwargs)
-    
-    
+
     wpimath_cpp_dir = os.path.join(wpimath_dir, "src/main/native/cpp/")
     wpimath_cpp_serde_dir = os.path.join(wpimath_cpp_dir, module.subfolder, "serde")
     serde_cpp = os.path.join(wpimath_cpp_serde_dir, f"{lang_type}Serde.cpp")
     # render_template(env, "cpp_serde.cpp.jinja2", serde_cpp, **kwargs)
 
-    
     wpimath_test_dir = os.path.join(wpimath_dir, "src/test/native/cpp/")
     wpimath_test_serde_dir = os.path.join(wpimath_test_dir, module.subfolder, "serde")
     serde_test = os.path.join(wpimath_test_serde_dir, f"{lang_type}SerdeTest.cpp")
     if force_tests or not os.path.exists(serde_test):
         render_template(env, "cpp_test.jinja2", serde_test, **kwargs)
-    
