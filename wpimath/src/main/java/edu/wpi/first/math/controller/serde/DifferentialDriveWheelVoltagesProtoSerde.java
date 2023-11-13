@@ -27,13 +27,13 @@ public class DifferentialDriveWheelVoltagesProtoSerde implements Protobuf<Differ
 
   @Override
   public DifferentialDriveWheelVoltages unpack(ProtobufDifferentialDriveWheelVoltages msg) {
-    return new DifferentialDriveWheelVoltages(msg.getLeft(), msg.getRight());
+    return new DifferentialDriveWheelVoltages(msg.getLeftVolts(), msg.getRightVolts());
   }
 
   @Override
   public void pack(ProtobufDifferentialDriveWheelVoltages msg, DifferentialDriveWheelVoltages value) {
-    msg.setLeft(value.left);
-    msg.setRight(value.right);
+    msg.setLeftVolts(value.left);
+    msg.setRightVolts(value.right);
 
   }
 }

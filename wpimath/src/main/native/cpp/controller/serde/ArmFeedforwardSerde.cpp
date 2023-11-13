@@ -19,10 +19,10 @@ frc::ArmFeedforward StructType::Unpack(
 
 void StructType::Pack(std::span<uint8_t, StructType::kSize> data,
                       const frc::ArmFeedforward& value) {
-    // wpi::PackStruct<0>(data, value.kS().value());
-    // wpi::PackStruct<0>(data, value.kG().value());
-    // wpi::PackStruct<0>(data, value.kV().value());
-    // wpi::PackStruct<0>(data, value.kA().value());
+    wpi::PackStruct<0>(data, value.kS());
+    wpi::PackStruct<0>(data, value.kG());
+    wpi::PackStruct<0>(data, value.kV());
+    wpi::PackStruct<0>(data, value.kA());
 }
 
 google::protobuf::Message* wpi::Protobuf<frc::ArmFeedforward>::New(
@@ -33,7 +33,7 @@ google::protobuf::Message* wpi::Protobuf<frc::ArmFeedforward>::New(
 
 frc::ArmFeedforward wpi::Protobuf<frc::ArmFeedforward>::Unpack(
     const google::protobuf::Message& msg) {
-//   auto m = static_cast<const wpi::proto::ProtobufArmFeedforward*>(&msg);
+  // auto m = static_cast<const wpi::proto::ProtobufArmFeedforward*>(&msg);
   return frc::ArmFeedforward{
     // m->ks(),
     // m->kg(),

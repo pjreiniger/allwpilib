@@ -18,15 +18,15 @@ from wpimath.src.main.proto.generator.lib import MessageClass, ProtobufModule
 def main():
     # proto_files = ["geometry2d", "geometry3d"]
     proto_files = [
-        ("geometry2d", "geometry"),
-        ("geometry3d", "geometry"),
-          ("controller", "controller"),
+        # ("geometry2d", "geometry"),
+        # ("geometry3d", "geometry"),
+        #   ("controller", "controller"),
           ("kinematics", "kinematics"),
-        #   ("plant", "system/plant"),
-         ###########33 ("spline", "spline"),
-        #   ("system", "system"),
-          ("trajectory", "trajectory"),
-        #   ("wpimath", "."),
+        # #   ("plant", "system/plant"),
+        #  ###########33 ("spline", "spline"),
+        # #   ("system", "system"),
+        #   ("trajectory", "trajectory"),
+        # #   ("wpimath", "."),
     ]
 
     force_tests = False
@@ -49,11 +49,26 @@ def main():
         "SwerveDriveKinematics",
     ]
 
+    message_types_to_do = [
+        # "ArmFeedforward",
+        "DifferentialDriveWheelVoltages",
+        "MecanumDriveWheelPositions",
+        "MecanumDriveWheelSpeeds",
+        "ChassisSpeeds",
+        "DifferentialDriveKinematics",
+        "DifferentialDriveWheelSpeeds",
+        "SwerveModulePosition",
+        "SwerveModuleState",
+    ]
+
     
     for module in modules:
         for message in module.messages:
-            print(message.local_type)
             if message.local_type in message_types_to_ignore:
+                # print(f"Ignoring {message.local_type}")
+                continue
+
+            if message.local_type not in message_types_to_do:
                 print(f"Ignoring {message.local_type}")
                 continue
           

@@ -2,14 +2,14 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-#include "frc/geometry/{{message.local_type}}.h"
-#include "geometry2d.pb.h"
+#include "frc/{{module.subfolder}}/{{message.local_type}}.h"
+#include "{{module.subfolder}}.pb.h"
 
 using StructType = wpi::Struct<frc::{{message.local_type}}>;
 
 frc::{{message.local_type}} StructType::Unpack(
     std::span<const uint8_t, StructType::kSize> data) {
-  return {
+  return frc::{{message.local_type}}{
   {%- for field in message.fields %}
     {{ struct_unpack(field) }},
   {%- endfor %}

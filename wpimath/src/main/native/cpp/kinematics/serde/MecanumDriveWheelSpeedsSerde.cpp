@@ -7,22 +7,22 @@
 
 using StructType = wpi::Struct<frc::MecanumDriveWheelSpeeds>;
 
-// frc::MecanumDriveWheelSpeeds StructType::Unpack(
-//     std::span<const uint8_t, StructType::kSize> data) {
-//   return {
-//     wpi::UnpackStruct<double, 0>(data),
-//     wpi::UnpackStruct<double, 0>(data),
-//     wpi::UnpackStruct<double, 0>(data),
-//     wpi::UnpackStruct<double, 0>(data),
-//   };
-// }
+frc::MecanumDriveWheelSpeeds StructType::Unpack(
+    std::span<const uint8_t, StructType::kSize> data) {
+  return frc::MecanumDriveWheelSpeeds{
+    units::meters_per_second_t{wpi::UnpackStruct<double, 0>(data)},
+    units::meters_per_second_t{wpi::UnpackStruct<double, 0>(data)},
+    units::meters_per_second_t{wpi::UnpackStruct<double, 0>(data)},
+    units::meters_per_second_t{wpi::UnpackStruct<double, 0>(data)},
+  };
+}
 
 void StructType::Pack(std::span<uint8_t, StructType::kSize> data,
                       const frc::MecanumDriveWheelSpeeds& value) {
-    // wpi::PackStruct<0>(data, value.FrontLeftMps());
-    // wpi::PackStruct<0>(data, value.FrontRightMps());
-    // wpi::PackStruct<0>(data, value.RearLeftMps());
-    // wpi::PackStruct<0>(data, value.RearRightMps());
+    wpi::PackStruct<0>(data, value.frontLeft.value());
+    wpi::PackStruct<0>(data, value.frontRight.value());
+    wpi::PackStruct<0>(data, value.rearLeft.value());
+    wpi::PackStruct<0>(data, value.rearRight.value());
 }
 
 google::protobuf::Message* wpi::Protobuf<frc::MecanumDriveWheelSpeeds>::New(
@@ -31,22 +31,22 @@ google::protobuf::Message* wpi::Protobuf<frc::MecanumDriveWheelSpeeds>::New(
       wpi::proto::ProtobufMecanumDriveWheelSpeeds>(arena);
 }
 
-// frc::MecanumDriveWheelSpeeds wpi::Protobuf<frc::MecanumDriveWheelSpeeds>::Unpack(
-//     const google::protobuf::Message& msg) {
-//   auto m = static_cast<const wpi::proto::ProtobufMecanumDriveWheelSpeeds*>(&msg);
-//   return frc::MecanumDriveWheelSpeeds{
-//     m->front_left_mps(),
-//     m->front_right_mps(),
-//     m->rear_left_mps(),
-//     m->rear_right_mps(),
-//   };
-// }
+frc::MecanumDriveWheelSpeeds wpi::Protobuf<frc::MecanumDriveWheelSpeeds>::Unpack(
+    const google::protobuf::Message& msg) {
+  auto m = static_cast<const wpi::proto::ProtobufMecanumDriveWheelSpeeds*>(&msg);
+  return frc::MecanumDriveWheelSpeeds{
+    units::meters_per_second_t{m->front_left_mps()},
+    units::meters_per_second_t{m->front_right_mps()},
+    units::meters_per_second_t{m->rear_left_mps()},
+    units::meters_per_second_t{m->rear_right_mps()},
+  };
+}
 
 void wpi::Protobuf<frc::MecanumDriveWheelSpeeds>::Pack(google::protobuf::Message* msg,
                                              const frc::MecanumDriveWheelSpeeds& value) {
-//   auto m = static_cast<wpi::proto::ProtobufMecanumDriveWheelSpeeds*>(msg);
-//     m->set_front_left_mps(value.FrontLeftMps());
-//     m->set_front_right_mps(value.FrontRightMps());
-//     m->set_rear_left_mps(value.RearLeftMps());
-//     m->set_rear_right_mps(value.RearRightMps());
+  auto m = static_cast<wpi::proto::ProtobufMecanumDriveWheelSpeeds*>(msg);
+    m->set_front_left_mps(value.frontLeft.value());
+    m->set_front_right_mps(value.frontRight.value());
+    m->set_rear_left_mps(value.rearLeft.value());
+    m->set_rear_right_mps(value.rearRight.value());
 }

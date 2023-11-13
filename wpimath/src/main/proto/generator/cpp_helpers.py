@@ -49,7 +49,7 @@ def __get_struct_size(message):
         output += "+ "
     output += " + ".join(subclass_parts)
 
-    print("GET SIZE : " + output)
+    # print("GET SIZE : " + output)
 
     return output
 
@@ -93,6 +93,14 @@ def __maybe_wrap_with_unit(field : MessageField, txt):
         return "units::radian_t{" + txt + "}"
     elif field.name.endswith("_meters"):
         return "units::meter_t{" + txt + "}"
+    elif field.name.endswith("_volts"):
+        return "units::volt_t{" + txt + "}"
+    elif field.name.endswith("_mps"):
+        return "units::meters_per_second_t{" + txt + "}"
+    elif field.name.endswith("_rps"):
+        return "units::radians_per_second_t{" + txt + "}"
+    
+    print("No units for ", field.name)
 
     return txt
 
@@ -124,14 +132,16 @@ def __proto_setter(field : MessageField):
 
 
 def __local_getter(field : MessageField):
-    field_name = field.name
+    field_name = field.name_without_units
     field_name = field_name.replace("meters", "")
-    # field_name = field_name.replace("volts", "voltage")
+    field_name = field_name.replace("volts", "")
     # field_name = field_name.replace("mps", "meters_per_second")
     # field_name = field_name.replace("rps", "radians_per_second")
 
-    return upper_camel_case(field_name) + "()"
+    # return upper_camel_case(field_name) + "()"
     # return upper_camel_case(field_name) + "().value()"
+    # return upper_camel_case(field_name) + ".value()"
+    return lower_camel_case(field_name) + ".value()"
 
 
 def __proto_unpack(field : MessageField):
@@ -139,7 +149,7 @@ def __proto_unpack(field : MessageField):
         return f"wpi::UnpackProtobuf<frc::{field.message_type}>(m->{__proto_getter(field)}())"
     
     output = f"m->{__proto_getter(field)}()"
-    print("POTO GETTER", output)
+    # print("POTO GETTER", output)
     output = __maybe_wrap_with_unit(field, output)
     return output
 
@@ -202,7 +212,7 @@ def render_message_cpp(module : ProtobufModule, message : MessageClass, force_te
     wpimath_incl_dir = os.path.join(wpimath_dir, "src/main/native/include/frc")
     wpimath_incl_serde_dir = os.path.join(wpimath_incl_dir, module.subfolder, "serde")
     serde_hdr = os.path.join(wpimath_incl_serde_dir, f"{lang_type}Serde.inc")
-    render_template(env, "cpp_serde.h.jinja2", serde_hdr, **kwargs)
+    # render_template(env, "cpp_serde.h.jinja2", serde_hdr, **kwargs)
     
     
     wpimath_cpp_dir = os.path.join(wpimath_dir, "src/main/native/cpp/")
@@ -214,26 +224,5 @@ def render_message_cpp(module : ProtobufModule, message : MessageClass, force_te
     wpimath_test_dir = os.path.join(wpimath_dir, "src/test/native/cpp/")
     wpimath_test_serde_dir = os.path.join(wpimath_test_dir, module.subfolder, "serde")
     serde_test = os.path.join(wpimath_test_serde_dir, f"{lang_type}SerdeTest.cpp")
-    render_template(env, "cpp_test.jinja2", serde_test, **kwargs)
+    # render_template(env, "cpp_test.jinja2", serde_test, **kwargs)
     
-    # with open(proto_src, "w") as f:
-    #     f.write(env.get_template("cpp_proto_serde.h.jinja2").render(**kwargs))
-
-    # proto_src = os.path.join(wpimath_cpp_dir, f"{output_directory}/{lang_type}ProtoSerde.cpp")
-    # with open(proto_src, "w") as f:
-    #     f.write(env.get_template("cpp_proto_serde.cpp.jinja2").render(**kwargs))
-
-
-
-    # proto_src = os.path.join(wpimath_incl_dir, f"{output_directory}/{lang_type}StructSerde.h")
-    # with open(proto_src, "w") as f:
-    #     f.write(env.get_template("cpp_struct_serde.h.jinja2").render(**kwargs))
-
-    # proto_src = os.path.join(wpimath_cpp_dir, f"{output_directory}/{lang_type}StructSerde.cpp")
-    # with open(proto_src, "w") as f:
-    #     f.write(env.get_template("cpp_struct_serde.cpp.jinja2").render(**kwargs))
-
-
-    # test_src = os.path.join(wpimath_test_dir, f"{output_directory}/serde/{lang_type}SerdeTest.cpp")
-    # with open(test_src, "w") as f:
-    #     f.write(env.get_template("cpp_serde_test.jinja2").render(**kwargs))

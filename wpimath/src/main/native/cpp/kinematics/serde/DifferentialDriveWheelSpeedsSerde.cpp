@@ -9,16 +9,16 @@ using StructType = wpi::Struct<frc::DifferentialDriveWheelSpeeds>;
 
 frc::DifferentialDriveWheelSpeeds StructType::Unpack(
     std::span<const uint8_t, StructType::kSize> data) {
-  return {
-    // wpi::UnpackStruct<double, 0>(data),
-    // wpi::UnpackStruct<double, 0>(data),
+  return frc::DifferentialDriveWheelSpeeds{
+    units::meters_per_second_t{wpi::UnpackStruct<double, 0>(data)},
+    units::meters_per_second_t{wpi::UnpackStruct<double, 0>(data)},
   };
 }
 
 void StructType::Pack(std::span<uint8_t, StructType::kSize> data,
                       const frc::DifferentialDriveWheelSpeeds& value) {
-    // wpi::PackStruct<0>(data, value.LeftMps());
-    // wpi::PackStruct<0>(data, value.RightMps());
+    wpi::PackStruct<0>(data, value.left.value());
+    wpi::PackStruct<0>(data, value.right.value());
 }
 
 google::protobuf::Message* wpi::Protobuf<frc::DifferentialDriveWheelSpeeds>::New(
@@ -29,16 +29,16 @@ google::protobuf::Message* wpi::Protobuf<frc::DifferentialDriveWheelSpeeds>::New
 
 frc::DifferentialDriveWheelSpeeds wpi::Protobuf<frc::DifferentialDriveWheelSpeeds>::Unpack(
     const google::protobuf::Message& msg) {
-//   auto m = static_cast<const wpi::proto::ProtobufDifferentialDriveWheelSpeeds*>(&msg);
+  auto m = static_cast<const wpi::proto::ProtobufDifferentialDriveWheelSpeeds*>(&msg);
   return frc::DifferentialDriveWheelSpeeds{
-    // m->left_mps(),
-    // m->right_mps(),
+    units::meters_per_second_t{m->left_mps()},
+    units::meters_per_second_t{m->right_mps()},
   };
 }
 
 void wpi::Protobuf<frc::DifferentialDriveWheelSpeeds>::Pack(google::protobuf::Message* msg,
                                              const frc::DifferentialDriveWheelSpeeds& value) {
-//   auto m = static_cast<wpi::proto::ProtobufDifferentialDriveWheelSpeeds*>(msg);
-//     m->set_left_mps(value.LeftMps());
-//     m->set_right_mps(value.RightMps());
+  auto m = static_cast<wpi::proto::ProtobufDifferentialDriveWheelSpeeds*>(msg);
+    m->set_left_mps(value.left.value());
+    m->set_right_mps(value.right.value());
 }
