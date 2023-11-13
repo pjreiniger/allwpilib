@@ -14,14 +14,22 @@ namespace {
 using StructType = wpi::Struct<frc::Pose3d>;
 using ProtoType = wpi::Protobuf<frc::Pose3d>;
 
-char kExpectedStructBufferChar[] = {
-    -113, -62,  -11, 40,  92,   -113, -2,   63,  82,  -72, 30,  -123, -21, 81,
-    2,    64,   102, 102, 102,  102,  102,  102, 49,  64,  84,  -54,  119, -113,
-    -40,  -106, -38, -65, -101, 58,   -111, -47, -66, -90, -20, 63,   30,  41,
-    -55,  -118, 53,  68,  -61,  63,   -76,  -25, -32, -83, -71, 105,  -84, 63};
+constexpr std::array<uint8_t, StructType::kSize> create_test_buffer() {
+  std::array<uint8_t, StructType::kSize> output;
+  int buffer[] = {-113, -62,  -11,  40,   92,   -113, -2,  63,   82,  -72,
+                  30,   -123, -21,  81,   2,    64,   102, 102,  102, 102,
+                  102,  102,  49,   64,   84,   -54,  119, -113, -40, -106,
+                  -38,  -65,  -101, 58,   -111, -47,  -66, -90,  -20, 63,
+                  30,   41,   -55,  -118, 53,   68,   -61, 63,   -76, -25,
+                  -32,  -83,  -71,  105,  -84,  63};
+  for (size_t idx = 0; idx < StructType::kSize; ++idx) {
+    output[idx] = static_cast<uint8_t>(buffer[idx]);
+  }
+  return output;
+}
 
-uint8_t* kExpectedStructBuffer =
-    reinterpret_cast<uint8_t*>(kExpectedStructBufferChar);
+std::array<uint8_t, StructType::kSize> kExpectedStructBuffer =
+    create_test_buffer();
 
 const Pose3d kExpectedData{1.91_m, 2.29_m, 17.4_m,
                            Rotation3d(35.4_rad, 12.34_rad, 56.78_rad)};
@@ -37,9 +45,7 @@ TEST(Pose3dTest, StructPack) {
 }
 
 TEST(Pose3dTest, StructUnpack) {
-  Pose3d unpacked_data =
-      StructType::Unpack(std::span<uint8_t, StructType::kSize>(
-          kExpectedStructBuffer, StructType::kSize));
+  Pose3d unpacked_data = StructType::Unpack(kExpectedStructBuffer);
 
   EXPECT_EQ(kExpectedData.Translation(), unpacked_data.Translation());
   EXPECT_EQ(kExpectedData.Rotation(), unpacked_data.Rotation());

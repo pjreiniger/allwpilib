@@ -14,13 +14,19 @@ namespace {
 using StructType = wpi::Struct<frc::Rotation3d>;
 using ProtoType = wpi::Protobuf<frc::Rotation3d>;
 
-char kExpectedStructBufferChar[] = {10, -88, 124, 104, -38,  70,  -27, -65,
-                                    95, 75,  113, 113, 97,   -20, -30, 63,
-                                    11, -40, 66,  111, -115, -46, -55, -65,
-                                    44, -40, 31,  20,  -91,  49,  -38, -65};
+constexpr std::array<uint8_t, StructType::kSize> create_test_buffer() {
+  std::array<uint8_t, StructType::kSize> output;
+  int buffer[] = {10,  -88, 124, 104, -38, 70, -27, -65, 95,  75,   113,
+                  113, 97,  -20, -30, 63,  11, -40, 66,  111, -115, -46,
+                  -55, -65, 44,  -40, 31,  20, -91, 49,  -38, -65};
+  for (size_t idx = 0; idx < StructType::kSize; ++idx) {
+    output[idx] = static_cast<uint8_t>(buffer[idx]);
+  }
+  return output;
+}
 
-uint8_t* kExpectedStructBuffer =
-    reinterpret_cast<uint8_t*>(kExpectedStructBufferChar);
+std::array<uint8_t, StructType::kSize> kExpectedStructBuffer =
+    create_test_buffer();
 
 const Rotation3d kExpectedData{1.91_rad, 2.29_rad, 35.04_rad};
 }  // namespace
@@ -35,9 +41,7 @@ TEST(Rotation3dTest, StructPack) {
 }
 
 TEST(Rotation3dTest, StructUnpack) {
-  Rotation3d unpacked_data =
-      StructType::Unpack(std::span<uint8_t, StructType::kSize>(
-          kExpectedStructBuffer, StructType::kSize));
+  Rotation3d unpacked_data = StructType::Unpack(kExpectedStructBuffer);
 
   EXPECT_EQ(kExpectedData.GetQuaternion(), unpacked_data.GetQuaternion());
 }

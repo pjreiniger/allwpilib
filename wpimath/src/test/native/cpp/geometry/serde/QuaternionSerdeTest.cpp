@@ -14,13 +14,20 @@ namespace {
 using StructType = wpi::Struct<frc::Quaternion>;
 using ProtoType = wpi::Protobuf<frc::Quaternion>;
 
-char kExpectedStructBufferChar[] = {
-    -102, -103, -103, -103, -103, -103, -15,  63,   -102, -103, -103,
-    -103, -103, -103, 1,    64,   102,  102,  102,  102,  102,  102,
-    10,   64,   -102, -103, -103, -103, -103, -103, 17,   64};
+constexpr std::array<uint8_t, StructType::kSize> create_test_buffer() {
+  std::array<uint8_t, StructType::kSize> output;
+  int buffer[] = {-102, -103, -103, -103, -103, -103, -15, 63,
+                  -102, -103, -103, -103, -103, -103, 1,   64,
+                  102,  102,  102,  102,  102,  102,  10,  64,
+                  -102, -103, -103, -103, -103, -103, 17,  64};
+  for (size_t idx = 0; idx < StructType::kSize; ++idx) {
+    output[idx] = static_cast<uint8_t>(buffer[idx]);
+  }
+  return output;
+}
 
-uint8_t* kExpectedStructBuffer =
-    reinterpret_cast<uint8_t*>(kExpectedStructBufferChar);
+std::array<uint8_t, StructType::kSize> kExpectedStructBuffer =
+    create_test_buffer();
 
 const Quaternion kExpectedData{1.1, 2.2, 3.3, 4.4};
 }  // namespace
@@ -35,9 +42,7 @@ TEST(QuaternionTest, StructPack) {
 }
 
 TEST(QuaternionTest, StructUnpack) {
-  Quaternion unpacked_data =
-      StructType::Unpack(std::span<uint8_t, StructType::kSize>(
-          kExpectedStructBuffer, StructType::kSize));
+  Quaternion unpacked_data = StructType::Unpack(kExpectedStructBuffer);
 
   EXPECT_EQ(kExpectedData.W(), unpacked_data.W());
   EXPECT_EQ(kExpectedData.X(), unpacked_data.X());

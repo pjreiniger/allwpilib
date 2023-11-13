@@ -14,11 +14,18 @@ namespace {
 using StructType = wpi::Struct<frc::Translation2d>;
 using ProtoType = wpi::Protobuf<frc::Translation2d>;
 
-char kExpectedStructBufferChar[] = {-113, -62, -11, 40,   92,  -113, -2, 63,
-                                    82,   -72, 30,  -123, -21, 81,   2,  64};
+constexpr std::array<uint8_t, StructType::kSize> create_test_buffer() {
+  std::array<uint8_t, StructType::kSize> output;
+  int buffer[] = {-113, -62, -11, 40,   92,  -113, -2, 63,
+                  82,   -72, 30,  -123, -21, 81,   2,  64};
+  for (size_t idx = 0; idx < StructType::kSize; ++idx) {
+    output[idx] = static_cast<uint8_t>(buffer[idx]);
+  }
+  return output;
+}
 
-uint8_t* kExpectedStructBuffer =
-    reinterpret_cast<uint8_t*>(kExpectedStructBufferChar);
+std::array<uint8_t, StructType::kSize> kExpectedStructBuffer =
+    create_test_buffer();
 
 constexpr Translation2d kExpectedData{1.91_m, 2.29_m};
 }  // namespace
@@ -33,9 +40,7 @@ TEST(Translation2dTest, StructPack) {
 }
 
 TEST(Translation2dTest, StructUnpack) {
-  Translation2d unpacked_data =
-      StructType::Unpack(std::span<uint8_t, StructType::kSize>(
-          kExpectedStructBuffer, StructType::kSize));
+  Translation2d unpacked_data = StructType::Unpack(kExpectedStructBuffer);
 
   EXPECT_EQ(kExpectedData.X().value(), unpacked_data.X().value());
   EXPECT_EQ(kExpectedData.Y().value(), unpacked_data.Y().value());

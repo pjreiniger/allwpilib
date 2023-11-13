@@ -14,10 +14,17 @@ namespace {
 using StructType = wpi::Struct<frc::Rotation2d>;
 using ProtoType = wpi::Protobuf<frc::Rotation2d>;
 
-char kExpectedStructBufferChar[] = {-123, -21, 81, -72, 30, -123, 65, 64};
+constexpr std::array<uint8_t, StructType::kSize> create_test_buffer() {
+  std::array<uint8_t, StructType::kSize> output;
+  int buffer[] = {-123, -21, 81, -72, 30, -123, 65, 64};
+  for (size_t idx = 0; idx < StructType::kSize; ++idx) {
+    output[idx] = static_cast<uint8_t>(buffer[idx]);
+  }
+  return output;
+}
 
-uint8_t* kExpectedStructBuffer =
-    reinterpret_cast<uint8_t*>(kExpectedStructBufferChar);
+std::array<uint8_t, StructType::kSize> kExpectedStructBuffer =
+    create_test_buffer();
 
 constexpr Rotation2d kExpectedData{35.04_rad};
 }  // namespace
@@ -32,9 +39,7 @@ TEST(Rotation2dTest, StructPack) {
 }
 
 TEST(Rotation2dTest, StructUnpack) {
-  Rotation2d unpacked_data =
-      StructType::Unpack(std::span<uint8_t, StructType::kSize>(
-          kExpectedStructBuffer, StructType::kSize));
+  Rotation2d unpacked_data = StructType::Unpack(kExpectedStructBuffer);
 
   EXPECT_EQ(kExpectedData.Radians(), unpacked_data.Radians());
 }
