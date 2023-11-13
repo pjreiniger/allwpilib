@@ -46,6 +46,12 @@ def main():
         "SimpleMotorFeedforward",
         "MecanumDriveMotorVoltages",
         "SwerveDriveKinematics",
+        "DCMotor",
+        "CubicHermiteSpline",
+        "QuinticHermiteSpline",
+        "Matrix",
+        "Vector",
+        "LinearSystem",
     ]
 
     message_types_to_do = [
