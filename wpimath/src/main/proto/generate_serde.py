@@ -20,12 +20,12 @@ def main():
     proto_files = [
         ("geometry2d", "geometry"),
         ("geometry3d", "geometry"),
-        #   ("controller", "controller"),
-        #   ("kinematics", "kinematics"),
-        # #   ("plant", "system/plant"),
-        #  ###########33 ("spline", "spline"),
-        # #   ("system", "system"),
-        #   ("trajectory", "trajectory"),
+          ("controller", "controller"),
+          ("kinematics", "kinematics"),
+        #   ("plant", "system/plant"),
+         ###########33 ("spline", "spline"),
+        #   ("system", "system"),
+          ("trajectory", "trajectory"),
         #   ("wpimath", "."),
     ]
 

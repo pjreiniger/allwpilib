@@ -145,3 +145,5 @@ WPILIB_DLLEXPORT
 void from_json(const wpi::json& json, Trajectory::State& state);
 
 }  // namespace frc
+
+#include "frc/trajectory/serde/TrajectorySerde.inc"

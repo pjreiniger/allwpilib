@@ -4,15 +4,15 @@
 
 #include <gtest/gtest.h>
 
-#include "frc/geometry/{{message.local_type}}.h"
+#include "frc/geometry/Trajectory.h"
 #include "geometry2d.pb.h"
 
 using namespace frc;
 
 namespace {
 
-using StructType = wpi::Struct<frc::{{message.local_type}}>;
-using ProtoType = wpi::Protobuf<frc::{{message.local_type}}>;
+using StructType = wpi::Struct<frc::Trajectory>;
+using ProtoType = wpi::Protobuf<frc::Trajectory>;
 
 constexpr std::array<uint8_t, StructType::kSize> create_test_buffer() {
   std::array<uint8_t, StructType::kSize> output;
@@ -30,10 +30,10 @@ constexpr std::array<uint8_t, StructType::kSize> create_test_buffer() {
 std::array<uint8_t, StructType::kSize> kExpectedStructBuffer =
     create_test_buffer();
 
-constexpr {{message.local_type}} kExpectedData{};
+constexpr Trajectory kExpectedData{};
 }  // namespace
 
-TEST({{message.local_type}}Test, StructPack) {
+TEST(TrajectoryTest, StructPack) {
   uint8_t buffer[StructType::kSize];
   StructType::Pack(buffer, kExpectedData);
 
@@ -42,32 +42,26 @@ TEST({{message.local_type}}Test, StructPack) {
   }
 }
 
-TEST({{message.local_type}}Test, StructUnpack) {
-  {{message.local_type}} unpacked_data = StructType::Unpack(kExpectedStructBuffer);
-{% for field in message.fields %}
-    {{assert_local_equals(field)}}
-{%- endfor %}
+TEST(TrajectoryTest, StructUnpack) {
+  Trajectory unpacked_data = StructType::Unpack(kExpectedStructBuffer);
+
+    EXPECT_EQ(kExpectedData.States(), unpacked_data.States());
 }
 
 
-TEST({{message.local_type}}Test, ProtobufPack) {
-  wpi::proto::Protobuf{{message.local_type}} proto;
+TEST(TrajectoryTest, ProtobufPack) {
+  wpi::proto::ProtobufTrajectory proto;
   ProtoType::Pack(&proto, kExpectedData);
-{% for field in message.fields %}
-    {{assert_local_vs_proto_equals(field)}}
-{%- endfor %}
+
+    EXPECT_EQ(kExpectedData.States(), proto.states());
 }
 
 
 
-TEST({{message.local_type}}Test, ProtobufUnpack) {
-  wpi::proto::Protobuf{{message.local_type}} proto;
-{%- for field in message.fields %}
-  {{test_proto_setter(field)}}
-{%- endfor %}
+TEST(TrajectoryTest, ProtobufUnpack) {
+  wpi::proto::ProtobufTrajectory proto;
+  proto.mutable_states()->(kExpectedData.States());
 
-  {{message.local_type}} unpacked_data = ProtoType::Unpack(proto);
-{%- for field in message.fields %}
-    {{assert_local_equals(field)}}
-{%- endfor %}
+  Trajectory unpacked_data = ProtoType::Unpack(proto);
+    EXPECT_EQ(kExpectedData.States(), unpacked_data.States());
 }

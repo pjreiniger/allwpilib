@@ -119,7 +119,7 @@ def __proto_getter(field : MessageField):
 
 def __proto_setter(field : MessageField):
     if field.is_message:
-        return f"getMutable{upper_camel_case(field.name)}"
+        return f"mutable_{field.name}()->"
     return f"set_{field.name}"
 
 
@@ -150,6 +150,18 @@ def __proto_pack(field : MessageField):
     output = f"m->{__proto_setter(field)}(value.{__local_getter(field)})"
     return output
 
+def __test_proto_setter(field: MessageField):
+    return f"proto.{__proto_setter(field)}(kExpectedData.{__local_getter(field)});"
+
+def __assert_local_equals(field: MessageField):
+    return f"EXPECT_EQ(kExpectedData.{__local_getter(field)}, unpacked_data.{__local_getter(field)});"
+
+def __assert_local_vs_proto_equals(field: MessageField):
+    return f"EXPECT_EQ(kExpectedData.{__local_getter(field)}, proto.{__proto_getter(field)}());"
+
+
+
+
 def render_message_cpp(module : ProtobufModule, message : MessageClass, force_tests: bool):
     env = Environment(
         loader=FileSystemLoader(
@@ -162,8 +174,10 @@ def render_message_cpp(module : ProtobufModule, message : MessageClass, force_te
     env.globals["struct_pack"] = __struct_pack
     env.globals["proto_unpack"] = __proto_unpack
     env.globals["proto_pack"] = __proto_pack
-    # env.globals["assert_equals"] = assert_equals
-    # env.globals["test_proto_setter"] = test_proto_setter
+    
+    env.globals["test_proto_setter"] = __test_proto_setter
+    env.globals["assert_local_vs_proto_equals"] = __assert_local_vs_proto_equals
+    env.globals["assert_local_equals"] = __assert_local_equals
 
     kwargs = dict(
         module = module,
@@ -182,7 +196,6 @@ def render_message_cpp(module : ProtobufModule, message : MessageClass, force_te
     wpimath_dir = "/home/pjreiniger/git/allwpilib/wpimath"
 
 
-    wpimath_test_dir = os.path.join(wpimath_dir, "src/test/native/cpp/")
     # wpimath_test_dir = os.path.join(wpimath_dir, "src/test/java/edu/wpi/first/math")
 
 
@@ -196,6 +209,12 @@ def render_message_cpp(module : ProtobufModule, message : MessageClass, force_te
     wpimath_cpp_serde_dir = os.path.join(wpimath_cpp_dir, module.subfolder, "serde")
     serde_cpp = os.path.join(wpimath_cpp_serde_dir, f"{lang_type}Serde.cpp")
     render_template(env, "cpp_serde.cpp.jinja2", serde_cpp, **kwargs)
+
+    
+    wpimath_test_dir = os.path.join(wpimath_dir, "src/test/native/cpp/")
+    wpimath_test_serde_dir = os.path.join(wpimath_test_dir, module.subfolder, "serde")
+    serde_test = os.path.join(wpimath_test_serde_dir, f"{lang_type}SerdeTest.cpp")
+    render_template(env, "cpp_test.jinja2", serde_test, **kwargs)
     
     # with open(proto_src, "w") as f:
     #     f.write(env.get_template("cpp_proto_serde.h.jinja2").render(**kwargs))

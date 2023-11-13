@@ -5,7 +5,12 @@ wpilib_cc_static_and_shared_library(
     name = "wpimath",
     srcs = glob(
         # ["cpp/**"],
-        ["cpp/geometry/**", "cpp/MathShared.cpp", "cpp/StateSpaceUtil.cpp", "cpp/trajectory/Trajectory.cpp", "cpp/trajectory/TrajectoryUtil.cpp"],
+        [
+            "cpp/geometry/**", 
+            "cpp/trajectory/**", 
+            "cpp/controller/**", 
+            "cpp/kinematics/**", 
+            "cpp/MathShared.cpp", "cpp/StateSpaceUtil.cpp", "cpp/trajectory/Trajectory.cpp", "cpp/trajectory/TrajectoryUtil.cpp"],
         exclude = ["cpp/jni/**"],
     ),
     hdrs = glob(["include/**/*"]),

@@ -91,3 +91,6 @@ class WPILIB_DLLEXPORT DifferentialDriveKinematics
   units::meter_t trackWidth;
 };
 }  // namespace frc
+
+
+#include "frc/kinematics/serde/DifferentialDriveKinematicsSerde.inc"
