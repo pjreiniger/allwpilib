@@ -35,7 +35,7 @@ jobs:
       - name: Install jinja
         run: python -m pip install jinja2
       - name: Run ntcore
-        run: ./ntcore/generate_topics.py
+        run: python ./ntcore/generate_topics.py
       - name: Add untracked files to index so they count as changes
         run: git add -A
       - name: Check output
