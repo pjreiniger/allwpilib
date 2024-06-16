@@ -1,6 +1,7 @@
 import os
 import sys
 import argparse
+from pathlib import Path
 
 from wpilibj.generate_hids import main as generate_hids
 from wpilibj.generate_pwm_motor_controllers import generate_pwm_motor_controllers
@@ -14,11 +15,13 @@ def main():
         "--output_directory",
         help="Optional. If set, will output the generated files to this directory, otherwise it will use a path relative to the script",
         default=os.path.join(dirname, "src/generated"),
+        type=Path,
     )
     parser.add_argument(
         "--template_root",
         help="Optional. If set, will use this directory as the root for the jinja templates",
         default=os.path.join(dirname, "src/generate"),
+        type=Path,
     )
     args = parser.parse_args()
 
