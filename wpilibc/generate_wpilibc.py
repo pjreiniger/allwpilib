@@ -3,7 +3,7 @@ import sys
 import argparse
 from pathlib import Path
 
-from wpilibc.generate_hids import main as generate_hids
+from wpilibc.generate_hids import generate_hids
 from wpilibc.generate_pwm_motor_controllers import generate_pwm_motor_controllers
 
 
@@ -31,8 +31,7 @@ def main():
     )
     args = parser.parse_args()
 
-    sys.argv = ["x", f"--output_directory={args.output_directory}", "--always_write"]
-    generate_hids()
+    generate_hids(args.output_directory, args.template_root, args.schema_root / "hids.json")
     generate_pwm_motor_controllers(
         args.output_directory, args.template_root, args.schema_root
     )
