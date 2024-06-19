@@ -45,6 +45,7 @@ def generate_usage_reporting(output_directory: Path, template_directory: Path):
             java_usage_reporting.read()
             .replace(r"${usage_reporting_types}", "\n".join(usage_reporting_types))
             .replace(r"${usage_reporting_instances}", "\n".join(usage_reporting_instances))
+            # fmt: on
         )
 
         frc_net_comm = output_directory / f"main/java/{java_package}/FRCNetComm.java"

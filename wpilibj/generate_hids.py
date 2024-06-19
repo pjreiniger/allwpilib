@@ -32,7 +32,7 @@ def generate_hids(output_directory: Path, template_directory: Path):
     for controller in controllers:
         controllerName = f"{controller['ConsoleName']}Controller.java"
         output = template.render(controller)
-        write_controller_file(rootPath, controllerName, output, args.always_write)
+        write_controller_file(rootPath, controllerName, output)
 
     # Java simulation files
     rootPath = output_directory / "main/java/edu/wpi/first/wpilibj/simulation"
@@ -40,7 +40,7 @@ def generate_hids(output_directory: Path, template_directory: Path):
     for controller in controllers:
         controllerName = f"{controller['ConsoleName']}ControllerSim.java"
         output = template.render(controller)
-        write_controller_file(rootPath, controllerName, output, args.always_write)
+        write_controller_file(rootPath, controllerName, output)
 
 
 def main(argv):

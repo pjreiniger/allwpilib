@@ -35,12 +35,13 @@ proto_lang_toolchain(
 write_source_files(
     name = "write_all",
     additional_update_targets = [
-        "//wpimath:write_wpimath",
+        "//hal:write_hal",
         "//ntcore:write_ntcore",
         "//wpilibc:write_wpilibc",
         "//wpilibcExamples:write_example_project_list",
         "//wpilibj:write_wpilibj",
         "//wpilibjExamples:write_example_project_list",
         "//wpilibNewCommands:write_wpilib_new_commands",
+        "//wpimath:write_wpimath",
     ],
 )
