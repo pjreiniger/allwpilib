@@ -9,7 +9,6 @@ def main():
 
     with open(args.symbols_file) as f:
         symbols = f.readlines()
-        print(symbols)
 
     with open(args.output_file, "w") as f:
         for line in symbols:

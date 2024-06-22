@@ -14,6 +14,7 @@ genrule(
 py_binary(
     name = "generate_export_symbols",
     srcs = ["generate_export_symbols.py"],
+    tags = ["manual"],
 )
 
 wpilib_cc_static_and_shared_library(

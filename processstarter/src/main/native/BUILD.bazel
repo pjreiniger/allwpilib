@@ -7,8 +7,11 @@ wpilib_cc_binary(
         "@bazel_tools//src/conditions:windows": glob(["windows/**"]),
         "@rules_bzlmodrio_toolchains//constraints/combined:is_linux": glob(["linux/**"]),
     }),
+    # TODO support these other platforms
     target_compatible_with = select({
         "@bazel_tools//src/conditions:darwin": ["@platforms//:incompatible"],
+        "@rules_bazelrio//conditions:windows_arm64": ["@platforms//:incompatible"],
+        "@rules_bzlmodrio_toolchains//constraints/is_roborio:roborio": ["@platforms//:incompatible"],
         "//conditions:default": [],
     }),
     deps = [],
