@@ -31,7 +31,9 @@ def main():
     )
     args = parser.parse_args()
 
-    generate_hids(args.output_directory, args.template_root, args.schema_root / "hids.json")
+    generate_hids(
+        args.output_directory, args.template_root, args.schema_root / "hids.json"
+    )
     generate_pwm_motor_controllers(
         args.output_directory, args.template_root, args.schema_root
     )
