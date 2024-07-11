@@ -24,6 +24,9 @@ target_include_directories(
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
+set_target_properties(googletest
+  PROPERTIES
+  COMPILE_DEFINITIONS "GTEST_CREATE_SHARED_LIBRARY=1")
 wpilib_target_warnings(googletest)
 
 install(TARGETS googletest EXPORT googletest)
