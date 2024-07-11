@@ -16,7 +16,7 @@ from upstream_utils import (
 EXCLUDED_FILES = [
     "gtest_main.cc",
     "gtest-all.cc",
-    "gmock_main.cc",
+    "googletest.cc",
     "gmock-all.cc",
     "README.md",
 ]
