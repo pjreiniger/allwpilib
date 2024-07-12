@@ -153,13 +153,13 @@ def update_glfw():
     def cmake_filter(dp, f):
         if dp.startswith("./CMake"):
             return True
-            
+
         path = os.path.join(dp, f)
         if path in ["./src/CMakeLists.txt", "./CMakeLists.txt"]:
             return True
 
         return False
-            
+
     # Copy CMAKE files
     walk_cwd_and_copy_if(
         cmake_filter,

@@ -21,7 +21,7 @@ task cppSourcesZip(type: Zip) {
     from('generated/gl3w/src') {
         into '/'
     }
-    
+
     from('glfw/src') {
         into '/'
     }
