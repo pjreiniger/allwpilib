@@ -5,9 +5,11 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from pathlib import Path
+from typing import Callable, List
 
 
-def clone_repo(url, treeish, shallow=True):
+def clone_repo(url: str, treeish: str, shallow: bool = True):
     """Clones a Git repo at the given URL into a temp folder, checks out the
     given tree-ish (either branch or tag), then returns the repo root.
 
@@ -21,9 +23,9 @@ def clone_repo(url, treeish, shallow=True):
     """
     cwd = os.getcwd()
     if url.startswith("file://"):
-        os.chdir(os.path.dirname(url[7:]))
+        temp_chdir(os.path.dirname(url[7:]))
     else:
-        os.chdir(tempfile.gettempdir())
+        temp_chdir(tempfile.gettempdir())
 
     repo = os.path.basename(url)
     dest = os.path.join(os.getcwd(), repo)
@@ -36,9 +38,9 @@ def clone_repo(url, treeish, shallow=True):
         if shallow:
             cmd += ["--branch", treeish, "--depth", "1"]
         subprocess.run(cmd + [url, dest])
-        os.chdir(dest)
+        temp_chdir(dest)
     else:
-        os.chdir(dest)
+        temp_chdir(dest)
         subprocess.run(["git", "fetch", "origin", treeish])
 
     # Get list of heads
@@ -56,24 +58,28 @@ def clone_repo(url, treeish, shallow=True):
     else:
         subprocess.run(["git", "checkout", treeish])
 
-    os.chdir(cwd)
+    temp_chdir(cwd)
     return dest
 
 
-def get_repo_root():
+def get_repo_root() -> Path:
     """Returns the Git repository root as an absolute path.
 
     An empty string is returned if no repository root was found.
     """
+    import os
+
     current_dir = os.path.abspath(os.getcwd())
     while current_dir != os.path.dirname(current_dir):
         if os.path.exists(current_dir + os.sep + ".git"):
-            return current_dir
+            return Path(current_dir)
         current_dir = os.path.dirname(current_dir)
-    return ""
+    return Path("")
 
 
-def walk_if(top, pred):
+def walk_if(top: Path, pred: Callable[[Path, str], bool]):
+    if not isinstance(top, Path):
+        raise Exception(f"Unexpected type: {type(top)}")
     """Walks the current directory, then returns a list of files for which the
     given predicate is true.
 
@@ -83,11 +89,11 @@ def walk_if(top, pred):
             True if the file should be included in the output list
     """
     return [
-        os.path.join(dp, f) for dp, dn, fn in os.walk(top) for f in fn if pred(dp, f)
+        Path(dp) / f for dp, dn, fn in temp_walk(top) for f in fn if pred(Path(dp), f)
     ]
 
 
-def copy_to(files, root):
+def copy_to(files: List[str], root: Path):
     """Copies list of files to root by appending the relative paths of the files
     to root.
 
@@ -100,30 +106,27 @@ def copy_to(files, root):
     Returns:
     The list of files in their destination.
     """
-    if not os.path.exists(root):
-        os.makedirs(root)
+    root.mkdir(parents=True, exist_ok=True)
 
     dest_files = []
     for f in files:
-        dest_file = os.path.join(root, f)
+        dest_file = root / f
 
         # Rename .cc file to .cpp
-        if dest_file.endswith(".cc"):
-            dest_file = os.path.splitext(dest_file)[0] + ".cpp"
-        if dest_file.endswith(".c"):
-            dest_file = os.path.splitext(dest_file)[0] + ".cpp"
+        if dest_file.suffix == ".cc":
+            dest_file = dest_file.with_suffix(".cpp")
+        if dest_file.suffix == ".c":
+            dest_file = dest_file.with_suffix(".cpp")
 
         # Make leading directory
-        dest_dir = os.path.dirname(dest_file)
-        if not os.path.exists(dest_dir):
-            os.makedirs(dest_dir)
+        dest_file.parent.mkdir(parents=True, exist_ok=True)
 
         shutil.copyfile(f, dest_file)
         dest_files.append(dest_file)
     return dest_files
 
 
-def walk_cwd_and_copy_if(pred, root):
+def walk_cwd_and_copy_if(pred: Callable[[Path, str], bool], root: Path):
     """Walks the current directory, generates a list of files for which the
     given predicate is true, then copies that list to root by appending the
     relative paths of the files to root.
@@ -138,7 +141,7 @@ def walk_cwd_and_copy_if(pred, root):
     Returns:
     The list of files in their destination.
     """
-    files = walk_if(".", pred)
+    files = walk_if(Path("."), pred)
     files = copy_to(files, root)
     return files
 
@@ -164,11 +167,8 @@ def comment_out_invalid_includes(filename, include_roots):
 
         # Comment out #include if the file doesn't exist in current directory or
         # include root
-        if not os.path.exists(
-            os.path.join(os.path.dirname(filename), include)
-        ) and not any(
-            os.path.exists(os.path.join(include_root, include))
-            for include_root in include_roots
+        if not (filename.parent / include).exists() and not any(
+            (include_root / include).exists() for include_root in include_roots
         ):
             new_contents += "// "
 
@@ -219,11 +219,11 @@ def has_git_rev(rev):
 class Lib:
     def __init__(
         self,
-        name,
-        url,
-        tag,
-        patch_list,
-        copy_upstream_src,
+        name: str,
+        url: str,
+        tag: str,
+        patch_list: list[str],
+        copy_upstream_src: Callable,
         patch_options={},
         *,
         pre_patch_hook=None,
@@ -253,25 +253,25 @@ class Lib:
         self.name = name
         self.url = url
         self.old_tag = tag
-        self.patch_list = patch_list
         self.copy_upstream_src = copy_upstream_src
         self.patch_options = patch_options
         self.pre_patch_hook = pre_patch_hook
         self.pre_patch_commits = pre_patch_commits
         self.wpilib_root = get_repo_root()
+        self.patch_list = [
+            self.wpilib_root / "upstream_utils" / f"{self.name}_patches" / f
+            for f in patch_list
+        ]
 
     def check_patches(self):
         """Checks that the patch list supplied to the constructor matches the
         patches in the patch directory.
         """
         patch_directory_patches = set()
-        patch_directory = os.path.join(
-            self.wpilib_root, f"upstream_utils/{self.name}_patches"
-        )
-        if os.path.exists(patch_directory):
-            for f in os.listdir(patch_directory):
-                if f.endswith(".patch"):
-                    patch_directory_patches.add(f)
+        patch_directory = self.wpilib_root / "upstream_utils" / f"{self.name}_patches"
+        if patch_directory.exists():
+            for f in patch_directory.glob("*.patch"):
+                patch_directory_patches.add(f)
         patches = set(self.patch_list)
         patch_directory_only = sorted(patch_directory_patches - patches)
         patch_list_only = sorted(patches - patch_directory_patches)
@@ -292,7 +292,7 @@ class Lib:
                 f"  Note: The patch directory and the patch list both have patches {common_patches}"
             )
 
-    def get_repo_path(self, tempdir=None):
+    def get_repo_path(self, tempdir: Path = None) -> Path:
         """Returns the path to the clone of the upstream repository.
 
         Keyword argument:
@@ -304,10 +304,12 @@ class Lib:
         tempdir is absolute.
         """
         if tempdir is None:
-            tempdir = tempfile.gettempdir()
+            tempdir = Path(tempfile.gettempdir())
         repo = os.path.basename(self.url)
-        dest = os.path.join(tempdir, repo)
-        dest = dest.removesuffix(".git")
+        dest = tempdir / repo
+        dest = dest.with_suffix("")
+        if not isinstance(dest, Path):
+            raise Exception(f"Unexpected type {type(tempdir)}")
         return dest
 
     def open_repo(self, *, err_msg_if_absent):
@@ -320,19 +322,19 @@ class Lib:
         upstream repository does not exist. If None, the upstream repository
         will be cloned without emitting any warnings.
         """
-        os.chdir(tempfile.gettempdir())
+        temp_chdir(Path(tempfile.gettempdir()))
 
-        dest = self.get_repo_path(os.getcwd())
+        dest = self.get_repo_path(Path(os.getcwd()))
 
         print(f"INFO: Opening repository at {dest}")
 
-        if not os.path.exists(dest):
+        if not dest.exists():
             if err_msg_if_absent is None:
                 subprocess.run(["git", "clone", "--filter=tree:0", self.url])
             else:
                 print(err_msg_if_absent, file=sys.stderr)
                 exit(1)
-        os.chdir(dest)
+        temp_chdir(dest)
 
     def get_root_tags(self):
         """Returns a list of potential root tags.
@@ -370,7 +372,7 @@ class Lib:
             exit(1)
         return root_tags[0]
 
-    def set_root_tag(self, tag):
+    def set_root_tag(self, tag: str):
         """Sets the root tag, deleting any potential candidates first.
 
         Keyword argument:
@@ -394,20 +396,15 @@ class Lib:
             self.pre_patch_hook()
 
         for f in self.patch_list:
-            git_am(
-                os.path.join(
-                    self.wpilib_root, f"upstream_utils/{self.name}_patches", f
-                ),
-                **self.patch_options,
-            )
+            git_am(f, **self.patch_options)
 
-    def replace_tag(self, tag):
+    def replace_tag(self, tag: str):
         """Replaces the tag in the script.
 
         Keyword argument:
         tag -- The tag to replace the script tag with.
         """
-        path = os.path.join(self.wpilib_root, f"upstream_utils/{self.name}.py")
+        path = self.wpilib_root / "upstream_utils" / f"{self.name}.py"
         with open(path, "r") as file:
             lines = file.readlines()
 
@@ -516,11 +513,9 @@ class Lib:
             ]
         )
 
-        patch_dest = os.path.join(
-            self.wpilib_root, f"upstream_utils/{self.name}_patches"
-        )
+        patch_dest = self.wpilib_root / "upstream_utils" / f"{self.name}_patches"
 
-        if not os.path.exists(patch_dest):
+        if patch_dest.exists():
             print(
                 f"WARNING: Patch directory {patch_dest} does not exist", file=sys.stderr
             )
@@ -531,7 +526,7 @@ class Lib:
         for f in os.listdir():
             if f.endswith(".patch"):
                 if is_first:
-                    os.mkdir(patch_dest)
+                    patch_dest.mkdir()
                     is_first = False
                 shutil.move(f, patch_dest)
 
@@ -608,3 +603,18 @@ class Lib:
             self.copy_upstream_to_thirdparty()
 
         self.check_patches()
+
+
+def temp_chdir(dir: Path):
+    if not isinstance(dir, Path):
+        raise Exception(f"Unexpected type {type(dir)}")
+
+    import os
+
+    os.chdir(dir)
+
+
+def temp_walk(dir: Path):
+    import os
+
+    return os.walk(dir)

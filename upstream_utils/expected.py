@@ -1,26 +1,18 @@
 #!/usr/bin/env python3
 
-import os
-import re
 import shutil
+from pathlib import Path
 
 from upstream_utils import (
-    get_repo_root,
-    clone_repo,
-    comment_out_invalid_includes,
-    walk_cwd_and_copy_if,
-    git_am,
     Lib,
 )
 
 
-def copy_upstream_src(wpilib_root):
-    wpiutil = os.path.join(wpilib_root, "wpiutil")
+def copy_upstream_src(wpilib_root: Path):
+    wpiutil = wpilib_root / "wpiutil"
 
     # Copy expected header into allwpilib
-    dest_filename = os.path.join(
-        wpiutil, "src/main/native/thirdparty/expected/include/wpi/expected"
-    )
+    dest_filename = wpiutil / "src/main/native/thirdparty/expected/include/wpi/expected"
     shutil.copyfile("include/tl/expected.hpp", dest_filename)
 
     # Rename namespace from tl to wpi

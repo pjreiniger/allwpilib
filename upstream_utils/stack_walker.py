@@ -1,26 +1,24 @@
 #!/usr/bin/env python3
 
-import os
 import shutil
 import subprocess
+from pathlib import Path
 
 from upstream_utils import (
-    get_repo_root,
-    clone_repo,
-    comment_out_invalid_includes,
-    walk_cwd_and_copy_if,
-    git_am,
     Lib,
+    temp_walk,
 )
 
 
 def crlf_to_lf():
-    for root, _, files in os.walk("."):
+    for root, _, files in temp_walk("."):
         if ".git" in root:
             continue
 
+        root = Path(root)
+
         for fname in files:
-            filename = os.path.join(root, fname)
+            filename = root / fname
             print(f"Converting CRLF -> LF for {filename}")
             with open(filename, "rb") as f:
                 content = f.read()
@@ -34,16 +32,16 @@ def crlf_to_lf():
 
 
 def copy_upstream_src(wpilib_root):
-    wpiutil = os.path.join(wpilib_root, "wpiutil")
+    wpiutil = wpilib_root / "wpiutil"
 
     shutil.copy(
-        os.path.join("Main", "StackWalker", "StackWalker.h"),
-        os.path.join(wpiutil, "src/main/native/windows/StackWalker.h"),
+        Path("Main") / "StackWalker" / "StackWalker.h",
+        wpiutil / "src/main/native/windows/StackWalker.h",
     )
 
     shutil.copy(
-        os.path.join("Main", "StackWalker", "StackWalker.cpp"),
-        os.path.join(wpiutil, "src/main/native/windows/StackWalker.cpp"),
+        Path("Main") / "StackWalker" / "StackWalker.cpp",
+        wpiutil / "src/main/native/windows/StackWalker.cpp",
     )
 
 

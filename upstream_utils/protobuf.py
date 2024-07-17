@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
 
-import os
 import shutil
+from pathlib import Path
 
 from upstream_utils import (
-    get_repo_root,
-    clone_repo,
-    comment_out_invalid_includes,
     copy_to,
-    walk_cwd_and_copy_if,
     walk_if,
-    git_am,
     Lib,
+    temp_chdir,
 )
 
 protobuf_lite_sources = set(
@@ -250,37 +246,38 @@ use_include_files = (
 
 
 def matches(dp, f, files):
-    if not dp.startswith("./src/"):
+    if not str(dp).startswith("src/"):
         return False
-    p = dp[6:] + "/" + f
+    p = str(dp)[4:] + "/" + f
     return p in files
 
 
 def copy_upstream_src(wpilib_root):
-    upstream_root = os.path.abspath(".")
-    wpiutil = os.path.join(wpilib_root, "wpiutil")
+    upstream_root = Path(".").absolute()
+    wpiutil = wpilib_root / "wpiutil"
 
     # Delete old install
     for d in [
         "src/main/native/thirdparty/protobuf/src",
         "src/main/native/thirdparty/protobuf/include",
     ]:
-        shutil.rmtree(os.path.join(wpiutil, d), ignore_errors=True)
+        shutil.rmtree(wpiutil / d, ignore_errors=True)
 
     # Copy protobuf source files into allwpilib
-    src_files = walk_if(".", lambda dp, f: matches(dp, f, use_src_files))
-    src_files = [f[22:] for f in src_files]
-    os.chdir(os.path.join(upstream_root, "src/google/protobuf"))
-    copy_to(src_files, os.path.join(wpiutil, "src/main/native/thirdparty/protobuf/src"))
+    src_files = walk_if(Path("."), lambda dp, f: matches(dp, f, use_src_files))
+    src_files = [str(f)[20:] for f in src_files]
+
+    temp_chdir(upstream_root / "src/google/protobuf")
+    copy_to(src_files, wpiutil / "src/main/native/thirdparty/protobuf/src")
 
     # Copy protobuf header files into allwpilib
-    os.chdir(upstream_root)
-    include_files = walk_if(".", lambda dp, f: matches(dp, f, use_include_files))
-    include_files = [f[6:] for f in include_files]
-    os.chdir(os.path.join(upstream_root, "src"))
+    temp_chdir(upstream_root)
+    include_files = walk_if(Path("."), lambda dp, f: matches(dp, f, use_include_files))
+    include_files = [Path(str(f)[4:]) for f in include_files]
+    temp_chdir(upstream_root / "src")
     copy_to(
         include_files,
-        os.path.join(wpiutil, "src/main/native/thirdparty/protobuf/include"),
+        wpiutil / "src/main/native/thirdparty/protobuf/include",
     )
 
 
