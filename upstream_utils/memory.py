@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 
-import os
 import shutil
+from pathlib import Path
 
 from upstream_utils import (
-    get_repo_root,
-    clone_repo,
-    comment_out_invalid_includes,
     walk_if,
     copy_to,
     Lib,
+    temp_chdir,
 )
 
 
@@ -30,7 +28,7 @@ def run_source_replacements(memory_files):
 
 def run_header_replacements(memory_files):
     for wpi_file in memory_files:
-        if "detail" not in wpi_file:
+        if "detail" not in str(wpi_file):
             continue
         with open(wpi_file) as f:
             content = f.read()
@@ -60,41 +58,39 @@ def run_global_replacements(memory_files):
 
 
 def copy_upstream_src(wpilib_root):
-    wpiutil = os.path.join(wpilib_root, "wpiutil")
+    wpiutil = wpilib_root / "wpiutil"
 
     # Delete old install
     for d in [
         "src/main/native/thirdparty/memory/src",
         "src/main/native/thirdparty/memory/include",
     ]:
-        shutil.rmtree(os.path.join(wpiutil, d), ignore_errors=True)
+        shutil.rmtree(wpiutil / d, ignore_errors=True)
 
     # Copy sources
-    src_files = walk_if("src", lambda dp, f: f.endswith(".cpp") or f.endswith(".hpp"))
-    src_files = copy_to(
-        src_files, os.path.join(wpiutil, "src/main/native/thirdparty/memory")
+    src_files = walk_if(
+        Path("src"), lambda dp, f: f.endswith(".cpp") or f.endswith(".hpp")
     )
+    src_files = copy_to(src_files, wpiutil / "src/main/native/thirdparty/memory")
     run_global_replacements(src_files)
     run_source_replacements(src_files)
 
     # Copy headers
-    os.chdir(os.path.join("include", "foonathan"))
-    include_files = walk_if(".", lambda dp, f: f.endswith(".hpp"))
+    temp_chdir(Path("include", "foonathan"))
+    include_files = walk_if(Path("."), lambda dp, f: f.endswith(".hpp"))
     include_files = copy_to(
         include_files,
-        os.path.join(wpiutil, "src/main/native/thirdparty/memory/include/wpi"),
+        wpiutil / "src/main/native/thirdparty/memory/include/wpi",
     )
-    os.chdir(os.path.join("..", ".."))
+    temp_chdir(Path("..", ".."))
     run_global_replacements(include_files)
     run_header_replacements(include_files)
 
     # Copy config_impl.hpp
     shutil.copyfile(
-        os.path.join(wpilib_root, "upstream_utils/memory_files/config_impl.hpp"),
-        os.path.join(
-            wpiutil,
-            "src/main/native/thirdparty/memory/include/wpi/memory/config_impl.hpp",
-        ),
+        wpilib_root / "upstream_utils/memory_files/config_impl.hpp",
+        wpiutil
+        / "src/main/native/thirdparty/memory/include/wpi/memory/config_impl.hpp",
     )
 
 
