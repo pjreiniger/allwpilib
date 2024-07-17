@@ -16,13 +16,13 @@ def copy_upstream_src(wpilib_root: Path):
     shutil.copyfile("include/tl/expected.hpp", dest_filename)
 
     # Rename namespace from tl to wpi
-    with open(dest_filename) as f:
+    with dest_filename.open(encoding="utf-8") as f:
         content = f.read()
     content = content.replace("namespace tl", "namespace wpi")
     content = content.replace("tl::", "wpi::")
     content = content.replace("TL_", "WPI_")
-    with open(dest_filename, "w") as f:
-        f.write(content)
+
+    dest_filename.write_text(content)
 
 
 def main():

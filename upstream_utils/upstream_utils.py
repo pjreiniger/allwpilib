@@ -154,7 +154,7 @@ def comment_out_invalid_includes(filename, include_roots):
     include_roots -- list of search paths for includes
     """
     # Read header
-    with open(filename) as f:
+    with filename.open(encoding="utf-8") as f:
         old_contents = f.read()
 
     new_contents = ""
@@ -181,8 +181,7 @@ def comment_out_invalid_includes(filename, include_roots):
 
     # Write modified file back out
     if old_contents != new_contents:
-        with open(filename, "w") as f:
-            f.write(new_contents)
+        filename.write_text(new_contents, encoding="utf-8")
 
 
 def git_am(patch, use_threeway=False, ignore_whitespace=False):

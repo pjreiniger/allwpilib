@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import shutil
-from pathlib import Path
+from pathlib import Path, PosixPath
 
 from upstream_utils import (
     copy_to,
@@ -246,9 +246,10 @@ use_include_files = (
 
 
 def matches(dp, f, files):
-    if not str(dp).startswith("src/"):
+    if not dp.is_relative_to("src/"):
         return False
-    p = str(dp)[4:] + "/" + f
+    p = str(Path(*dp.parts[1:], f)).replace("\\", "/")
+    print(p, p in files)
     return p in files
 
 

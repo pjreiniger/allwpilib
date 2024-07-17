@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import shutil
+from pathlib import Path
 
 from upstream_utils import (
     comment_out_invalid_includes,
@@ -9,7 +10,7 @@ from upstream_utils import (
 )
 
 
-def copy_upstream_src(wpilib_root):
+def copy_upstream_src(wpilib_root: Path):
     wpiutil = wpilib_root / "wpiutil"
 
     # Delete old install
@@ -21,13 +22,13 @@ def copy_upstream_src(wpilib_root):
 
     # Copy fmt source files into allwpilib
     src_files = walk_cwd_and_copy_if(
-        lambda dp, f: str(dp).startswith("src") and f.endswith(".cc") and f != "fmt.cc",
+        lambda dp, f: dp.is_relative_to("src") and f.endswith(".cc") and f != "fmt.cc",
         wpiutil / "src/main/native/thirdparty/fmtlib",
     )
 
     # Copy fmt header files into allwpilib
     include_files = walk_cwd_and_copy_if(
-        lambda dp, f: str(dp).startswith("include/fmt"),
+        lambda dp, f: dp.is_relative_to(Path("include/fmt")),
         wpiutil / "src/main/native/thirdparty/fmtlib",
     )
 

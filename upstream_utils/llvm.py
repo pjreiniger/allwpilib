@@ -27,7 +27,7 @@ def run_global_replacements(wpiutil_llvm_files: List[Path]):
         # Fix uses of span
         content = content.replace("span", "std::span")
         content = content.replace("include <std::span>", "include <span>")
-        if str(wpi_file).endswith("ConvertUTFWrapper.cpp"):
+        if wpi_file.name == "ConvertUTFWrapper.cpp":
             content = content.replace(
                 "const UTF16 *Src = reinterpret_cast<const UTF16 *>(SrcBytes.begin());",
                 "const UTF16 *Src = reinterpret_cast<const UTF16 *>(&*SrcBytes.begin());",

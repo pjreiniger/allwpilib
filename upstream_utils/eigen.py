@@ -11,7 +11,7 @@ from upstream_utils import (
 )
 
 
-def eigen_inclusions(dp, f):
+def eigen_inclusions(dp: Path, f):
     """Returns true if the given file in the "Eigen" include directory of the
     Eigen git repo should be copied into allwpilib
 
@@ -22,7 +22,7 @@ def eigen_inclusions(dp, f):
     if not isinstance(dp, Path):
         raise Exception(f"Unexpected type: {type(dp)}, {dp}")
 
-    if not str(dp).startswith("Eigen"):
+    if not dp.is_relative_to(Path("Eigen")):
         return False
 
     abspath = dp / f
@@ -44,12 +44,13 @@ def eigen_inclusions(dp, f):
         return False
 
     # Include architectures we care about
-    if "Core/arch/" in str(abspath):
+    sanitized_abspath = str(abspath).replace("\\", "/")
+    if "Core/arch/" in sanitized_abspath:
         return (
-            "arch/AVX/" in str(abspath)
-            or "arch/Default" in str(abspath)
-            or "arch/NEON" in str(abspath)
-            or "arch/SSE" in str(abspath)
+            "arch/AVX/" in sanitized_abspath
+            or "arch/Default" in sanitized_abspath
+            or "arch/NEON" in sanitized_abspath
+            or "arch/SSE" in sanitized_abspath
         )
 
     # Include the following modules
@@ -71,7 +72,13 @@ def eigen_inclusions(dp, f):
         "misc",
         "plugins",
     ]
-    return bool(re.search(r"|".join("/" + m for m in modules), str(abspath)))
+
+    import os
+    sep_str = os.sep
+    if sep_str == "\\":
+        sep_str += "\\"
+
+    return bool(re.search(r"|".join(sep_str + m for m in modules), str(abspath)))
 
 
 def unsupported_inclusions(dp, f):
@@ -82,7 +89,7 @@ def unsupported_inclusions(dp, f):
     dp -- directory path
     f -- filename
     """
-    if not str(dp).startswith("unsupported"):
+    if not dp.is_relative_to(Path("unsupported")):
         return False
 
     abspath = dp / f
