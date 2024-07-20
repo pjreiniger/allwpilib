@@ -3,14 +3,7 @@
 import os
 import shutil
 
-from upstream_utils import (
-    get_repo_root,
-    clone_repo,
-    copy_to,
-    walk_cwd_and_copy_if,
-    git_am,
-    Lib,
-)
+from upstream_utils import copy_to, Lib
 
 
 def copy_upstream_src(wpilib_root):

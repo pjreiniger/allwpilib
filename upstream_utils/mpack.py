@@ -4,13 +4,7 @@ import os
 import shutil
 import subprocess
 
-from upstream_utils import (
-    get_repo_root,
-    clone_repo,
-    walk_cwd_and_copy_if,
-    git_am,
-    Lib,
-)
+from upstream_utils import walk_cwd_and_copy_if, Lib
 
 
 def copy_upstream_src(wpilib_root):
