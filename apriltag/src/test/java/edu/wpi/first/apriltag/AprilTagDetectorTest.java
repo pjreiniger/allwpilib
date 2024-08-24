@@ -144,6 +144,7 @@ class AprilTagDetectorTest {
       return;
     }
     try {
+      // NOOP comment
       AprilTagDetection[] results = detector.detect(image);
       assertEquals(1, results.length);
       assertEquals("tag36h11", results[0].getFamily());
